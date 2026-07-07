@@ -20,10 +20,15 @@ set(SOURCES
     ui/widgets/SectorHeatmap.cpp
     ui/widgets/SentimentGauge.cpp
     ui/widgets/TopBannerWidget.cpp
+    ui/widgets/RunningTradeTicker.cpp
+    ui/widgets/BottomBanner.cpp
     ui/screens/DashboardScreen.cpp
     ui/screens/ChartScreen.cpp
     ui/screens/ScreenerScreen.cpp
     ui/screens/SettingsScreen.cpp
+    ui/screens/PortfolioScreen.cpp
+    ui/screens/MarketOverviewScreen.cpp
+    ui/screens/NewsScreen.cpp
     core/PythonBridge.cpp
 )
 
@@ -37,10 +42,15 @@ set(HEADERS
     ui/widgets/SectorHeatmap.h
     ui/widgets/SentimentGauge.h
     ui/widgets/TopBannerWidget.h
+    ui/widgets/RunningTradeTicker.h
+    ui/widgets/BottomBanner.h
     ui/screens/DashboardScreen.h
     ui/screens/ChartScreen.h
     ui/screens/ScreenerScreen.h
     ui/screens/SettingsScreen.h
+    ui/screens/PortfolioScreen.h
+    ui/screens/MarketOverviewScreen.h
+    ui/screens/NewsScreen.h
     core/PythonBridge.h
 )
 
