@@ -21,6 +21,10 @@ set(SOURCES
     ui/widgets/SentimentGauge.cpp
     ui/widgets/TopBannerWidget.cpp
     ui/screens/DashboardScreen.cpp
+    ui/screens/ChartScreen.cpp
+    ui/screens/ScreenerScreen.cpp
+    ui/screens/SettingsScreen.cpp
+    core/PythonBridge.cpp
 )
 
 set(HEADERS
@@ -34,6 +38,10 @@ set(HEADERS
     ui/widgets/SentimentGauge.h
     ui/widgets/TopBannerWidget.h
     ui/screens/DashboardScreen.h
+    ui/screens/ChartScreen.h
+    ui/screens/ScreenerScreen.h
+    ui/screens/SettingsScreen.h
+    core/PythonBridge.h
 )
 
 set(RESOURCES
@@ -46,6 +54,7 @@ target_include_directories(niskala-ui PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/app
     ${CMAKE_CURRENT_SOURCE_DIR}/ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/core
 )
 
 target_link_libraries(niskala-ui PRIVATE
