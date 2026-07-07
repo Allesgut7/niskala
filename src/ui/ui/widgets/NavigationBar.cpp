@@ -1,6 +1,7 @@
 #include "NavigationBar.h"
 #include <QHBoxLayout>
 #include <QSpacerItem>
+#include <QPixmap>
 
 NavigationBar::NavigationBar(QWidget *parent)
     : QWidget(parent)
@@ -15,11 +16,9 @@ void NavigationBar::setupUI()
     layout->setContentsMargins(16, 8, 16, 0);
     layout->setSpacing(4);
 
-    // Logo (stylized N)
-    auto *logoLabel = new QLabel("N");
-    logoLabel->setStyleSheet(
-        "QLabel { color: #10b981; font-size: 22px; font-weight: bold; "
-        "border: 2px solid #10b981; border-radius: 6px; padding: 4px 8px; }");
+    // Logo (image)
+    auto *logoLabel = new QLabel();
+    logoLabel->setPixmap(QPixmap(":/images/Logo-fix.png").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     layout->addWidget(logoLabel);
 
     // Brand
