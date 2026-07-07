@@ -6,6 +6,50 @@ All notable changes to Niskala will be documented in this file.
 
 ---
 
+## [2.0.0] - 2026-07-07
+
+### Qt6 Desktop Migration (MAJOR)
+
+**New Desktop UI (Qt6):**
+- ✅ Migrated from FTXUI (TUI) to Qt6 (GUI)
+- ✅ Bloomberg-style dark theme with professional color palette
+- ✅ Tiling dock widget layout (resizable, draggable)
+- ✅ 7 screens with F1-F7 keyboard shortcuts
+- ✅ Command bar with history and autocomplete
+- ✅ Menu bar (File, View, Tools, Help)
+- ✅ Auto-save/restore panel layout
+
+**Screens:**
+- ✅ Dashboard (F1): Watchlist + Fear/Greed gauges
+- ✅ Chart (F2): Candlestick + MA5/MA20 + timeframes
+- ✅ Screener (F3): Stock filter (search, sector, change, volume)
+- ✅ Portfolio (F4): Open positions, trades, P&L cards
+- ✅ Market Overview (F5): Indices, commodities, forex, gainers/losers
+- ✅ News (F6): Filterable news with sentiment
+- ✅ Settings (F7): Theme, language, data source, shortcuts
+
+**Widgets:**
+- ✅ TopBannerWidget: Scrolling market indices ticker
+- ✅ RunningTradeTicker: Live trade scrolling marquee
+- ✅ BottomBanner: Gainers vs Losers strip
+- ✅ CandlestickChart: OHLC + MA overlays (Qt6 Charts)
+- ✅ OrderBookWidget: Bid/Ask depth 8-level
+- ✅ FearGreedGauge: Semicircle gauge (ID/ASIA/GLOBAL)
+- ✅ SectorHeatmap: 3x3 color-coded sector grid
+- ✅ SentimentGauge: Bullish/Bearish/Neutral gauge
+
+**Core:**
+- ✅ PythonBridge: QProcess integration with Python modules
+- ✅ DataManager: Auto-refresh every 30 seconds
+- ✅ ThemeManager: Dynamic theme switching
+
+**Build System:**
+- ✅ CMakeLists.txt for Qt6 (Core, Gui, Widgets, Charts, Network)
+- ✅ Qt resources system (.qrc)
+- ✅ Ninja build support
+
+---
+
 ## [1.0.0] - 2026-07-06
 
 ### Phase 7: Global Expansion (NEW)

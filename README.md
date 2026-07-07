@@ -9,6 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB.svg?logo=python&logoColor=white)](https://python.org)
 [![C++20](https://img.shields.io/badge/C++-20-00599C.svg?logo=cplusplus&logoColor=white)](https://isocpp.org)
+[![Qt6](https://img.shields.io/badge/Qt-6-41CD52.svg?logo=qt&logoColor=white)](https://qt.io)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://docker.com)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF.svg?logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
 
@@ -23,7 +24,7 @@ with AI-powered sentiment analysis, quantitative trading tools, and multi-market
 
 **Niskala** is a high-performance trading terminal purpose-built for the Indonesian stock market. It combines real-time market data, AI-driven sentiment analysis (FinBERT + LLM), and institutional-grade quantitative tools into a single unified platform.
 
-Designed for professional traders, quant analysts, and fintech teams who demand Bloomberg-level capabilities without the enterprise price tag.
+Built with **Qt6** (desktop GUI), **C++20** (core engine), and **Python** (AI/ML modules), Niskala delivers Bloomberg-level capabilities without the enterprise price tag.
 
 ---
 
@@ -57,7 +58,7 @@ Designed for professional traders, quant analysts, and fintech teams who demand 
 - Stock screener with 80+ filters & 8 presets
 - Pattern recognition (15 candlestick patterns)
 - Correlation analysis & clustering
-- ASCII chart engine (candlestick, multi-timeframe)
+- Candlestick charts with MA overlays
 
 </td>
 <td>
@@ -74,12 +75,70 @@ Designed for professional traders, quant analysts, and fintech teams who demand 
 
 ---
 
+## Qt6 Desktop UI
+
+Niskala features a **Bloomberg-style dark theme** built with Qt6:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  FILE  VIEW  TOOLS  HELP                                        │
+├─────────────────────────────────────────────────────────────────┤
+│ [SCROLLING TICKER] IHSG, S&P500, Gold, USD/IDR                  │
+├─────────────────────────────────────────────────────────────────┤
+│ [RUNNING TRADES] BBCA 9200 150K ● BBRI 4800 200K ● ...         │
+├──────────────────┬──────────────────────────┬───────────────────┤
+│ WATCHLIST (F1)   │ CHART (F2)               │ NEWS (F6)         │
+│ BBCA 9200 +1.6%  │ ▲▼▲ Candlestick         │ BBRI ↑ 15%       │
+│ BBRI 4800 -1.0%  │  MA5 (yellow)            │ GOTO ↑ 25%       │
+│ BMRI 6150 +1.2%  │  MA20 (cyan)             │ ...               │
+├──────────────────┤ SCREENER (F3)            ├───────────────────┤
+│ FEAR/GREED       │ PORTFOLIO (F4)           │ ORDER BOOK        │
+│ [ID] [ASIA] [GL] │ MARKET (F5)              │ 9250: 150        │
+├──────────────────┴──────────────────────────┴───────────────────┤
+│ GAINERS: ICBP +1.82% ADRO +2.01% │ LOSERS: GOTO -2.30%        │
+├─────────────────────────────────────────────────────────────────┤
+│ [> Command Bar]  Type: DASH CHART SCREENER PORT HELP            │
+├─────────────────────────────────────────────────────────────────┤
+│  IHSG: 7,123.45 (+0.50%)    Connected    Niskala v2.0.0        │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Screens
+
+| Screen | Key | Description |
+|--------|-----|-------------|
+| Dashboard | F1 | Watchlist + Fear/Greed gauges |
+| Chart | F2 | Candlestick + MA5/MA20 + timeframes |
+| Screener | F3 | Stock filter (search, sector, change, volume) |
+| Portfolio | F4 | Open positions, trades, P&L cards |
+| Market | F5 | Indices, commodities, forex, gainers/losers |
+| News | F6 | Filterable news with sentiment |
+| Settings | F7 | Theme, language, data source, shortcuts |
+
+### Widgets
+
+| Widget | Description |
+|--------|-------------|
+| TopBannerWidget | Scrolling market indices ticker |
+| RunningTradeTicker | Live trade scrolling marquee |
+| BottomBanner | Gainers vs Losers strip |
+| CandlestickChart | OHLC + MA overlays (Qt6 Charts) |
+| OrderBookWidget | Bid/Ask depth 8-level |
+| FearGreedGauge | Semicircle gauge (ID/ASIA/GLOBAL) |
+| SectorHeatmap | 3x3 color-coded sector grid |
+| SentimentGauge | Bullish/Bearish/Neutral gauge |
+| CommandBar | Command input with history |
+| PythonBridge | QProcess bridge to Python modules |
+
+---
+
 ## Tech Stack
 
 <div align="center">
 
 ![C++20](https://img.shields.io/badge/C++-20-00599C.svg?logo=cplusplus&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB.svg?logo=python&logoColor=white)
+![Qt6](https://img.shields.io/badge/Qt-6-41CD52.svg?logo=qt&logoColor=white)
 ![FTXUI](https://img.shields.io/badge/FTXUI-Terminal%20UI-blue)
 ![Docker](https://img.shields.io/badge/Docker-2496ED.svg?logo=docker&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF.svg?logo=githubactions&logoColor=white)
@@ -100,6 +159,8 @@ Designed for professional traders, quant analysts, and fintech teams who demand 
 | Python | 3.10+ |
 | C++ Compiler | GCC 11+ / Clang 14+ / MSVC 2022 |
 | CMake | 3.20+ |
+| Qt6 | 6.5+ (Core, Gui, Widgets, Charts, Network) |
+| Ninja | Latest (optional, for faster builds) |
 | Docker | 20.10+ *(optional)* |
 
 ### Installation
@@ -112,12 +173,23 @@ cd niskala
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Build C++ terminal
+# Build C++ terminal (legacy TUI)
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
+./build/niskala
+```
+
+### Qt6 Desktop App (Recommended)
+
+```bash
+# Build Qt6 desktop app
+cd src/ui
+mkdir build && cd build
+cmake .. -G Ninja
+ninja
 
 # Run
-./build/niskala
+./bin/niskala
 ```
 
 ### Docker Deployment
@@ -139,33 +211,41 @@ docker-compose down
 
 ```
 niskala/
-├── src/                        # C++ terminal UI (77 files, ~15,000 LOC)
-│   ├── core/                   # Core logic, market data, AI
-│   │   ├── ai/                 # Sentiment analyzer, LLM client
-│   │   ├── fear_greed/         # Multi-region Fear & Greed Index
-│   │   ├── market_data/        # Data providers (yfinance, akshare)
-│   │   └── quant/              # Backtest, factor, portfolio, risk
-│   └── tui/                    # FTXUI components
-│       ├── screens/            # Dashboard, chart, news, portfolio
-│       └── widgets/            # Gauges, feeds, tables, banners
+├── src/
+│   ├── core/                    # C++ core engine (77 files, ~15,000 LOC)
+│   │   ├── ai/                  # Sentiment analyzer, LLM client
+│   │   ├── fear_greed/          # Multi-region Fear & Greed Index
+│   │   ├── market_data/         # Data providers (yfinance, akshare)
+│   │   └── quant/               # Backtest, factor, portfolio, risk
+│   │
+│   ├── tui/                     # Legacy FTXUI terminal (deprecated)
+│   │
+│   └── ui/                      # Qt6 Desktop App (NEW)
+│       ├── app/                 # MainWindow, entry point
+│       ├── core/                # PythonBridge, DataManager
+│       ├── ui/
+│       │   ├── theme/           # Bloomberg dark theme
+│       │   ├── widgets/         # 10 custom widgets
+│       │   └── screens/         # 7 screens
+│       └── resources/           # Icons, fonts, themes
 │
-├── python/                     # Python modules (38 files, ~8,700 LOC)
-│   ├── ai/                     # Sentiment pipeline, NLP, models
-│   ├── analytics/              # Screener, patterns, correlation
-│   ├── broker/                 # Broker integrations (Ajaib, Stockbit)
-│   ├── cloud/                  # Config, cache, database, queue
-│   ├── i18n/                   # 7-language translation engine
-│   ├── integrations/           # Telegram & Discord bots
-│   ├── markets/                # 6-market config (IDX, SGX, etc.)
-│   ├── marketplace/            # Strategy marketplace
-│   ├── quant/                  # Backtest, DCF, portfolio, risk
-│   ├── social/                 # Copy trading, leaderboard
-│   └── trading/                # Paper engine, order, position
+├── python/                      # Python modules (38 files, ~8,700 LOC)
+│   ├── ai/                      # Sentiment pipeline, NLP, models
+│   ├── analytics/               # Screener, patterns, correlation
+│   ├── broker/                  # Broker integrations (Ajaib, Stockbit)
+│   ├── cloud/                   # Config, cache, database, queue
+│   ├── i18n/                    # 7-language translation engine
+│   ├── integrations/            # Telegram & Discord bots
+│   ├── markets/                 # 6-market config (IDX, SGX, etc.)
+│   ├── marketplace/             # Strategy marketplace
+│   ├── quant/                   # Backtest, DCF, portfolio, risk
+│   ├── social/                  # Copy trading, leaderboard
+│   └── trading/                 # Paper engine, order, position
 │
-├── config/                     # Application configuration
-├── tests/                      # Unit & integration tests
-├── gcp/                        # Cloud deployment scripts
-└── docker-compose.yml          # Container orchestration
+├── config/                      # Application configuration
+├── tests/                       # Unit & integration tests
+├── gcp/                         # Cloud deployment scripts
+└── docker-compose.yml           # Container orchestration
 ```
 
 ---
@@ -174,10 +254,12 @@ niskala/
 
 | Metric | Value |
 |--------|-------|
-| Total Files | 261 |
+| Total Files | 57+ |
 | Total Lines of Code | ~32,500 |
 | C++ Source Files | 77 |
 | Python Modules | 38 |
+| Qt6 UI Files | 57 |
+| Qt6 UI LOC | ~5,500 |
 | Test Files | 11 |
 | Supported Markets | 6 |
 | Supported Languages | 7 |
@@ -216,18 +298,6 @@ weights = optimizer.optimize_mean_variance(returns)
 # Risk metrics
 calculator = RiskCalculator()
 metrics = calculator.calculate(returns, benchmark)
-```
-
-### Analytics
-
-```python
-from analytics import ASCIIChart, AdvancedScreener, PatternDetector
-
-chart = ASCIIChart()
-print(chart.render_candlestick(df, title="BBRI"))
-
-screener = AdvancedScreener()
-value_stocks = screener.screen(stocks, preset="value")
 ```
 
 ---
