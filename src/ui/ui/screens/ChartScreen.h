@@ -4,7 +4,7 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QLabel>
-#include <QTableWidget>
+#include <QCheckBox>
 
 class CandlestickChart;
 

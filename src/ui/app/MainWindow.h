@@ -4,13 +4,9 @@
 #include <QDockWidget>
 #include <QToolBar>
 #include <QStatusBar>
-#include <QTabWidget>
 #include <QSettings>
 
 class CommandBar;
-class TopBannerWidget;
-class RunningTradeTicker;
-class BottomBanner;
 class ChartScreen;
 class ScreenerScreen;
 class SettingsScreen;
@@ -40,19 +36,20 @@ private slots:
 
 private:
     void setupMenuBar();
-    void setupTopBanner();
-    void setupCommandBar();
+    void setupToolBars();
     void setupDockWidgets();
     void setupStatusBar();
     void setupKeyboardShortcuts();
     void setupConnections();
     void setupDataManager();
 
+    QToolBar *m_topToolBar = nullptr;
+    QToolBar *m_tickerToolBar = nullptr;
+    QToolBar *m_bottomToolBar = nullptr;
+    QWidget *m_topBanner = nullptr;
+    QWidget *m_ticker = nullptr;
+    QWidget *m_bottomBanner = nullptr;
     QMenuBar *m_menuBar = nullptr;
-    TopBannerWidget *m_topBanner = nullptr;
-    CommandBar *m_commandBar = nullptr;
-    RunningTradeTicker *m_ticker = nullptr;
-    BottomBanner *m_bottomBanner = nullptr;
 
     QDockWidget *m_stockDock = nullptr;
     QDockWidget *m_chartDock = nullptr;

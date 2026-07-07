@@ -11,6 +11,7 @@ struct Position {
     double currentPrice;
     double unrealizedPnl;
     double unrealizedPnlPct;
+    double value;
 };
 
 struct Trade {
@@ -38,8 +39,4 @@ private:
 
     QTableWidget *m_positionsTable = nullptr;
     QTableWidget *m_tradesTable = nullptr;
-    QLabel *m_balanceLabel = nullptr;
-    QLabel *m_investedLabel = nullptr;
-    QLabel *m_unrealizedLabel = nullptr;
-    QLabel *m_realizedLabel = nullptr;
 };

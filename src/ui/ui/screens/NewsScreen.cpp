@@ -1,6 +1,7 @@
 #include "NewsScreen.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QLabel>
 
 NewsScreen::NewsScreen(QWidget *parent)
     : QWidget(parent)

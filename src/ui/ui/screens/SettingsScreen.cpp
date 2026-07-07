@@ -22,7 +22,6 @@ void SettingsScreen::setupUI()
     mainLayout->setContentsMargins(16, 16, 16, 16);
     mainLayout->setSpacing(12);
 
-    // Title
     auto *title = new QLabel("SETTINGS");
     title->setStyleSheet("color: #e94560; font-size: 16px; font-weight: bold;");
     mainLayout->addWidget(title);
@@ -34,20 +33,17 @@ void SettingsScreen::setupUI()
 
     mainLayout->addStretch();
 
-    // Buttons
     auto *btnLayout = new QHBoxLayout();
     m_applyBtn = new QPushButton("Apply");
     m_applyBtn->setStyleSheet(
         "QPushButton { background-color: #0f3460; color: #e0e0e0; padding: 8px 24px; font-weight: bold; }"
-        "QPushButton:hover { background-color: #e94560; }"
-    );
+        "QPushButton:hover { background-color: #e94560; }");
     connect(m_applyBtn, &QPushButton::clicked, this, &SettingsScreen::onApplyClicked);
 
     m_resetBtn = new QPushButton("Reset to Default");
     m_resetBtn->setStyleSheet(
         "QPushButton { background-color: transparent; color: #888888; padding: 8px 16px; border: 1px solid #0f3460; }"
-        "QPushButton:hover { border-color: #e94560; color: #e0e0e0; }"
-    );
+        "QPushButton:hover { border-color: #e94560; color: #e0e0e0; }");
     connect(m_resetBtn, &QPushButton::clicked, this, &SettingsScreen::onResetClicked);
 
     btnLayout->addStretch();
@@ -74,7 +70,6 @@ void SettingsScreen::setupGeneralSection()
     m_languageCombo->setCurrentIndex(1);
     layout->addRow("Language:", m_languageCombo);
 
-    QVBoxLayout().dynamicCast(this->layout())->insertWidget(1, group);
     this->layout()->addWidget(group);
 }
 
@@ -177,10 +172,7 @@ void SettingsScreen::saveSettings()
 
 void SettingsScreen::onThemeChanged(int index)
 {
-    QStringList themes = {"dark", "light", "monokai", "nord"};
-    if (index >= 0 && index < themes.size()) {
-        emit themeChanged(themes[index]);
-    }
+    Q_UNUSED(index);
 }
 
 void SettingsScreen::onApplyClicked()

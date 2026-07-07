@@ -18,6 +18,8 @@ signals:
 private slots:
     void onReturnPressed();
 
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     void setupUI();
     void loadCommands();

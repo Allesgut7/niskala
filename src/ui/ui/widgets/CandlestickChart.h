@@ -1,13 +1,11 @@
 #pragma once
 
 #include <QWidget>
-#include <QtCharts/QChartView>
-#include <QtCharts/QCandlestickSeries>
-#include <QtCharts/QLineSeries>
-#include <QtCharts/QBarSeries>
-#include <QtCharts/QChart>
-#include <QtCharts/QValueAxis>
-#include <QtCharts/QBarCategoryAxis>
+#include <QChartView>
+#include <QCandlestickSeries>
+#include <QLineSeries>
+#include <QChart>
+#include <QValueAxis>
 #include <QTimer>
 
 class CandlestickChart : public QWidget
@@ -28,15 +26,14 @@ private:
     void setupChart();
     void generateSampleData();
     void updateChart();
-    void addMovingAverage(QLineSeries *series, int period);
 
-    QtCharts::QChart *m_chart = nullptr;
-    QtCharts::QChartView *m_chartView = nullptr;
-    QtCharts::QCandlestickSeries *m_candleSeries = nullptr;
-    QtCharts::QLineSeries *m_ma5Series = nullptr;
-    QtCharts::QLineSeries *m_ma20Series = nullptr;
-    QtCharts::QValueAxis *m_axisX = nullptr;
-    QtCharts::QValueAxis *m_axisY = nullptr;
+    QChart *m_chart = nullptr;
+    QChartView *m_chartView = nullptr;
+    QCandlestickSeries *m_candleSeries = nullptr;
+    QLineSeries *m_ma5Series = nullptr;
+    QLineSeries *m_ma20Series = nullptr;
+    QValueAxis *m_axisX = nullptr;
+    QValueAxis *m_axisY = nullptr;
 
     QString m_currentSymbol = "BBCA";
     QString m_timeframe = "1D";

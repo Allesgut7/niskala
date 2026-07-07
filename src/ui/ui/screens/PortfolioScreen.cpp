@@ -2,7 +2,6 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
-#include <QGroupBox>
 
 PortfolioScreen::PortfolioScreen(QWidget *parent)
     : QWidget(parent)
@@ -17,47 +16,34 @@ void PortfolioScreen::setupUI()
     mainLayout->setContentsMargins(8, 8, 8, 8);
     mainLayout->setSpacing(8);
 
-    // Title
     auto *title = new QLabel("PORTFOLIO");
     title->setStyleSheet("color: #e94560; font-size: 16px; font-weight: bold;");
     mainLayout->addWidget(title);
 
-    // Summary cards
     auto *summaryLayout = new QHBoxLayout();
     summaryLayout->setSpacing(8);
 
     auto createCard = [](const QString &label, const QString &value, const QString &color) -> QWidget * {
         auto *card = new QWidget();
-        card->setStyleSheet(QString(
-            "QWidget { background-color: #16213e; border: 1px solid #0f3460; border-radius: 6px; padding: 8px; }"
-        ));
+        card->setStyleSheet(
+            "QWidget { background-color: #16213e; border: 1px solid #0f3460; border-radius: 6px; padding: 8px; }");
         auto *layout = new QVBoxLayout(card);
         layout->setContentsMargins(12, 8, 12, 8);
-
         auto *lbl = new QLabel(label);
         lbl->setStyleSheet("color: #888888; font-size: 10px;");
         layout->addWidget(lbl);
-
         auto *val = new QLabel(value);
         val->setStyleSheet(QString("color: %1; font-size: 18px; font-weight: bold;").arg(color));
         layout->addWidget(val);
-
         return card;
     };
-
-    m_balanceLabel = new QLabel("Rp 150,000,000");
-    m_investedLabel = new QLabel("Rp 85,000,000");
-    m_unrealizedLabel = new QLabel("+Rp 12,500,000");
-    m_realizedLabel = new QLabel("+Rp 3,200,000");
 
     summaryLayout->addWidget(createCard("BALANCE", "Rp 150,000,000", "#e0e0e0"));
     summaryLayout->addWidget(createCard("INVESTED", "Rp 85,000,000", "#00bcd4"));
     summaryLayout->addWidget(createCard("UNREALIZED P&L", "+Rp 12,500,000", "#00d989"));
     summaryLayout->addWidget(createCard("REALIZED P&L", "+Rp 3,200,000", "#ffc107"));
-
     mainLayout->addLayout(summaryLayout);
 
-    // Positions table
     auto *posLabel = new QLabel("OPEN POSITIONS");
     posLabel->setStyleSheet("color: #00d989; font-weight: bold; font-size: 12px;");
     mainLayout->addWidget(posLabel);
@@ -71,11 +57,8 @@ void PortfolioScreen::setupUI()
     m_positionsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_positionsTable->setAlternatingRowColors(true);
     m_positionsTable->verticalHeader()->setVisible(false);
-    m_positionsTable->setStyleSheet(
-        "QTableWidget { background-color: #1a1a2e; alternate-background-color: #16213e; }");
     mainLayout->addWidget(m_positionsTable);
 
-    // Recent trades
     auto *tradesLabel = new QLabel("RECENT TRADES");
     tradesLabel->setStyleSheet("color: #ffc107; font-weight: bold; font-size: 12px;");
     mainLayout->addWidget(tradesLabel);
@@ -88,15 +71,12 @@ void PortfolioScreen::setupUI()
     m_tradesTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_tradesTable->setAlternatingRowColors(true);
     m_tradesTable->verticalHeader()->setVisible(false);
-    m_tradesTable->setStyleSheet(
-        "QTableWidget { background-color: #1a1a2e; alternate-background-color: #16213e; }");
     m_tradesTable->setMaximumHeight(150);
     mainLayout->addWidget(m_tradesTable);
 }
 
 void PortfolioScreen::populateSampleData()
 {
-    // Positions
     QList<Position> positions = {
         {"BBCA", 500, 8800, 9200, 200000, 4.55, 4600000},
         {"BBRI", 1000, 4900, 4800, -100000, -2.04, 4800000},
@@ -134,12 +114,11 @@ void PortfolioScreen::populateSampleData()
         m_positionsTable->setItem(i, 5, pctItem);
 
         auto *valItem = new QTableWidgetItem(
-            "Rp " + QString::number((int)p.value));
+            "Rp " + QString::number(static_cast<int>(p.value)));
         valItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_positionsTable->setItem(i, 6, valItem);
     }
 
-    // Recent trades
     QList<Trade> trades = {
         {"2026-07-06", "BBCA", "BUY", 200, 8900, 0},
         {"2026-07-05", "BBRI", "SELL", 500, 4950, 25000},

@@ -22,13 +22,13 @@ void FearGreedGauge::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    QRect rect(10, 5, width() - 20, height() - 30);
-    drawGauge(painter, rect);
+    QRect gaugeRect(10, 5, width() - 20, height() - 30);
+    drawGauge(painter, gaugeRect);
 
-    // Label
     painter.setPen(QColor("#e0e0e0"));
     painter.setFont(QFont("monospace", 10, QFont::Bold));
-    painter.drawText(rect(0, height() - 25, width(), 20), Qt::AlignCenter, m_label);
+    QRect labelRect(0, height() - 25, width(), 20);
+    painter.drawText(labelRect, Qt::AlignCenter, m_label);
 }
 
 void FearGreedGauge::drawGauge(QPainter &painter, const QRect &rect)
@@ -37,19 +37,17 @@ void FearGreedGauge::drawGauge(QPainter &painter, const QRect &rect)
     int centerY = rect.bottom() - 10;
     int radius = qMin(rect.width() / 2, rect.height()) - 5;
 
-    // Background arc (gray)
     QPen bgPen(QColor("#0f3460"), 8, Qt::SolidLine, Qt::RoundCap);
     painter.setPen(bgPen);
     painter.drawArc(centerX - radius, centerY - radius, radius * 2, radius * 2,
                     0, 180 * 16);
 
-    // Colored segments
     QList<QPair<int, QColor>> segments = {
-        {25, QColor("#ff4757")},    // Extreme Fear - Red
-        {20, QColor("#ffc107")},    // Fear - Yellow
-        {10, QColor("#e0e0e0")},    // Neutral - Gray
-        {20, QColor("#00bcd4")},    // Greed - Cyan
-        {25, QColor("#00d989")}     // Extreme Greed - Green
+        {25, QColor("#ff4757")},
+        {20, QColor("#ffc107")},
+        {10, QColor("#e0e0e0")},
+        {20, QColor("#00bcd4")},
+        {25, QColor("#00d989")}
     };
 
     int startAngle = 0;
@@ -61,35 +59,32 @@ void FearGreedGauge::drawGauge(QPainter &painter, const QRect &rect)
         startAngle += seg.first;
     }
 
-    // Needle
     double angle = 180.0 - (m_score / 100.0 * 180.0);
     double rad = angle * M_PI / 180.0;
     int needleLen = radius - 15;
 
+    QPoint needleStart(centerX, centerY);
     QPoint needleEnd(
         centerX + static_cast<int>(needleLen * cos(rad)),
         centerY - static_cast<int>(needleLen * sin(rad))
     );
 
     painter.setPen(QPen(QColor("#e0e0e0"), 2));
-    painter.drawLine(centerX, centerY, needleEnd);
+    painter.drawLine(needleStart, needleEnd);
 
-    // Center dot
     painter.setBrush(QColor("#e94560"));
     painter.setPen(Qt::NoPen);
     painter.drawEllipse(centerX - 4, centerY - 4, 8, 8);
 
-    // Score text
+    QRect scoreRect(centerX - 30, centerY - 45, 60, 25);
     painter.setPen(getScoreColor(m_score));
     painter.setFont(QFont("monospace", 16, QFont::Bold));
-    painter.drawText(rect(0, centerY - 45, rect.width(), 25), Qt::AlignCenter,
-                     QString::number(m_score));
+    painter.drawText(scoreRect, Qt::AlignCenter, QString::number(m_score));
 
-    // Status text
+    QRect statusRect(centerX - 30, centerY - 25, 60, 15);
     painter.setPen(QColor("#888888"));
     painter.setFont(QFont("monospace", 8));
-    painter.drawText(rect(0, centerY - 25, rect.width(), 15), Qt::AlignCenter,
-                     getScoreLabel(m_score));
+    painter.drawText(statusRect, Qt::AlignCenter, getScoreLabel(m_score));
 }
 
 QColor FearGreedGauge::getScoreColor(int score) const

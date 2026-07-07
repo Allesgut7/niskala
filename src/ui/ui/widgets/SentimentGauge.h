@@ -22,5 +22,5 @@ protected:
 private:
     void drawGauge(QPainter &painter, const QRect &rect);
 
-    double m_score = 0.0; // -100 to +100
+    double m_score = 0.0;
 };

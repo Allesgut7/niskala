@@ -1,9 +1,5 @@
 #include "MainWindow.h"
 #include "../ui/widgets/CommandBar.h"
-#include "../ui/widgets/TopBannerWidget.h"
-#include "../ui/widgets/RunningTradeTicker.h"
-#include "../ui/widgets/BottomBanner.h"
-#include "../ui/widgets/FearGreedGauge.h"
 #include "../ui/screens/ChartScreen.h"
 #include "../ui/screens/ScreenerScreen.h"
 #include "../ui/screens/SettingsScreen.h"
@@ -35,8 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     setMinimumSize(1400, 900);
 
     setupMenuBar();
-    setupTopBanner();
-    setupCommandBar();
+    setupToolBars();
     setupDockWidgets();
     setupStatusBar();
     setupKeyboardShortcuts();
@@ -61,96 +56,107 @@ void MainWindow::setupMenuBar()
         "QMenuBar { background-color: #0f3460; color: #e0e0e0; border-bottom: 1px solid #e94560; }"
         "QMenuBar::item:selected { background-color: #e94560; }"
         "QMenu { background-color: #16213e; border: 1px solid #0f3460; color: #e0e0e0; }"
-        "QMenu::item:selected { background-color: #e94560; }"
-    );
+        "QMenu::item:selected { background-color: #e94560; }");
 
-    // File menu
     auto *fileMenu = m_menuBar->addMenu("&File");
-    fileMenu->addAction("&Refresh Data", this, [this]() {
+    QAction *refreshAction = fileMenu->addAction("&Refresh Data");
+    connect(refreshAction, &QAction::triggered, this, [this]() {
         m_dataManager->refreshAll();
-    }, QKeySequence::Refresh);
-    fileMenu->addSeparator();
-    fileMenu->addAction("Export &Watchlist...", this, [this]() {
-        QString file = QFileDialog::getSaveFileName(this, "Export Watchlist", "",
-                                                    "CSV Files (*.csv);;All Files (*)");
-        if (!file.isEmpty()) {
-            statusBar()->showMessage("Exported to: " + file, 3000);
-        }
     });
+
     fileMenu->addSeparator();
-    fileMenu->addAction("E&xit", this, &QWidget::close, QKeySequence::Quit);
+    QAction *exitAction = fileMenu->addAction("E&xit");
+    connect(exitAction, &QAction::triggered, this, &QWidget::close);
 
-    // View menu
     auto *viewMenu = m_menuBar->addMenu("&View");
-    viewMenu->addAction("&Dashboard", this, [this]() { switchToScreen(0); }, QKeySequence("F1"));
-    viewMenu->addAction("&Chart", this, [this]() { switchToScreen(1); }, QKeySequence("F2"));
-    viewMenu->addAction("&Screener", this, [this]() { switchToScreen(2); }, QKeySequence("F3"));
-    viewMenu->addAction("&Portfolio", this, [this]() { switchToScreen(3); }, QKeySequence("F4"));
-    viewMenu->addAction("&Market Overview", this, [this]() { switchToScreen(4); }, QKeySequence("F5"));
-    viewMenu->addAction("&News", this, [this]() { switchToScreen(5); }, QKeySequence("F6"));
+    QAction *dashAction = viewMenu->addAction("&Dashboard (F1)");
+    connect(dashAction, &QAction::triggered, this, [this]() { switchToScreen(0); });
+    QAction *chartAction = viewMenu->addAction("&Chart (F2)");
+    connect(chartAction, &QAction::triggered, this, [this]() { switchToScreen(1); });
+    QAction *screenAction = viewMenu->addAction("&Screener (F3)");
+    connect(screenAction, &QAction::triggered, this, [this]() { switchToScreen(2); });
+    QAction *portAction = viewMenu->addAction("&Portfolio (F4)");
+    connect(portAction, &QAction::triggered, this, [this]() { switchToScreen(3); });
+    QAction *mktAction = viewMenu->addAction("&Market Overview (F5)");
+    connect(mktAction, &QAction::triggered, this, [this]() { switchToScreen(4); });
+    QAction *newsAction = viewMenu->addAction("&News (F6)");
+    connect(newsAction, &QAction::triggered, this, [this]() { switchToScreen(5); });
     viewMenu->addSeparator();
-    viewMenu->addAction("&Settings", this, [this]() { switchToScreen(6); }, QKeySequence("F7"));
+    QAction *settingsAction = viewMenu->addAction("&Settings (F7)");
+    connect(settingsAction, &QAction::triggered, this, [this]() { switchToScreen(6); });
 
-    // Tools menu
     auto *toolsMenu = m_menuBar->addMenu("&Tools");
-    toolsMenu->addAction("Auto-Refresh &On", this, [this]() {
+    QAction *autoOnAction = toolsMenu->addAction("Auto-Refresh &On");
+    connect(autoOnAction, &QAction::triggered, this, [this]() {
         m_dataManager->startAutoRefresh(30);
         statusBar()->showMessage("Auto-refresh enabled (30s)", 3000);
     });
-    toolsMenu->addAction("Auto-Refresh &Off", this, [this]() {
+    QAction *autoOffAction = toolsMenu->addAction("Auto-Refresh &Off");
+    connect(autoOffAction, &QAction::triggered, this, [this]() {
         m_dataManager->stopAutoRefresh();
         statusBar()->showMessage("Auto-refresh disabled", 3000);
     });
     toolsMenu->addSeparator();
-    toolsMenu->addAction("&Save Layout", this, &MainWindow::saveLayout, QKeySequence::Save);
-    toolsMenu->addAction("&Restore Layout", this, &MainWindow::restoreLayout);
+    QAction *saveAction = toolsMenu->addAction("&Save Layout");
+    connect(saveAction, &QAction::triggered, this, &MainWindow::saveLayout);
+    QAction *restoreAction = toolsMenu->addAction("&Restore Layout");
+    connect(restoreAction, &QAction::triggered, this, &MainWindow::restoreLayout);
 
-    // Help menu
     auto *helpMenu = m_menuBar->addMenu("&Help");
-    helpMenu->addAction("&Keyboard Shortcuts", this, [this]() {
+    QAction *shortcutsAction = helpMenu->addAction("&Keyboard Shortcuts");
+    connect(shortcutsAction, &QAction::triggered, this, [this]() {
         QMessageBox::information(this, "Keyboard Shortcuts",
-            "F1 - Dashboard\n"
-            "F2 - Chart\n"
-            "F3 - Screener\n"
-            "F4 - Portfolio\n"
-            "F5 - Market Overview\n"
-            "F6 - News\n"
-            "F7 - Settings\n"
-            "Ctrl+S - Save Layout\n"
-            "Ctrl+R - Restore Layout\n"
-            "Ctrl+Q - Quit");
+            "F1 - Dashboard\nF2 - Chart\nF3 - Screener\nF4 - Portfolio\n"
+            "F5 - Market Overview\nF6 - News\nF7 - Settings\n"
+            "Ctrl+S - Save Layout\nCtrl+R - Restore Layout");
     });
-    helpMenu->addAction("&About Niskala", this, [this]() {
+    QAction *aboutAction = helpMenu->addAction("&About Niskala");
+    connect(aboutAction, &QAction::triggered, this, [this]() {
         QMessageBox::about(this, "About Niskala",
             "<h2>Niskala Trading Terminal</h2>"
             "<p>Version 2.0.0</p>"
             "<p>Professional Indonesian Stock Market Terminal</p>"
-            "<p>with AI-powered sentiment analysis.</p>"
             "<p>Built with Qt6</p>");
     });
 }
 
-void MainWindow::setupTopBanner()
+void MainWindow::setupToolBars()
 {
-    m_topBanner = new TopBannerWidget(this);
-    addToolBar(Qt::TopToolBarArea, m_topBanner);
+    m_topToolBar = addToolBar("Market");
+    m_topToolBar->setMovable(false);
+    m_topToolBar->setStyleSheet("background-color: #0f3460; border-bottom: 1px solid #e94560;");
 
-    m_ticker = new RunningTradeTicker(this);
-    addToolBar(Qt::TopToolBarArea, m_ticker);
+    auto *marketLabel = new QLabel("  IHSG 7,123.45 +0.50%  |  S&P500 5,432.10 +1.20%  |  Gold 2,050.30 +0.20%  |  USD/IDR 15,600 +0.30%  ");
+    marketLabel->setStyleSheet("color: #e0e0e0; font-family: monospace; font-size: 11px;");
+    m_topToolBar->addWidget(marketLabel);
 
-    m_bottomBanner = new BottomBanner(this);
-    addToolBar(Qt::BottomToolBarArea, m_bottomBanner);
-}
+    m_tickerToolBar = addToolBar("Ticker");
+    m_tickerToolBar->setMovable(false);
+    m_tickerToolBar->setStyleSheet("background-color: #16213e; border-bottom: 1px solid #0f3460;");
 
-void MainWindow::setupCommandBar()
-{
-    m_commandBar = new CommandBar(this);
-    addToolBar(Qt::BottomToolBarArea, m_commandBar);
+    auto *tickerLabel = new QLabel("  BBCA 9200 150K  BBRI 4800 200K  BMRI 6150 80K  TLKM 2850 120K  GOTO 85 500K  ADRO 1520 90K  ");
+    tickerLabel->setStyleSheet("color: #ffc107; font-family: monospace; font-size: 11px; font-weight: bold;");
+    m_tickerToolBar->addWidget(tickerLabel);
+
+    m_bottomToolBar = new QToolBar("Gainers/Losers", this);
+    addToolBar(Qt::BottomToolBarArea, m_bottomToolBar);
+    m_bottomToolBar->setMovable(false);
+    m_bottomToolBar->setStyleSheet("background-color: #0f3460; border-top: 1px solid #e94560;");
+
+    auto *glLabel = new QLabel("  GAINERS: ICBP +1.82%  ADRO +2.01%  BBCA +1.66%  BREN +1.80%    |    LOSERS: GOTO -2.30%  UNVR -1.73%  BBRI -1.03%  ");
+    glLabel->setStyleSheet("color: #e0e0e0; font-family: monospace; font-size: 10px;");
+    m_bottomToolBar->addWidget(glLabel);
+
+    auto *cmdToolBar = new QToolBar("Command", this);
+    addToolBar(Qt::BottomToolBarArea, cmdToolBar);
+    cmdToolBar->setMovable(false);
+    auto *cmdBar = new CommandBar();
+    connect(cmdBar, &CommandBar::commandEntered, this, &MainWindow::onCommandEntered);
+    cmdToolBar->addWidget(cmdBar);
 }
 
 void MainWindow::setupDockWidgets()
 {
-    // === Left: Watchlist + Fear/Greed ===
     m_stockDock = new QDockWidget("Watchlist", this);
     m_stockDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     auto *stockWidget = new QWidget();
@@ -166,7 +172,8 @@ void MainWindow::setupDockWidgets()
     stockTable->setAlternatingRowColors(true);
     stockTable->verticalHeader()->setVisible(false);
 
-    struct { QString sym; double price; double chg; double pct; QString vol; } stocks[] = {
+    struct StockData { QString sym; double price; double chg; double pct; QString vol; };
+    StockData stocks[] = {
         {"BBCA", 9200, 150, 1.66, "45M"},
         {"BBRI", 4800, -50, -1.03, "38M"},
         {"BMRI", 6150, 75, 1.23, "28M"},
@@ -190,25 +197,10 @@ void MainWindow::setupDockWidgets()
         stockTable->setItem(i, 3, pctItem);
         stockTable->setItem(i, 4, new QTableWidgetItem(stocks[i].vol));
     }
-
     stockLayout->addWidget(stockTable);
-
-    auto *gaugeLayout = new QHBoxLayout();
-    auto *fgID = new FearGreedGauge("ID");
-    fgID->setScore(55);
-    auto *fgAsia = new FearGreedGauge("ASIA");
-    fgAsia->setScore(48);
-    auto *fgGlobal = new FearGreedGauge("GLOBAL");
-    fgGlobal->setScore(62);
-    gaugeLayout->addWidget(fgID);
-    gaugeLayout->addWidget(fgAsia);
-    gaugeLayout->addWidget(fgGlobal);
-    stockLayout->addLayout(gaugeLayout);
-
     m_stockDock->setWidget(stockWidget);
     addDockWidget(Qt::LeftDockWidgetArea, m_stockDock);
 
-    // === Center: Chart ===
     m_chartDock = new QDockWidget("Chart", this);
     m_chartDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea |
                                  Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -216,7 +208,6 @@ void MainWindow::setupDockWidgets()
     m_chartDock->setWidget(m_chartScreen);
     addDockWidget(Qt::BottomDockWidgetArea, m_chartDock);
 
-    // === Center: Screener ===
     m_screenerDock = new QDockWidget("Screener", this);
     m_screenerDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea |
                                     Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -225,7 +216,6 @@ void MainWindow::setupDockWidgets()
     addDockWidget(Qt::BottomDockWidgetArea, m_screenerDock);
     tabifyDockWidget(m_chartDock, m_screenerDock);
 
-    // === Center: Portfolio ===
     m_portfolioDock = new QDockWidget("Portfolio", this);
     m_portfolioDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea |
                                      Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -234,7 +224,6 @@ void MainWindow::setupDockWidgets()
     addDockWidget(Qt::BottomDockWidgetArea, m_portfolioDock);
     tabifyDockWidget(m_chartDock, m_portfolioDock);
 
-    // === Center: Market Overview ===
     m_marketDock = new QDockWidget("Market", this);
     m_marketDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea |
                                   Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -243,14 +232,12 @@ void MainWindow::setupDockWidgets()
     addDockWidget(Qt::BottomDockWidgetArea, m_marketDock);
     tabifyDockWidget(m_chartDock, m_marketDock);
 
-    // === Right: News ===
     m_newsDock = new QDockWidget("News", this);
     m_newsDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     m_newsScreen = new NewsScreen();
     m_newsDock->setWidget(m_newsScreen);
     addDockWidget(Qt::RightDockWidgetArea, m_newsDock);
 
-    // === Right: Order Book ===
     m_orderBookDock = new QDockWidget("Order Book", this);
     m_orderBookDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     auto *obWidget = new QWidget();
@@ -266,17 +253,14 @@ void MainWindow::setupDockWidgets()
     obTable->verticalHeader()->setVisible(false);
     obTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    double bidStart = 9150;
-    double askStart = 9200;
+    double bidStart = 9150, askStart = 9200;
     for (int i = 0; i < 8; ++i) {
-        double bid = bidStart - (i * 50);
-        double ask = askStart + (i * 50);
-        auto *bidItem = new QTableWidgetItem(QString::number(bid, 'f', 0));
+        auto *bidItem = new QTableWidgetItem(QString::number(bidStart - (i * 50), 'f', 0));
         bidItem->setForeground(QColor("#00d989"));
         bidItem->setTextAlignment(Qt::AlignRight);
         obTable->setItem(i, 0, bidItem);
 
-        auto *askItem = new QTableWidgetItem(QString::number(ask, 'f', 0));
+        auto *askItem = new QTableWidgetItem(QString::number(askStart + (i * 50), 'f', 0));
         askItem->setForeground(QColor("#ff4757"));
         askItem->setTextAlignment(Qt::AlignRight);
         obTable->setItem(i, 1, askItem);
@@ -286,7 +270,6 @@ void MainWindow::setupDockWidgets()
     addDockWidget(Qt::RightDockWidgetArea, m_orderBookDock);
     tabifyDockWidget(m_newsDock, m_orderBookDock);
 
-    // === Settings (hidden) ===
     m_settingsDock = new QDockWidget("Settings", this);
     m_settingsDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea |
                                     Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -296,7 +279,6 @@ void MainWindow::setupDockWidgets()
     tabifyDockWidget(m_chartDock, m_settingsDock);
     m_settingsDock->hide();
 
-    // Raise defaults
     m_stockDock->raise();
     m_chartDock->raise();
 }
@@ -318,25 +300,35 @@ void MainWindow::setupStatusBar()
 
 void MainWindow::setupKeyboardShortcuts()
 {
-    new QShortcut(QKeySequence(Qt::Key_F1), this, [this]() { switchToScreen(0); });
-    new QShortcut(QKeySequence(Qt::Key_F2), this, [this]() { switchToScreen(1); });
-    new QShortcut(QKeySequence(Qt::Key_F3), this, [this]() { switchToScreen(2); });
-    new QShortcut(QKeySequence(Qt::Key_F4), this, [this]() { switchToScreen(3); });
-    new QShortcut(QKeySequence(Qt::Key_F5), this, [this]() { switchToScreen(4); });
-    new QShortcut(QKeySequence(Qt::Key_F6), this, [this]() { switchToScreen(5); });
-    new QShortcut(QKeySequence(Qt::Key_F7), this, [this]() { switchToScreen(6); });
+    QShortcut *f1 = new QShortcut(QKeySequence(Qt::Key_F1), this);
+    connect(f1, &QShortcut::activated, this, [this]() { switchToScreen(0); });
 
-    new QShortcut(QKeySequence(Qt::Key_1), this, [this]() { switchToScreen(0); });
-    new QShortcut(QKeySequence(Qt::Key_2), this, [this]() { switchToScreen(1); });
-    new QShortcut(QKeySequence(Qt::Key_3), this, [this]() { switchToScreen(2); });
-    new QShortcut(QKeySequence(Qt::Key_4), this, [this]() { switchToScreen(3); });
-    new QShortcut(QKeySequence(Qt::Key_5), this, [this]() { switchToScreen(4); });
-    new QShortcut(QKeySequence(Qt::Key_6), this, [this]() { switchToScreen(5); });
-    new QShortcut(QKeySequence(Qt::Key_7), this, [this]() { switchToScreen(6); });
+    QShortcut *f2 = new QShortcut(QKeySequence(Qt::Key_F2), this);
+    connect(f2, &QShortcut::activated, this, [this]() { switchToScreen(1); });
 
-    new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this, &MainWindow::saveLayout);
-    new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_R), this, &MainWindow::restoreLayout);
-    new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q), this, &QWidget::close);
+    QShortcut *f3 = new QShortcut(QKeySequence(Qt::Key_F3), this);
+    connect(f3, &QShortcut::activated, this, [this]() { switchToScreen(2); });
+
+    QShortcut *f4 = new QShortcut(QKeySequence(Qt::Key_F4), this);
+    connect(f4, &QShortcut::activated, this, [this]() { switchToScreen(3); });
+
+    QShortcut *f5 = new QShortcut(QKeySequence(Qt::Key_F5), this);
+    connect(f5, &QShortcut::activated, this, [this]() { switchToScreen(4); });
+
+    QShortcut *f6 = new QShortcut(QKeySequence(Qt::Key_F6), this);
+    connect(f6, &QShortcut::activated, this, [this]() { switchToScreen(5); });
+
+    QShortcut *f7 = new QShortcut(QKeySequence(Qt::Key_F7), this);
+    connect(f7, &QShortcut::activated, this, [this]() { switchToScreen(6); });
+
+    QShortcut *ctrlS = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this);
+    connect(ctrlS, &QShortcut::activated, this, &MainWindow::saveLayout);
+
+    QShortcut *ctrlR = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_R), this);
+    connect(ctrlR, &QShortcut::activated, this, &MainWindow::restoreLayout);
+
+    QShortcut *ctrlQ = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q), this);
+    connect(ctrlQ, &QShortcut::activated, this, &QWidget::close);
 }
 
 void MainWindow::setupDataManager()
@@ -347,8 +339,6 @@ void MainWindow::setupDataManager()
 
 void MainWindow::setupConnections()
 {
-    connect(m_commandBar, &CommandBar::commandEntered,
-            this, &MainWindow::onCommandEntered);
     connect(&ThemeManager::instance(), &ThemeManager::themeChanged,
             this, [this]() { ThemeManager::instance().applyTheme(qApp); });
     connect(m_dataManager, &DataManager::refreshFinished,

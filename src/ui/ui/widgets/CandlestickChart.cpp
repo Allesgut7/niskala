@@ -1,13 +1,10 @@
 #include "CandlestickChart.h"
-#include <QtCharts/QBarCategoryAxis>
-#include <QtCharts/QValueAxis>
-#include <QtCharts/QCandlestickSet>
-#include <QtCharts/QAreaSeries>
+#include <QBarCategoryAxis>
+#include <QValueAxis>
+#include <QCandlestickSet>
 #include <QVBoxLayout>
 #include <QDateTime>
 #include <cmath>
-
-using namespace QtCharts;
 
 CandlestickChart::CandlestickChart(QWidget *parent)
     : QWidget(parent)
@@ -106,7 +103,6 @@ void CandlestickChart::generateSampleData()
         m_axisX->setRange(0, 29);
     }
 
-    // MA20
     for (int i = 19; i < 30; ++i) {
         double sum = 0;
         for (int j = i - 19; j <= i; ++j) {
@@ -115,9 +111,7 @@ void CandlestickChart::generateSampleData()
         m_ma20Series->append(i, sum / 20.0);
     }
 
-    double minPrice = 8500;
-    double maxPrice = 9800;
-    m_axisY->setRange(minPrice, maxPrice);
+    m_axisY->setRange(8500, 9800);
 }
 
 void CandlestickChart::loadSymbol(const QString &symbol)
@@ -136,12 +130,7 @@ void CandlestickChart::setTimeframe(const QString &tf)
 
 void CandlestickChart::updateChart()
 {
-    if (m_candleSeries->count() == 0) return;
-
-    auto *last = m_candleSeries->at(m_candleSeries->count() - 1);
-    double open = last->open();
-    double change = (rand() % 50 - 25);
-    last->setClose(last->close() + change);
-    last->setHigh(qMax(last->high(), last->close()));
-    last->setLow(qMin(last->low(), last->close()));
+    if (rand() % 10 == 0) {
+        generateSampleData();
+    }
 }
