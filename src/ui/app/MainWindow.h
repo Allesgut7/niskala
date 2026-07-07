@@ -17,6 +17,7 @@ class SettingsScreen;
 class PortfolioScreen;
 class MarketOverviewScreen;
 class NewsScreen;
+class DataManager;
 
 class MainWindow : public QMainWindow
 {
@@ -34,15 +35,20 @@ private slots:
     void switchToScreen(int screenIndex);
     void saveLayout();
     void restoreLayout();
+    void onDataUpdated();
+    void onRefreshError(const QString &error);
 
 private:
+    void setupMenuBar();
     void setupTopBanner();
     void setupCommandBar();
     void setupDockWidgets();
     void setupStatusBar();
     void setupKeyboardShortcuts();
     void setupConnections();
+    void setupDataManager();
 
+    QMenuBar *m_menuBar = nullptr;
     TopBannerWidget *m_topBanner = nullptr;
     CommandBar *m_commandBar = nullptr;
     RunningTradeTicker *m_ticker = nullptr;
@@ -64,6 +70,7 @@ private:
     MarketOverviewScreen *m_marketScreen = nullptr;
     NewsScreen *m_newsScreen = nullptr;
 
+    DataManager *m_dataManager = nullptr;
     QSettings *m_settings = nullptr;
     int m_currentScreen = 1;
 };

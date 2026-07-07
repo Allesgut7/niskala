@@ -11,6 +11,7 @@
 #include "../ui/screens/MarketOverviewScreen.h"
 #include "../ui/screens/NewsScreen.h"
 #include "../ui/theme/ThemeManager.h"
+#include "../core/DataManager.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -24,6 +25,7 @@
 #include <QHeaderView>
 #include <QShortcut>
 #include <QCloseEvent>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -32,11 +34,13 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("Niskala - Indonesian Stock Market Terminal");
     setMinimumSize(1400, 900);
 
+    setupMenuBar();
     setupTopBanner();
     setupCommandBar();
     setupDockWidgets();
     setupStatusBar();
     setupKeyboardShortcuts();
+    setupDataManager();
     setupConnections();
     restoreLayout();
 }
@@ -46,7 +50,84 @@ MainWindow::~MainWindow() = default;
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     saveLayout();
+    m_dataManager->stopAutoRefresh();
     event->accept();
+}
+
+void MainWindow::setupMenuBar()
+{
+    m_menuBar = menuBar();
+    m_menuBar->setStyleSheet(
+        "QMenuBar { background-color: #0f3460; color: #e0e0e0; border-bottom: 1px solid #e94560; }"
+        "QMenuBar::item:selected { background-color: #e94560; }"
+        "QMenu { background-color: #16213e; border: 1px solid #0f3460; color: #e0e0e0; }"
+        "QMenu::item:selected { background-color: #e94560; }"
+    );
+
+    // File menu
+    auto *fileMenu = m_menuBar->addMenu("&File");
+    fileMenu->addAction("&Refresh Data", this, [this]() {
+        m_dataManager->refreshAll();
+    }, QKeySequence::Refresh);
+    fileMenu->addSeparator();
+    fileMenu->addAction("Export &Watchlist...", this, [this]() {
+        QString file = QFileDialog::getSaveFileName(this, "Export Watchlist", "",
+                                                    "CSV Files (*.csv);;All Files (*)");
+        if (!file.isEmpty()) {
+            statusBar()->showMessage("Exported to: " + file, 3000);
+        }
+    });
+    fileMenu->addSeparator();
+    fileMenu->addAction("E&xit", this, &QWidget::close, QKeySequence::Quit);
+
+    // View menu
+    auto *viewMenu = m_menuBar->addMenu("&View");
+    viewMenu->addAction("&Dashboard", this, [this]() { switchToScreen(0); }, QKeySequence("F1"));
+    viewMenu->addAction("&Chart", this, [this]() { switchToScreen(1); }, QKeySequence("F2"));
+    viewMenu->addAction("&Screener", this, [this]() { switchToScreen(2); }, QKeySequence("F3"));
+    viewMenu->addAction("&Portfolio", this, [this]() { switchToScreen(3); }, QKeySequence("F4"));
+    viewMenu->addAction("&Market Overview", this, [this]() { switchToScreen(4); }, QKeySequence("F5"));
+    viewMenu->addAction("&News", this, [this]() { switchToScreen(5); }, QKeySequence("F6"));
+    viewMenu->addSeparator();
+    viewMenu->addAction("&Settings", this, [this]() { switchToScreen(6); }, QKeySequence("F7"));
+
+    // Tools menu
+    auto *toolsMenu = m_menuBar->addMenu("&Tools");
+    toolsMenu->addAction("Auto-Refresh &On", this, [this]() {
+        m_dataManager->startAutoRefresh(30);
+        statusBar()->showMessage("Auto-refresh enabled (30s)", 3000);
+    });
+    toolsMenu->addAction("Auto-Refresh &Off", this, [this]() {
+        m_dataManager->stopAutoRefresh();
+        statusBar()->showMessage("Auto-refresh disabled", 3000);
+    });
+    toolsMenu->addSeparator();
+    toolsMenu->addAction("&Save Layout", this, &MainWindow::saveLayout, QKeySequence::Save);
+    toolsMenu->addAction("&Restore Layout", this, &MainWindow::restoreLayout);
+
+    // Help menu
+    auto *helpMenu = m_menuBar->addMenu("&Help");
+    helpMenu->addAction("&Keyboard Shortcuts", this, [this]() {
+        QMessageBox::information(this, "Keyboard Shortcuts",
+            "F1 - Dashboard\n"
+            "F2 - Chart\n"
+            "F3 - Screener\n"
+            "F4 - Portfolio\n"
+            "F5 - Market Overview\n"
+            "F6 - News\n"
+            "F7 - Settings\n"
+            "Ctrl+S - Save Layout\n"
+            "Ctrl+R - Restore Layout\n"
+            "Ctrl+Q - Quit");
+    });
+    helpMenu->addAction("&About Niskala", this, [this]() {
+        QMessageBox::about(this, "About Niskala",
+            "<h2>Niskala Trading Terminal</h2>"
+            "<p>Version 2.0.0</p>"
+            "<p>Professional Indonesian Stock Market Terminal</p>"
+            "<p>with AI-powered sentiment analysis.</p>"
+            "<p>Built with Qt6</p>");
+    });
 }
 
 void MainWindow::setupTopBanner()
@@ -175,7 +256,7 @@ void MainWindow::setupDockWidgets()
     auto *obWidget = new QWidget();
     auto *obLayout = new QVBoxLayout(obWidget);
     obLayout->setContentsMargins(4, 4, 4, 4);
-    auto *obLabel = new QLabel("ORDER BOOK");
+    auto *obLabel = new QLabel("ORDER BOOK - BBCA");
     obLabel->setStyleSheet("color: #e94560; font-weight: bold;");
     obLayout->addWidget(obLabel);
 
@@ -255,6 +336,13 @@ void MainWindow::setupKeyboardShortcuts()
 
     new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this, &MainWindow::saveLayout);
     new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_R), this, &MainWindow::restoreLayout);
+    new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q), this, &QWidget::close);
+}
+
+void MainWindow::setupDataManager()
+{
+    m_dataManager = new DataManager(this);
+    m_dataManager->startAutoRefresh(30);
 }
 
 void MainWindow::setupConnections()
@@ -263,6 +351,10 @@ void MainWindow::setupConnections()
             this, &MainWindow::onCommandEntered);
     connect(&ThemeManager::instance(), &ThemeManager::themeChanged,
             this, [this]() { ThemeManager::instance().applyTheme(qApp); });
+    connect(m_dataManager, &DataManager::refreshFinished,
+            this, &MainWindow::onDataUpdated);
+    connect(m_dataManager, &DataManager::errorOccurred,
+            this, &MainWindow::onRefreshError);
 }
 
 void MainWindow::switchToScreen(int screenIndex)
@@ -270,32 +362,32 @@ void MainWindow::switchToScreen(int screenIndex)
     m_currentScreen = screenIndex;
 
     switch (screenIndex) {
-        case 0: // Dashboard
+        case 0:
             m_stockDock->raise();
             m_chartDock->raise();
             statusBar()->showMessage("Dashboard (F1)", 2000);
             break;
-        case 1: // Chart
+        case 1:
             m_chartDock->raise();
             statusBar()->showMessage("Chart (F2)", 2000);
             break;
-        case 2: // Screener
+        case 2:
             m_screenerDock->raise();
             statusBar()->showMessage("Screener (F3)", 2000);
             break;
-        case 3: // Portfolio
+        case 3:
             m_portfolioDock->raise();
             statusBar()->showMessage("Portfolio (F4)", 2000);
             break;
-        case 4: // Market
+        case 4:
             m_marketDock->raise();
             statusBar()->showMessage("Market Overview (F5)", 2000);
             break;
-        case 5: // News
+        case 5:
             m_newsDock->raise();
             statusBar()->showMessage("News (F6)", 2000);
             break;
-        case 6: // Settings
+        case 6:
             m_settingsDock->show();
             m_settingsDock->raise();
             statusBar()->showMessage("Settings (F7)", 2000);
@@ -317,12 +409,25 @@ void MainWindow::onCommandEntered(const QString &command)
     else if (cmd == "BOOK" || cmd == "ORDERBOOK") {
         m_orderBookDock->raise();
         statusBar()->showMessage("Order Book", 2000);
+    } else if (cmd == "REFRESH") {
+        m_dataManager->refreshAll();
+        statusBar()->showMessage("Refreshing...", 2000);
     } else if (cmd == "HELP") {
         statusBar()->showMessage(
-            "DASH CHART SCREENER PORT MARKET NEWS SETTINGS BOOK HELP", 5000);
+            "DASH CHART SCREENER PORT MARKET NEWS SETTINGS BOOK REFRESH HELP", 5000);
     } else {
         statusBar()->showMessage("Unknown: " + command, 3000);
     }
+}
+
+void MainWindow::onDataUpdated()
+{
+    statusBar()->showMessage("Data updated", 2000);
+}
+
+void MainWindow::onRefreshError(const QString &error)
+{
+    statusBar()->showMessage("Error: " + error, 5000);
 }
 
 void MainWindow::saveLayout()

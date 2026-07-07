@@ -30,6 +30,7 @@ set(SOURCES
     ui/screens/MarketOverviewScreen.cpp
     ui/screens/NewsScreen.cpp
     core/PythonBridge.cpp
+    core/DataManager.cpp
 )
 
 set(HEADERS
@@ -52,6 +53,7 @@ set(HEADERS
     ui/screens/MarketOverviewScreen.h
     ui/screens/NewsScreen.h
     core/PythonBridge.h
+    core/DataManager.h
 )
 
 set(RESOURCES
