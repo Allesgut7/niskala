@@ -1,0 +1,63 @@
+{
+  "code": "Bursa",
+  "name": "Bursa Malaysia",
+  "country": "MY",
+  "currency": "MYR",
+  "currency_symbol": "RM",
+  "ticker_suffix": ".KL",
+  "index_symbol": "^KLSE",
+  "index_name": "KLCI",
+  "commission": {
+    "buy_commission": 0.0006,
+    "sell_commission": 0.0006,
+    "transaction_tax": 0.001,
+    "min_commission": 1
+  },
+  "lot_size": {
+    "default_lot": 100
+  },
+  "tick_size": {
+    "rules": [
+      {"min": 0, "max": 1, "tick": 0.005},
+      {"min": 1, "max": 5, "tick": 0.01},
+      {"min": 5, "max": 10, "tick": 0.02},
+      {"min": 10, "max": 50, "tick": 0.05},
+      {"min": 50, "max": 100, "tick": 0.10},
+      {"min": 100, "max": 500, "tick": 0.20},
+      {"min": 500, "max": 1000, "tick": 0.50},
+      {"min": 1000, "max": 5000, "tick": 1.00}
+    ]
+  },
+  "trading_hours": {
+    "timezone": "Asia/Kuala_Lumpur",
+    "open_time": "09:00",
+    "close_time": "17:00",
+    "lunch_start": "12:30",
+    "lunch_end": "14:30"
+  },
+  "initial_capital_default": 100000,
+  "risk_free_rate": 0.03,
+  "sector_classification": {
+    "FINANCE": ["1155", "1295", "5819", "1066"],
+    "PLANTATION": ["1947", "5185", "2445", "1023"],
+    "TELECOM": ["6888", "5347", "0023"],
+    "CONSUMER": ["4707", "3182", "5196"],
+    "PROPERTY": ["5202", "1724", "1171"],
+    "INDUSTRIAL": ["3182", "5185", "1023"],
+    "ENERGY": ["5210", "5347", "6033"],
+    "TECHNOLOGY": ["0041", "0138", "0166"]
+  },
+  "top_stocks": [
+    {"symbol": "1155", "name": "Maybank"},
+    {"symbol": "1295", "name": "Public Bank"},
+    {"symbol": "5819", "name": "Hong Leong Bank"},
+    {"symbol": "6888", "name": "Axiata Group"},
+    {"symbol": "4707", "name": "Nestle Malaysia"},
+    {"symbol": "5202", "name": "Sime Darby Property"},
+    {"symbol": "3182", "name": "Genting Malaysia"},
+    {"symbol": "5185", "name": "Sime Darby"},
+    {"symbol": "1023", "name": "CIMB Group"},
+    {"symbol": "5347", "name": "Tenaga Nasional"}
+  ],
+  "data_sources": ["yfinance"]
+}

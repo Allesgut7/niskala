@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Niskala Trading Terminal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .status {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        .status-item {
+            background: #1e293b;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+        .status-label {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        .status-value {
+            color: #22c55e;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .api-link {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            background: #3b82f6;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .api-link:hover {
+            background: #2563eb;
+        }
+        .docs-link {
+            display: inline-block;
+            margin-top: 1rem;
+            margin-left: 1rem;
+            padding: 1rem 2rem;
+            background: #8b5cf6;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .docs-link:hover {
+            background: #7c3aed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Niskala</h1>
+        <p class="subtitle">Indonesian Stock Market Trading Terminal</p>
+        
+        <div class="status">
+            <div class="status-item">
+                <div class="status-label">API Status</div>
+                <div class="status-value" id="api-status">Checking...</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Version</div>
+                <div class="status-value">1.0.0</div>
+            </div>
+        </div>
+        
+        <a href="/api/" class="api-link">API Endpoints</a>
+        <a href="/api/docs" class="docs-link">API Documentation</a>
+    </div>
+    
+    <script>
+        // Check API health
+        fetch('/health')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('api-status').textContent = data.status === 'healthy' ? 'Operational' : 'Degraded';
+                document.getElementById('api-status').style.color = data.status === 'healthy' ? '#22c55e' : '#f59e0b';
+            })
+            .catch(() => {
+                document.getElementById('api-status').textContent = 'Offline';
+                document.getElementById('api-status').style.color = '#ef4444';
+            });
+    </script>
+</body>
+</html>

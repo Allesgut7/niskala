@@ -1,0 +1,43 @@
+# Niskala - Docker Compose
+# Version: 1.0.0
+
+version: '3.8'
+
+services:
+  niskala:
+    build: .
+    container_name: niskala-app
+    ports:
+      - "8765:8765"  # WebSocket
+      - "8080:8080"  # API
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./models:/app/models
+    environment:
+      - PYTHONPATH=/app/python
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '2.0'
+        reservations:
+          memory: 256M
+          cpus: '1.0'
+
+  # Optional: Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: niskala-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  redis_data:

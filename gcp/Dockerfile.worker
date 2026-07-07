@@ -1,0 +1,47 @@
+# Niskala - Worker Dockerfile
+# Background task processor
+
+FROM python:3.11-slim as builder
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# Production stage
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /install /usr/local
+
+RUN groupadd -r niskala && useradd -r -g niskala -d /app niskala
+
+WORKDIR /app
+
+COPY . .
+
+RUN mkdir -p data/cache data/logs data/paper_trading && \
+    chown -R niskala:niskala /app
+
+# Set Python path for module imports
+ENV PYTHONPATH=/app
+
+USER niskala
+
+HEALTHCHECK --interval=60s --timeout=10s --retries=3 \
+    CMD python -c "import sys; sys.exit(0)"
+
+# Worker command
+CMD ["python", "-m", "python.worker"]

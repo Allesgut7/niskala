@@ -1,0 +1,58 @@
+{
+  "code": "HOSE",
+  "name": "Ho Chi Minh Stock Exchange",
+  "country": "VN",
+  "currency": "VND",
+  "currency_symbol": "₫",
+  "ticker_suffix": ".VN",
+  "index_symbol": "^VNINDEX",
+  "index_name": "VN-Index",
+  "commission": {
+    "buy_commission": 0.0015,
+    "sell_commission": 0.0015,
+    "transaction_tax": 0.001,
+    "min_commission": 0
+  },
+  "lot_size": {
+    "default_lot": 100
+  },
+  "tick_size": {
+    "rules": [
+      {"min": 0, "max": 50000, "tick": 100},
+      {"min": 50000, "max": 100000, "tick": 100},
+      {"min": 100000, "max": 500000, "tick": 500}
+    ]
+  },
+  "trading_hours": {
+    "timezone": "Asia/Ho_Chi_Minh",
+    "open_time": "09:00",
+    "close_time": "14:45",
+    "lunch_start": "11:30",
+    "lunch_end": "13:00"
+  },
+  "initial_capital_default": 100000000,
+  "risk_free_rate": 0.045,
+  "sector_classification": {
+    "BANKING": ["VCB", "BID", "CTG", "MBB"],
+    "SECURITIES": ["SSI", "VCI", "HCM", "VCSC"],
+    "REAL_ESTATE": ["VHM", "VIC", "NVL", "KDH"],
+    "TELECOM": ["VGI", "FOX", "ICT"],
+    "CONSUMER": ["MSN", "SAB", "VNM", "QNS"],
+    "INDUSTRIAL": ["GVR", "PNJ", "MWG", "FPT"],
+    "ENERGY": ["PLX", "GAS", "POW", "NT2"],
+    "MATERIALS": ["HPG", "HSG", "NKG", "DPM"]
+  },
+  "top_stocks": [
+    {"symbol": "VHM", "name": "Vinhomes"},
+    {"symbol": "VIC", "name": "Vingroup"},
+    {"symbol": "VCB", "name": "Vietcombank"},
+    {"symbol": "VNM", "name": "Vinamilk"},
+    {"symbol": "HPG", "name": "Hoa Phat Group"},
+    {"symbol": "FPT", "name": "FPT Corporation"},
+    {"symbol": "MWG", "name": "Mobile World"},
+    {"symbol": "MSN", "name": "Masan Group"},
+    {"symbol": "VRE", "name": "Vincom Retail"},
+    {"symbol": "SAB", "name": "Sabeco"}
+  ],
+  "data_sources": ["yfinance"]
+}

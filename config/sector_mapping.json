@@ -1,0 +1,85 @@
+{
+    "sectors": {
+        "AGRI": {
+            "name": "Agriculture",
+            "code": "AGRI",
+            "stocks": ["LSIP", "AALI", "SSMS", "DSNG", "BWPT"]
+        },
+        "MINE": {
+            "name": "Mining",
+            "code": "MINE",
+            "stocks": ["ADRO", "ITMG", "PTBA", "ANTM", "MDKA", "INCO", "HRUM"]
+        },
+        "BASIC": {
+            "name": "Basic Industry",
+            "code": "BASIC",
+            "stocks": ["SMGR", "INTP", "TPIA", "BRPT", "INKP"]
+        },
+        "MISC": {
+            "name": "Miscellaneous Industry",
+            "code": "MISC",
+            "stocks": ["ASII", "SMSM", "AUTO", "GJTL"]
+        },
+        "CONS": {
+            "name": "Consumer",
+            "code": "CONS",
+            "stocks": ["UNVR", "ICBP", "INDF", "MYOR", "KLBF"]
+        },
+        "PROP": {
+            "name": "Property & Real Estate",
+            "code": "PROP",
+            "stocks": ["BSDE", "CTRA", "SMRA", "PWON"]
+        },
+        "TRADE": {
+            "name": "Trade & Services",
+            "code": "TRADE",
+            "stocks": ["ACES", "MAPI", "LPPF", "RALS"]
+        },
+        "INFRA": {
+            "name": "Infrastructure",
+            "code": "INFRA",
+            "stocks": ["TLKM", "TOWR", "TBIG", "EXCL", "ISAT", "FREN"]
+        },
+        "TRANS": {
+            "name": "Transportation & Logistics",
+            "code": "TRANS",
+            "stocks": ["GOTO", "BUKA", "BIRD", "SMDR"]
+        },
+        "ENERGY": {
+            "name": "Energy",
+            "code": "ENERGY",
+            "stocks": ["PGAS", "AKRA", "MEDC", "ELSA"]
+        },
+        "FINANCE": {
+            "name": "Financials",
+            "code": "FINANCE",
+            "stocks": ["BBCA", "BBRI", "BMRI", "BBNI", "BRIS", "ARTO"]
+        },
+        "HEALTH": {
+            "name": "Healthcare",
+            "code": "HEALTH",
+            "stocks": ["KLBF", "SIDO", "MIKA"]
+        },
+        "TECH": {
+            "name": "Technology",
+            "code": "TECH",
+            "stocks": ["GOTO", "BUKA", "EMTK", "DCII"]
+        }
+    },
+    "blue_chips": [
+        "BBCA", "BBRI", "BMRI", "TLKM", "GOTO",
+        "ADRO", "UNVR", "ICBP", "ASII", "PGAS",
+        "ANTM", "BBNI", "KLKM"
+    ],
+    "idx30": [
+        "BBCA", "BBRI", "BMRI", "TLKM", "GOTO",
+        "ADRO", "UNVR", "ICBP", "ASII", "PGAS",
+        "ANTM", "BBNI", "INTP", "SMGR", "KLBF",
+        "EXCL", "ISAT", "TOWR", "TBIG", "AKRA",
+        "INDF", "MYOR", "BSDE", "CTRA", "TPIA",
+        "BRPT", "INKP", "BUKA", "EMTK", "ARTO"
+    ],
+    "idx30_change_pct": {
+        "default": 0.0
+    }
+}

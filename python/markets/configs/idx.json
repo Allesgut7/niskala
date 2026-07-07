@@ -1,0 +1,64 @@
+{
+  "code": "IDX",
+  "name": "Indonesia Stock Exchange",
+  "country": "ID",
+  "currency": "IDR",
+  "currency_symbol": "Rp",
+  "ticker_suffix": ".JK",
+  "index_symbol": "^JKSE",
+  "index_name": "IHSG",
+  "commission": {
+    "buy_commission": 0.0015,
+    "sell_commission": 0.0025,
+    "transaction_tax": 0.001,
+    "min_commission": 0
+  },
+  "lot_size": {
+    "default_lot": 100
+  },
+  "tick_size": {
+    "rules": [
+      {"min": 0, "max": 2000, "tick": 50},
+      {"min": 2000, "max": 5000, "tick": 50},
+      {"min": 5000, "max": 10000, "tick": 100},
+      {"min": 10000, "max": 20000, "tick": 100},
+      {"min": 20000, "max": 50000, "tick": 500},
+      {"min": 50000, "max": 100000, "tick": 500}
+    ]
+  },
+  "trading_hours": {
+    "timezone": "Asia/Jakarta",
+    "open_time": "09:00",
+    "close_time": "16:00",
+    "lunch_start": null,
+    "lunch_end": null
+  },
+  "initial_capital_default": 100000000,
+  "risk_free_rate": 0.06,
+  "sector_classification": {
+    "ENERGY": ["ADRO", "PTBA", "ITMG", "INDY", "MEDC"],
+    "BASIC": ["INCO", "MDKA", "ANTM", "BRMS"],
+    "INDUST": ["ASII", "UNTR", "SMGR", "GJTL"],
+    "CONNON": ["ICBP", "UNVR", "INDF", "HMSP"],
+    "CONCYC": ["MAPI", "LPPF", "ACES", "SMSM"],
+    "HEALTH": ["SIDO", "KLBF", "MIKA", "HEAL"],
+    "FINANCE": ["BBRI", "BBCA", "BMRI", "BNI", "BRIS"],
+    "PROPERT": ["BSDE", "CTRA", "SMRA", "PWON"],
+    "TECH": ["GOTO", "BUKA", "EMTEK", "BALI"],
+    "INFRA": ["TLKM", "TOWR", "TBIG", "JSMR"],
+    "TRANS": ["BIRD", "CITA", "ASSA", "SMDR"]
+  },
+  "top_stocks": [
+    {"symbol": "BBCA", "name": "Bank Central Asia"},
+    {"symbol": "BBRI", "name": "Bank Rakyat Indonesia"},
+    {"symbol": "BMRI", "name": "Bank Mandiri"},
+    {"symbol": "TLKM", "name": "Telkom Indonesia"},
+    {"symbol": "GOTO", "name": "Gojek Tokopedia"},
+    {"symbol": "ADRO", "name": "Adaro Energy"},
+    {"symbol": "UNVR", "name": "Unilever Indonesia"},
+    {"symbol": "ICBP", "name": "Indofood CBP"},
+    {"symbol": "ASII", "name": "Astra International"},
+    {"symbol": "PGAS", "name": "Perusahaan Gas Negara"}
+  ],
+  "data_sources": ["yfinance", "idx_bei", "akshare"]
+}

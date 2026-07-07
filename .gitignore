@@ -1,0 +1,54 @@
+# Niskala - Git Ignore
+
+# Build
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+dist/
+*.whl
+
+# Data
+data/cache/*.db
+data/local_db/*.db
+data/*.db
+data/niskala.log
+
+# Models
+models/finbert/
+*.bin
+*.pt
+*.onnx
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Compiled
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+
+# Environment / Secrets
+.env
+.env.*
+gcp/.env

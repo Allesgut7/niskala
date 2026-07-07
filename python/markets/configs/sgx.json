@@ -1,0 +1,65 @@
+{
+  "code": "SGX",
+  "name": "Singapore Exchange",
+  "country": "SG",
+  "currency": "SGD",
+  "currency_symbol": "S$",
+  "ticker_suffix": ".SI",
+  "index_symbol": "^STI",
+  "index_name": "Straits Times Index",
+  "commission": {
+    "buy_commission": 0.0005,
+    "sell_commission": 0.0005,
+    "transaction_tax": 0.0001,
+    "min_commission": 1
+  },
+  "lot_size": {
+    "default_lot": 100
+  },
+  "tick_size": {
+    "rules": [
+      {"min": 0, "max": 0.20, "tick": 0.001},
+      {"min": 0.20, "max": 0.50, "tick": 0.002},
+      {"min": 0.50, "max": 1.00, "tick": 0.005},
+      {"min": 1.00, "max": 2.00, "tick": 0.01},
+      {"min": 2.00, "max": 5.00, "tick": 0.02},
+      {"min": 5.00, "max": 10.00, "tick": 0.05},
+      {"min": 10.00, "max": 20.00, "tick": 0.10},
+      {"min": 20.00, "max": 50.00, "tick": 0.20},
+      {"min": 50.00, "max": 100.00, "tick": 0.50},
+      {"min": 100.00, "max": 999.99, "tick": 1.00}
+    ]
+  },
+  "trading_hours": {
+    "timezone": "Asia/Singapore",
+    "open_time": "09:00",
+    "close_time": "17:00",
+    "lunch_start": null,
+    "lunch_end": null
+  },
+  "initial_capital_default": 100000,
+  "risk_free_rate": 0.03,
+  "sector_classification": {
+    "BANKING": ["D05", "O39", "U11", "Y38"],
+    "TELECOM": ["Z74", "BXY"],
+    "PROPERTY": ["C61", "T82", "P14"],
+    "REIT": ["C2PU", "N2IU", "C38U"],
+    "TRANSPORT": ["C6L", "S61", "BS6"],
+    "CONSUMER": ["C09", "O87", "V03"],
+    "HEALTHCARE": ["E27", "MXDU"],
+    "ENERGY": ["S58", "U13"]
+  },
+  "top_stocks": [
+    {"symbol": "D05", "name": "DBS Group"},
+    {"symbol": "O39", "name": "OCBC Bank"},
+    {"symbol": "U11", "name": "UOB"},
+    {"symbol": "Z74", "name": "Singtel"},
+    {"symbol": "C61", "name": "CapitaLand Investment"},
+    {"symbol": "C6L", "name": "Singapore Airlines"},
+    {"symbol": "A17U", "name": "CapitaLand Integrated Commercial Trust"},
+    {"symbol": "S58", "name": "Sembcorp Industries"},
+    {"symbol": "C09", "name": "Jardine Matheson Holdings"},
+    {"symbol": "Y38", "name": "Keppel Corporation"}
+  ],
+  "data_sources": ["yfinance"]
+}

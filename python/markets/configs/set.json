@@ -1,0 +1,68 @@
+{
+  "code": "SET",
+  "name": "Stock Exchange of Thailand",
+  "country": "TH",
+  "currency": "THB",
+  "currency_symbol": "฿",
+  "ticker_suffix": ".BK",
+  "index_symbol": "^SET.BK",
+  "index_name": "SET Index",
+  "commission": {
+    "buy_commission": 0.0015,
+    "sell_commission": 0.0015,
+    "transaction_tax": 0.001,
+    "min_commission": 0
+  },
+  "lot_size": {
+    "default_lot": 100
+  },
+  "tick_size": {
+    "rules": [
+      {"min": 0, "max": 2, "tick": 0.01},
+      {"min": 2, "max": 5, "tick": 0.02},
+      {"min": 5, "max": 10, "tick": 0.05},
+      {"min": 10, "max": 25, "tick": 0.10},
+      {"min": 25, "max": 50, "tick": 0.25},
+      {"min": 50, "max": 100, "tick": 0.50},
+      {"min": 100, "max": 200, "tick": 1.00},
+      {"min": 200, "max": 500, "tick": 2.00},
+      {"min": 500, "max": 1000, "tick": 5.00},
+      {"min": 1000, "max": 9999, "tick": 10.00}
+    ]
+  },
+  "trading_hours": {
+    "timezone": "Asia/Bangkok",
+    "open_time": "10:00",
+    "close_time": "16:30",
+    "lunch_start": "12:30",
+    "lunch_end": "14:00"
+  },
+  "initial_capital_default": 100000,
+  "risk_free_rate": 0.025,
+  "sector_classification": {
+    "AGRO": ["BANPU", "CPF", "MINT", "TU"],
+    "FOOD": ["CPF", "MINT", "TU", "STA"],
+    "FASHION": ["CRC", "ERW", "ICSC"],
+    "HOME": ["HMPRO", "SCC", "TPIPL"],
+    "HEALTH": ["BCH", "BGH", "BDMS", "RAM"],
+    "SERVICE": ["AOT", "BDMS", "BTS", "TRUE"],
+    "TECH": ["ADVANC", "DTAC", "TRUE", "JAS"],
+    "INDUSTRY": ["SCC", "TKN", "TPIPL", "GLOW"],
+    "PROPERTY": ["LAND", "LH", "SPALI", "QLTCC"],
+    "RESOURCE": ["PTT", "PTTEP", "IRPC", "TOP"],
+    "FINANCE": ["BBL", "KBANK", "SCB", "TCAP"]
+  },
+  "top_stocks": [
+    {"symbol": "PTT", "name": "PTT Public Company"},
+    {"symbol": "SCB", "name": "Siam Commercial Bank"},
+    {"symbol": "KBANK", "name": "Kasikornbank"},
+    {"symbol": "ADVANC", "name": "Advanced Info Service"},
+    {"symbol": "BBL", "name": "Bangkok Bank"},
+    {"symbol": "AOT", "name": "Airports of Thailand"},
+    {"symbol": "CPALL", "name": "CP ALL"},
+    {"symbol": "PTTEP", "name": "PTT Exploration & Production"},
+    {"symbol": "TRUE", "name": "True Corporation"},
+    {"symbol": "BDMS", "name": "Bangkok Dusit Medical Services"}
+  ],
+  "data_sources": ["yfinance"]
+}

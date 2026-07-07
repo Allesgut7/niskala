@@ -1,0 +1,38 @@
+{
+    "app": {
+        "name": "Niskala",
+        "version": "1.0.0",
+        "description": "Terminal Trading Profesional untuk Indonesia"
+    },
+    "watchlist": [
+        "BBCA",
+        "BBRI",
+        "BMRI",
+        "TLKM",
+        "GOTO",
+        "ADRO",
+        "UNVR",
+        "ICBP",
+        "ASII",
+        "PGAS"
+    ],
+    "refresh_interval": 5,
+    "theme": "dark",
+    "language": "id",
+    "data_sources": {
+        "primary": "yfinance",
+        "fallback": ["akshare", "idx-bei"]
+    },
+    "fear_greed": {
+        "update_interval": 300,
+        "regions": ["indonesia", "asia", "global"]
+    },
+    "ai": {
+        "sentiment_model": "finbert",
+        "llm_provider": "openai"
+    },
+    "notification": {
+        "telegram": false,
+        "discord": false
+    }
+}

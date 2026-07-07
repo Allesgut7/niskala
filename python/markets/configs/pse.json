@@ -1,0 +1,69 @@
+{
+  "code": "PSE",
+  "name": "Philippine Stock Exchange",
+  "country": "PH",
+  "currency": "PHP",
+  "currency_symbol": "₱",
+  "ticker_suffix": ".PS",
+  "index_symbol": "PSEI",
+  "index_name": "PSEi",
+  "commission": {
+    "buy_commission": 0.0025,
+    "sell_commission": 0.0025,
+    "transaction_tax": 0.006,
+    "min_commission": 20
+  },
+  "lot_size": {
+    "default_lot": 10
+  },
+  "tick_size": {
+    "rules": [
+      {"min": 0, "max": 0.01, "tick": 0.0001},
+      {"min": 0.01, "max": 0.05, "tick": 0.001},
+      {"min": 0.05, "max": 0.25, "tick": 0.005},
+      {"min": 0.25, "max": 0.50, "tick": 0.01},
+      {"min": 0.50, "max": 5, "tick": 0.05},
+      {"min": 5, "max": 10, "tick": 0.10},
+      {"min": 10, "max": 20, "tick": 0.20},
+      {"min": 20, "max": 50, "tick": 0.50},
+      {"min": 50, "max": 100, "tick": 1.00},
+      {"min": 100, "max": 200, "tick": 2.00},
+      {"min": 200, "max": 500, "tick": 5.00},
+      {"min": 500, "max": 1000, "tick": 10.00},
+      {"min": 1000, "max": 2000, "tick": 20.00},
+      {"min": 2000, "max": 5000, "tick": 50.00}
+    ]
+  },
+  "trading_hours": {
+    "timezone": "Asia/Manila",
+    "open_time": "09:30",
+    "close_time": "15:30",
+    "lunch_start": "12:00",
+    "lunch_end": "13:30"
+  },
+  "initial_capital_default": 100000,
+  "risk_free_rate": 0.065,
+  "sector_classification": {
+    "FINANCE": ["BDO", "BPI", "MBT", "SECB"],
+    "PROPERTY": ["ALI", "MEG", "RLC", "URC"],
+    "INDUSTRIAL": ["AEV", "LTG", "MPI", "JFC"],
+    "SERVICES": ["AC", "GLO", "TEL", "SM"],
+    "HOLDING": ["AC", "LTG", "JGS", "MPI"],
+    "MINING": ["SCC", "NIKL", "MA", "APL"],
+    "ENERGY": ["SCC", "MEG", "AC", "SM"],
+    "TELECOM": ["GLO", "TEL", "DITO"]
+  },
+  "top_stocks": [
+    {"symbol": "BDO", "name": "BDO Unibank"},
+    {"symbol": "SM", "name": "SM Investments"},
+    {"symbol": "AC", "name": "Ayala Corporation"},
+    {"symbol": "ALI", "name": "Ayala Land"},
+    {"symbol": "BPI", "name": "Bank of the Philippine Islands"},
+    {"symbol": "TEL", "name": "PLDT"},
+    {"symbol": "MBT", "name": "Metropolitan Bank"},
+    {"symbol": "JFC", "name": "Jollibee Foods"},
+    {"symbol": "MEG", "name": "Megaworld Corporation"},
+    {"symbol": "URC", "name": "Universal Robina Corporation"}
+  ],
+  "data_sources": ["yfinance"]
+}
