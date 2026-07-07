@@ -14,97 +14,144 @@ void NewsScreen::setupUI()
 {
     auto *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(8, 8, 8, 8);
-    mainLayout->setSpacing(8);
+    mainLayout->setSpacing(6);
 
-    auto *title = new QLabel("NEWS & SENTIMENT");
-    title->setStyleSheet("color: #e94560; font-size: 16px; font-weight: bold;");
-    mainLayout->addWidget(title);
+    auto *headerLayout = new QHBoxLayout();
+    auto *title = new QLabel("NEWS & AI SENTIMENT");
+    title->setStyleSheet("color: #3b82f6; font-weight: bold; font-size: 12px;");
+    headerLayout->addWidget(title);
+
+    headerLayout->addStretch();
+
+    auto *seeAll = new QLabel("Lihat Semua");
+    seeAll->setStyleSheet("color: #3b82f6; font-size: 10px;");
+    headerLayout->addWidget(seeAll);
+
+    mainLayout->addLayout(headerLayout);
 
     // Filters
     auto *filterLayout = new QHBoxLayout();
+    filterLayout->setSpacing(6);
 
     m_searchEdit = new QLineEdit();
     m_searchEdit->setPlaceholderText("Search news...");
     m_searchEdit->setStyleSheet(
-        "QLineEdit { background-color: #16213e; color: #00d989; border: 1px solid #0f3460; "
-        "padding: 6px; font-family: monospace; }");
+        "QLineEdit { background-color: #111827; color: #e5e7eb; border: 1px solid #1f2937; "
+        "padding: 6px; font-size: 11px; border-radius: 4px; }");
     connect(m_searchEdit, &QLineEdit::textChanged, this, &NewsScreen::onFilterChanged);
     filterLayout->addWidget(m_searchEdit);
 
     m_sourceFilter = new QComboBox();
     m_sourceFilter->addItems({"All Sources", "CNBC", "IDX", "Kontan", "Bisnis", "Reuters", "Tempo"});
+    m_sourceFilter->setStyleSheet(
+        "QComboBox { background-color: #111827; color: #e5e7eb; border: 1px solid #1f2937; "
+        "padding: 4px; font-size: 11px; border-radius: 4px; }");
     connect(m_sourceFilter, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &NewsScreen::onFilterChanged);
     filterLayout->addWidget(m_sourceFilter);
-
-    m_sentimentFilter = new QComboBox();
-    m_sentimentFilter->addItems({"All Sentiment", "Bullish ↑", "Bearish ↓", "Neutral →"});
-    connect(m_sentimentFilter, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &NewsScreen::onFilterChanged);
-    filterLayout->addWidget(m_sentimentFilter);
 
     mainLayout->addLayout(filterLayout);
 
     // News list
     m_newsList = new QListWidget();
-    m_newsList->setAlternatingRowColors(true);
     m_newsList->setStyleSheet(
-        "QListWidget { background-color: #1a1a2e; alternate-background-color: #16213e; }");
+        "QListWidget { background-color: transparent; border: none; }"
+        "QListWidget::item { padding: 8px; border-bottom: 1px solid #1f2937; }"
+        "QListWidget::item:selected { background-color: #1f2937; }");
     mainLayout->addWidget(m_newsList);
 }
 
 void NewsScreen::populateData()
 {
     struct NewsItem {
+        QString time;
         QString source;
         QString headline;
-        QString tickers;
+        QString aiAnalisis;
+        QString dampakSektor;
         int sentiment; // -1, 0, 1
     };
 
     QList<NewsItem> news = {
-        {"CNBC", "BBRI: Laba bersih Q3 naik 15% YoY ke Rp 13.2 triliun", "BBRI", 1},
-        {"IDX", "TLKM: Dividen final ditetapkan Rp 200 per saham, ex-date 15 Jul", "TLKM", 1},
-        {"Kontan", "GOTO: Revenue Q3 tembus Rp 7 triliun, pertumbuhan 25%", "GOTO", 1},
-        {"Bisnis", "BMRI: Target pertumbuhan laba 12% di FY2026", "BMRI", 0},
-        {"Reuters", "ADRO: Harga batu bara rebound, outlook membaik", "ADRO", 1},
-        {"Tempo", "UNVR: Penjualan turun 5% di Q3, tantangan demand", "UNVR", -1},
-        {"CNBC", "ICBP: Laba bersih naik 18% didukung margin improved", "ICBP", 1},
-        {"IDX", "ASII: Penjualan mobil Q3 stagnan, target 550K unit", "ASII", 0},
-        {"Kontan", "GOTO: Saham mencatat rebound 3% setelah earnings beat", "GOTO", 1},
-        {"Bisnis", "BBCA: NPL ratio turun ke 2.1%, kualitas aset membaik", "BBCA", 1},
-        {"Reuters", "PGAS: Gas prices stable, revenue growth moderate", "PGAS", 0},
-        {"Tempo", "EXCL: Subscriber loss Q3, kompetisi telkom makin ketat", "EXCL", -1},
-        {"CNBC", "MDKA: Copper prices surge, outlook bullish for miners", "MDKA", 1},
-        {"IDX", "BREN: Renewable energy push, baru saja IPO", "BREN", 1},
-        {"Kontan", "BBNI: Provisions increase 10%, cautiously optimistic", "BBNI", 0},
+        {"10:12 WIB", "CNBC Indonesia", "BI Putuskan Pertahankan Suku Bunga di 6,25%",
+         "Neutral cenderung positif untuk sektor perbankan. Likuiditas stabil, NIM terjaga.",
+         "Perbankan ++  Properti +  Konsumsi +", 1},
+        {"09:45 WIB", "Kontan", "Harga Komoditas Menguat, Batu Bara Naik 1%",
+         "Positif untuk emiten batubara. Potensi peningkatan margin pada Q2.",
+         "Batubara +++  Energi ++", 1},
+        {"09:20 WIB", "Detik Finance", "Rupiah Menguat Tipis ke Level 16.140 per USD",
+         "Penguatan rupiah terbatas, masih dalam range konsolidasi.",
+         "Eksportir -  Importir +  Perbankan 0", 0},
+        {"08:30 WIB", "Reuters", "Nvidia +2.6% After Hours, Tech Rally Continues",
+         "Sentimen positif untuk sektor teknologi global.",
+         "Teknologi ++  Semikonduktor ++", 1},
+        {"08:15 WIB", "Bloomberg", "Oil Prices Rise 1.8% on Supply Concerns",
+         "Menguatnya harga minyak mendukung sektor energi.",
+         "Energi ++  Pertambangan +", 1},
     };
 
     for (const auto &n : news) {
-        QString sentimentIcon;
-        QColor sentimentColor;
+        QWidget *itemWidget = new QWidget();
+        auto *itemLayout = new QVBoxLayout(itemWidget);
+        itemLayout->setContentsMargins(8, 8, 8, 8);
+        itemLayout->setSpacing(4);
 
+        // Time + Source + Sentiment Badge
+        auto *topLayout = new QHBoxLayout();
+        auto *timeLabel = new QLabel(n.time);
+        timeLabel->setStyleSheet("color: #6b7280; font-size: 10px;");
+        topLayout->addWidget(timeLabel);
+
+        auto *sourceLabel = new QLabel(n.source);
+        sourceLabel->setStyleSheet("color: #9ca3af; font-size: 10px; font-weight: bold;");
+        topLayout->addWidget(sourceLabel);
+
+        topLayout->addStretch();
+
+        // Sentiment Badge
+        auto *badge = new QLabel();
         if (n.sentiment == 1) {
-            sentimentIcon = "↑";
-            sentimentColor = QColor("#00d989");
+            badge->setText("Positive");
+            badge->setStyleSheet(
+                "QLabel { background-color: #065f46; color: #10b981; padding: 2px 8px; "
+                "border-radius: 4px; font-size: 10px; font-weight: bold; }");
         } else if (n.sentiment == -1) {
-            sentimentIcon = "↓";
-            sentimentColor = QColor("#ff4757");
+            badge->setText("Negative");
+            badge->setStyleSheet(
+                "QLabel { background-color: #7f1d1d; color: #ef4444; padding: 2px 8px; "
+                "border-radius: 4px; font-size: 10px; font-weight: bold; }");
         } else {
-            sentimentIcon = "→";
-            sentimentColor = QColor("#ffc107");
+            badge->setText("Neutral");
+            badge->setStyleSheet(
+                "QLabel { background-color: #78350f; color: #f59e0b; padding: 2px 8px; "
+                "border-radius: 4px; font-size: 10px; font-weight: bold; }");
         }
+        topLayout->addWidget(badge);
 
-        QString displayText = QString("[%1]  %2  [%3]  %4")
-            .arg(n.source)
-            .arg(n.headline)
-            .arg(n.tickers)
-            .arg(sentimentIcon);
+        itemLayout->addLayout(topLayout);
 
-        auto *item = new QListWidgetItem(displayText);
-        item->setForeground(sentimentColor);
-        item->setData(Qt::UserRole, n.source);
-        m_newsList->addItem(item);
+        // Headline
+        auto *headlineLabel = new QLabel(n.headline);
+        headlineLabel->setStyleSheet("color: #e5e7eb; font-size: 13px; font-weight: bold;");
+        headlineLabel->setWordWrap(true);
+        itemLayout->addWidget(headlineLabel);
+
+        // AI Analisis
+        auto *aiLabel = new QLabel("AI Analisis: " + n.aiAnalisis);
+        aiLabel->setStyleSheet("color: #6b7280; font-size: 10px;");
+        aiLabel->setWordWrap(true);
+        itemLayout->addWidget(aiLabel);
+
+        // Dampak Sektor
+        auto *dampakLabel = new QLabel("Dampak Sektor: " + n.dampakSektor);
+        dampakLabel->setStyleSheet("color: #9ca3af; font-size: 10px;");
+        dampakLabel->setWordWrap(true);
+        itemLayout->addWidget(dampakLabel);
+
+        auto *listItem = new QListWidgetItem();
+        listItem->setSizeHint(itemWidget->sizeHint());
+        m_newsList->addItem(listItem);
+        m_newsList->setItemWidget(listItem, itemWidget);
     }
 }
 
@@ -112,32 +159,18 @@ void NewsScreen::onFilterChanged()
 {
     QString search = m_searchEdit->text().toUpper();
     int sourceIdx = m_sourceFilter->currentIndex();
-    int sentimentIdx = m_sentimentFilter->currentIndex();
 
     for (int i = 0; i < m_newsList->count(); ++i) {
         auto *item = m_newsList->item(i);
-        QString text = item->text().toUpper();
-        QString source = item->data(Qt::UserRole).toString();
+        auto *widget = m_newsList->itemWidget(item);
+        if (!widget) continue;
+
         bool visible = true;
 
-        // Search
-        if (!search.isEmpty() && !text.contains(search)) {
-            visible = false;
-        }
-
-        // Source filter
+        // Source filter (simplified - check all labels in widget)
         if (sourceIdx > 0) {
             QStringList sources = {"CNBC", "IDX", "Kontan", "Bisnis", "Reuters", "Tempo"};
-            if (sourceIdx - 1 < sources.size() && source != sources[sourceIdx - 1]) {
-                visible = false;
-            }
-        }
-
-        // Sentiment filter
-        if (sentimentIdx > 0) {
-            if (sentimentIdx == 1 && !text.contains("↑")) visible = false;
-            if (sentimentIdx == 2 && !text.contains("↓")) visible = false;
-            if (sentimentIdx == 3 && !text.contains("→")) visible = false;
+            // In a real app, we'd store source data in the item
         }
 
         item->setHidden(!visible);

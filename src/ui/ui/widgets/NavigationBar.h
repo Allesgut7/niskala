@@ -20,6 +20,7 @@ private slots:
 
 private:
     void setupUI();
+    void updateTabStyles();
 
     QList<QPushButton*> m_tabs;
     int m_activeTab = 0;

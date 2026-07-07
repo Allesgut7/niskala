@@ -11,6 +11,7 @@ public:
     explicit FearGreedGauge(const QString &label = "ID", QWidget *parent = nullptr);
 
     void setScore(int score);
+    void setDelta(int delta);
     int score() const { return m_score; }
 
 signals:
@@ -25,5 +26,6 @@ private:
     QString getScoreLabel(int score) const;
 
     int m_score = 50;
+    int m_delta = 0;
     QString m_label;
 };
