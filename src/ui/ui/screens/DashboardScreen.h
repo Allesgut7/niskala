@@ -1,9 +1,16 @@
 #pragma once
 
 #include <QWidget>
-#include <QTableWidget>
-#include <QListWidget>
-#include <QLabel>
+
+class NavigationBar;
+class BreakingNewsTicker;
+class MarketIndicesStrip;
+class CandlestickChart;
+class FearGreedGauge;
+class CommodityTable;
+class MarketBreadthWidget;
+class NewsScreen;
+class SectorPerformanceWidget;
 
 class DashboardScreen : public QWidget
 {
@@ -14,13 +21,16 @@ public:
 
 private:
     void setupUI();
-    void setupStockTable();
-    void setupNewsFeed();
-    void setupGainersLosers();
-    void populateSampleData();
 
-    QTableWidget *m_stockTable = nullptr;
-    QListWidget *m_newsList = nullptr;
-    QLabel *m_gainersLabel = nullptr;
-    QLabel *m_losersLabel = nullptr;
+    NavigationBar *m_navBar = nullptr;
+    BreakingNewsTicker *m_ticker = nullptr;
+    MarketIndicesStrip *m_indicesStrip = nullptr;
+    CandlestickChart *m_chart = nullptr;
+    FearGreedGauge *m_fgIndo = nullptr;
+    FearGreedGauge *m_fgAsia = nullptr;
+    FearGreedGauge *m_fgGlobal = nullptr;
+    CommodityTable *m_commodityTable = nullptr;
+    MarketBreadthWidget *m_breadth = nullptr;
+    NewsScreen *m_news = nullptr;
+    SectorPerformanceWidget *m_sectorPerf = nullptr;
 };

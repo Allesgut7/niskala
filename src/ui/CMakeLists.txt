@@ -14,6 +14,13 @@ set(SOURCES
     app/MainWindow.cpp
     ui/theme/ThemeManager.cpp
     ui/widgets/CommandBar.cpp
+    ui/widgets/NavigationBar.cpp
+    ui/widgets/BreakingNewsTicker.cpp
+    ui/widgets/MarketIndexCard.cpp
+    ui/widgets/MarketIndicesStrip.cpp
+    ui/widgets/CommodityTable.cpp
+    ui/widgets/MarketBreadthWidget.cpp
+    ui/widgets/SectorPerformanceWidget.cpp
     ui/widgets/CandlestickChart.cpp
     ui/widgets/OrderBookWidget.cpp
     ui/widgets/FearGreedGauge.cpp
@@ -37,6 +44,13 @@ set(HEADERS
     app/MainWindow.h
     ui/theme/ThemeManager.h
     ui/widgets/CommandBar.h
+    ui/widgets/NavigationBar.h
+    ui/widgets/BreakingNewsTicker.h
+    ui/widgets/MarketIndexCard.h
+    ui/widgets/MarketIndicesStrip.h
+    ui/widgets/CommodityTable.h
+    ui/widgets/MarketBreadthWidget.h
+    ui/widgets/SectorPerformanceWidget.h
     ui/widgets/CandlestickChart.h
     ui/widgets/OrderBookWidget.h
     ui/widgets/FearGreedGauge.h
