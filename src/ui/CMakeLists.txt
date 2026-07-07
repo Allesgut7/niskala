@@ -14,6 +14,12 @@ set(SOURCES
     app/MainWindow.cpp
     ui/theme/ThemeManager.cpp
     ui/widgets/CommandBar.cpp
+    ui/widgets/CandlestickChart.cpp
+    ui/widgets/OrderBookWidget.cpp
+    ui/widgets/FearGreedGauge.cpp
+    ui/widgets/SectorHeatmap.cpp
+    ui/widgets/SentimentGauge.cpp
+    ui/widgets/TopBannerWidget.cpp
     ui/screens/DashboardScreen.cpp
 )
 
@@ -21,6 +27,12 @@ set(HEADERS
     app/MainWindow.h
     ui/theme/ThemeManager.h
     ui/widgets/CommandBar.h
+    ui/widgets/CandlestickChart.h
+    ui/widgets/OrderBookWidget.h
+    ui/widgets/FearGreedGauge.h
+    ui/widgets/SectorHeatmap.h
+    ui/widgets/SentimentGauge.h
+    ui/widgets/TopBannerWidget.h
     ui/screens/DashboardScreen.h
 )
 

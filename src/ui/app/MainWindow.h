@@ -2,13 +2,16 @@
 
 #include <QMainWindow>
 #include <QDockWidget>
-#include <QMenuBar>
 #include <QToolBar>
 #include <QStatusBar>
 #include <QTabWidget>
 
 class CommandBar;
-class DashboardScreen;
+class TopBannerWidget;
+class CandlestickChart;
+class OrderBookWidget;
+class FearGreedGauge;
+class SectorHeatmap;
 
 class MainWindow : public QMainWindow
 {
@@ -20,21 +23,22 @@ public:
 
 private slots:
     void onCommandEntered(const QString &command);
-    void onThemeChanged();
 
 private:
-    void setupMenuBar();
-    void setupToolBar();
+    void setupTopBanner();
     void setupCommandBar();
     void setupDockWidgets();
     void setupStatusBar();
     void setupConnections();
 
-    QToolBar *m_toolBar = nullptr;
+    TopBannerWidget *m_topBanner = nullptr;
     CommandBar *m_commandBar = nullptr;
-    QTabWidget *m_tabWidget = nullptr;
     QDockWidget *m_stockDock = nullptr;
     QDockWidget *m_newsDock = nullptr;
     QDockWidget *m_chartDock = nullptr;
-    DashboardScreen *m_dashboard = nullptr;
+    QDockWidget *m_orderBookDock = nullptr;
+    QDockWidget *m_heatmapDock = nullptr;
+    CandlestickChart *m_chart = nullptr;
+    OrderBookWidget *m_orderBook = nullptr;
+    SectorHeatmap *m_heatmap = nullptr;
 };
