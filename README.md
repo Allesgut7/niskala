@@ -1,108 +1,112 @@
+<div align="center">
+
 ![NISKALA](Logo-fix.png)
 
-# Niskala - Complete Project README
+# NISKALA
 
-**Version:** 1.0.0  
-**Status:** Production Ready  
-**Date:** July 3, 2026
+### Reveal the Unseen
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB.svg?logo=python&logoColor=white)](https://python.org)
+[![C++20](https://img.shields.io/badge/C++-20-00599C.svg?logo=cplusplus&logoColor=white)](https://isocpp.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://docker.com)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF.svg?logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
+
+A professional-grade trading terminal for the Indonesian stock market (IDX)
+with AI-powered sentiment analysis, quantitative trading tools, and multi-market support.
+
+</div>
 
 ---
 
-## 🚀 Overview
+## Overview
 
-**Niskala** is a professional-grade Indonesian stock market terminal featuring AI-powered sentiment analysis, quantitative trading tools, and real-time collaboration. Built with C++ (terminal UI) and Python (AI/quant modules).
+**Niskala** is a high-performance trading terminal purpose-built for the Indonesian stock market. It combines real-time market data, AI-driven sentiment analysis (FinBERT + LLM), and institutional-grade quantitative tools into a single unified platform.
 
-### Key Features
+Designed for professional traders, quant analysts, and fintech teams who demand Bloomberg-level capabilities without the enterprise price tag.
 
-✅ **AI Sentiment Analysis**
-- FinBERT + LLM (GPT-4/Claude) interpretation
-- Multi-source news scraping (6 sources)
-- Sector/emiten impact mapping
+---
+
+## Key Features
+
+<table>
+<tr>
+<td width="50%">
+
+#### AI-Powered Sentiment Analysis
+- FinBERT + LLM (GPT-4 / Claude) interpretation
+- Multi-source news scraping from 6+ providers
+- Sector & emiten impact mapping
 - Real-time sentiment scoring (-100 to +100)
 
-✅ **Quantitative Trading Lab**
+</td>
+<td width="50%">
+
+#### Quantitative Trading Lab
 - Event-driven backtesting (IDX commission model)
 - Multi-factor analysis (Value, Momentum, Quality, Size)
 - Portfolio optimization (Mean-Variance, HRP, Black-Litterman)
 - Risk metrics (VaR, CVaR, Sharpe, Sortino, Max DD)
-- DCF valuation with Monte Carlo simulation
 
-✅ **Advanced Analytics**
-- Stock screener (80+ filters, 8 presets)
-- Pattern recognition (15 patterns)
+</td>
+</tr>
+<tr>
+<td>
+
+#### Advanced Analytics & Screener
+- Stock screener with 80+ filters & 8 presets
+- Pattern recognition (15 candlestick patterns)
 - Correlation analysis & clustering
 - ASCII chart engine (candlestick, multi-timeframe)
-- Order book & trade visualization
 
-✅ **Collaboration & Bots**
-- Shared watchlists (real-time sync)
-- Telegram bot (8 commands)
-- Discord bot (6 slash commands)
-- Price alerts & notifications
+</td>
+<td>
 
-✅ **Production Ready**
-- Docker deployment
-- CI/CD with GitHub Actions
-- Multi-platform builds (Linux, macOS)
-- Performance optimized (< 50MB memory)
+#### Multi-Market & Collaboration
+- 6 markets: IDX, SGX, Bursa, SET, PSE, HOSE
+- 7 languages (EN, ID, MS, TH, VN, TL, ZH)
+- 10 currencies with real-time conversion
+- Telegram & Discord bot integrations
 
----
-
-## 📊 Project Stats
-
-| Metric | Count |
-|--------|-------|
-| **Total Files** | 115+ |
-| **Total LOC** | ~23,700 |
-| **Python Files** | 38 |
-| **Python LOC** | ~8,700 |
-| **C++ Files** | 77 |
-| **Test Files** | 11 |
-| **Packages** | 8 |
+</td>
+</tr>
+</table>
 
 ---
 
-## 🏗️ Architecture
+## Tech Stack
 
-```
-niskala/
-├── src/                   # C++ terminal UI (77 files, ~15,000 LOC)
-│   ├── core/             # Core logic, data structures
-│   ├── ui/               # FTXUI components
-│   └── utils/            # Utilities
-│
-├── python/               # Python modules (38 files, ~8,700 LOC)
-│   ├── ai/               # Sentiment pipeline (5 files, 854 LOC)
-│   ├── analytics/        # Charts, screener, patterns (7 files, 2,000+ LOC)
-│   ├── collaboration/    # Shared watchlists (2 files, 615 LOC)
-│   ├── data_sources/     # Market data (4 files, 509 LOC)
-│   ├── fear_greed/       # F&G index (3 files, 646 LOC)
-│   ├── integrations/     # Telegram, Discord (3 files, 606 LOC)
-│   ├── quant/            # Backtest, portfolio, risk (7 files, 2,205 LOC)
-│   └── utils/            # Cache, WebSocket (3 files, 542 LOC)
-│
-├── tests/                # Unit tests (11 files)
-├── data/                 # Local database & cache
-├── models/               # AI models (FinBERT)
-└── docs/                 # Documentation (20+ MD files)
-```
+<div align="center">
+
+![C++20](https://img.shields.io/badge/C++-20-00599C.svg?logo=cplusplus&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB.svg?logo=python&logoColor=white)
+![FTXUI](https://img.shields.io/badge/FTXUI-Terminal%20UI-blue)
+![Docker](https://img.shields.io/badge/Docker-2496ED.svg?logo=docker&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF.svg?logo=githubactions&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192.svg?logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D.svg?logo=redis&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688.svg?logo=fastapi&logoColor=white)
+
+</div>
 
 ---
 
-## 🚀 Quick Start
+## Getting Started
 
 ### Prerequisites
 
-- **Python 3.10+**
-- **C++ compiler** (GCC 11+, Clang 14+, MSVC 2022)
-- **CMake 3.20+**
-- **Docker** (optional)
+| Requirement | Version |
+|-------------|---------|
+| Python | 3.10+ |
+| C++ Compiler | GCC 11+ / Clang 14+ / MSVC 2022 |
+| CMake | 3.20+ |
+| Docker | 20.10+ *(optional)* |
 
 ### Installation
 
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/niskala.git
+# Clone the repository
+git clone https://github.com/Allesgut7/niskala.git
 cd niskala
 
 # Install Python dependencies
@@ -119,50 +123,97 @@ cmake --build build
 ### Docker Deployment
 
 ```bash
-# Build and run with Docker Compose
+# Production deployment
 docker-compose up -d
 
 # View logs
 docker-compose logs -f niskala
 
-# Stop
+# Stop services
 docker-compose down
 ```
 
 ---
 
-## 📦 Python Modules
+## Architecture
 
-### AI Sentiment Pipeline
-
-```python
-from ai import SentimentPipeline, LLMInterpreter
-
-# Initialize pipeline
-pipeline = SentimentPipeline(use_llm=True, llm_provider='openai')
-
-# Analyze news
-result = pipeline.analyze("BBRI Q3 laba naik 15% YoY")
-print(f"Score: {result.sentiment_score}")  # -100 to +100
-print(f"Sectors: {result.sectors}")
-print(f"Impact: {result.impact}")
+```
+niskala/
+├── src/                        # C++ terminal UI (77 files, ~15,000 LOC)
+│   ├── core/                   # Core logic, market data, AI
+│   │   ├── ai/                 # Sentiment analyzer, LLM client
+│   │   ├── fear_greed/         # Multi-region Fear & Greed Index
+│   │   ├── market_data/        # Data providers (yfinance, akshare)
+│   │   └── quant/              # Backtest, factor, portfolio, risk
+│   └── tui/                    # FTXUI components
+│       ├── screens/            # Dashboard, chart, news, portfolio
+│       └── widgets/            # Gauges, feeds, tables, banners
+│
+├── python/                     # Python modules (38 files, ~8,700 LOC)
+│   ├── ai/                     # Sentiment pipeline, NLP, models
+│   ├── analytics/              # Screener, patterns, correlation
+│   ├── broker/                 # Broker integrations (Ajaib, Stockbit)
+│   ├── cloud/                  # Config, cache, database, queue
+│   ├── i18n/                   # 7-language translation engine
+│   ├── integrations/           # Telegram & Discord bots
+│   ├── markets/                # 6-market config (IDX, SGX, etc.)
+│   ├── marketplace/            # Strategy marketplace
+│   ├── quant/                  # Backtest, DCF, portfolio, risk
+│   ├── social/                 # Copy trading, leaderboard
+│   └── trading/                # Paper engine, order, position
+│
+├── config/                     # Application configuration
+├── tests/                      # Unit & integration tests
+├── gcp/                        # Cloud deployment scripts
+└── docker-compose.yml          # Container orchestration
 ```
 
-### Quant Lab
+---
+
+## Project Metrics
+
+| Metric | Value |
+|--------|-------|
+| Total Files | 261 |
+| Total Lines of Code | ~32,500 |
+| C++ Source Files | 77 |
+| Python Modules | 38 |
+| Test Files | 11 |
+| Supported Markets | 6 |
+| Supported Languages | 7 |
+| Supported Currencies | 10 |
+
+---
+
+## API & Modules
+
+### Sentiment Analysis
+
+```python
+from ai import SentimentPipeline
+
+pipeline = SentimentPipeline(use_llm=True, llm_provider="openai")
+result = pipeline.analyze("BBRI Q3 laba naik 15% YoY")
+
+print(f"Score: {result.sentiment_score}")   # -100 to +100
+print(f"Sectors: {result.sectors}")          # ["banking", "finance"]
+print(f"Impact: {result.impact}")            # bullish / bearish / neutral
+```
+
+### Quantitative Lab
 
 ```python
 from quant import BacktestEngine, PortfolioOptimizer, RiskCalculator
 
-# Backtest strategy
+# Backtest
 engine = BacktestEngine(initial_capital=100_000_000)
-engine.add_strategy(MACrossoverStrategy())
 results = engine.run(data)
 
-# Optimize portfolio
+# Portfolio optimization
 optimizer = PortfolioOptimizer()
-result = optimizer.optimize_mean_variance(returns)
+weights = optimizer.optimize_mean_variance(returns)
 
-# Calculate risk
+# Risk metrics
 calculator = RiskCalculator()
 metrics = calculator.calculate(returns, benchmark)
 ```
@@ -172,36 +223,16 @@ metrics = calculator.calculate(returns, benchmark)
 ```python
 from analytics import ASCIIChart, AdvancedScreener, PatternDetector
 
-# Render chart
 chart = ASCIIChart()
 print(chart.render_candlestick(df, title="BBRI"))
 
-# Screen stocks
 screener = AdvancedScreener()
-results = screener.screen(stocks, preset='value')
-
-# Detect patterns
-detector = PatternDetector()
-patterns = detector.detect(df)
-```
-
-### Integrations
-
-```python
-from integrations import NiskalaTelegramBot, NiskalaDiscordBot
-
-# Telegram bot
-telegram_bot = NiskalaTelegramBot(token=TELEGRAM_TOKEN)
-telegram_bot.run()
-
-# Discord bot
-discord_bot = NiskalaDiscordBot(token=DISCORD_TOKEN)
-discord_bot.run()
+value_stocks = screener.screen(stocks, preset="value")
 ```
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests
@@ -210,145 +241,50 @@ pytest tests/ -v
 # Run with coverage
 pytest tests/ --cov=python --cov-report=html
 
-# Run specific phase
-pytest tests/unit/test_phase2_quant.py -v
-pytest tests/unit/test_phase3_charts.py -v
+# Run specific module
+pytest tests/unit/test_sentiment.py -v
+pytest tests/unit/test_fear_greed.py -v
 ```
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 | Document | Description |
 |----------|-------------|
-| `README.md` | This file |
-| `PHASE2_SUMMARY.md` | AI & Quant Lab implementation |
-| `PHASE3_SUMMARY.md` | Charts & Deployment implementation |
-| `03_DASHBOARD_LAYOUT.md` | Dashboard UI design |
-| `08_STOCK_DETAIL.md` | Stock detail screen spec |
-| `09_DEVELOPMENT_PHASES.md` | Development roadmap |
-| `13_ENHANCED_FEATURES.md` | Enhanced features guide |
-| `20_DEPLOYMENT.md` | Deployment guide |
+| [QUICKSTART.md](QUICKSTART.md) | Getting started guide |
+| [CHANGELOG.md](CHANGELOG.md) | Version history & release notes |
+| [docs/API.md](docs/API.md) | REST API documentation |
+| [PHASE1_SUMMARY.md](PHASE1_SUMMARY.md) | Core terminal implementation |
+| [PHASE2_SUMMARY.md](PHASE2_SUMMARY.md) | AI & Quant Lab |
+| [PHASE3_SUMMARY.md](PHASE3_SUMMARY.md) | Charts & deployment |
+| [PHASE4_SUMMARY.md](PHASE4_SUMMARY.md) | Broker integration |
+| [PHASE5_SUMMARY.md](PHASE5_SUMMARY.md) | Social & marketplace |
+| [PHASE6_SUMMARY.md](PHASE6_SUMMARY.md) | Advanced AI models |
+| [PHASE7_SUMMARY.md](PHASE7_SUMMARY.md) | Global expansion |
 
 ---
 
-## 🎯 Features by Phase
-
-### Phase 1: Core Terminal (Completed)
-- ✅ TUI with FTXUI
-- ✅ Stock table & watchlist
-- ✅ Basic charts
-- ✅ Market data integration
-
-### Phase 2: AI & Quant Lab (Completed)
-- ✅ AI sentiment pipeline (FinBERT + LLM)
-- ✅ News scraping (6 sources)
-- ✅ Backtesting engine
-- ✅ Factor analysis
-- ✅ Portfolio optimizer
-- ✅ Risk metrics
-- ✅ Signal generator
-- ✅ DCF model
-- ✅ Advanced screener
-- ✅ Pattern recognition
-- ✅ Correlation analysis
-- ✅ Shared watchlists
-- ✅ Telegram bot
-
-### Phase 3: Charts & Deploy (Completed)
-- ✅ ASCII chart engine
-- ✅ Multi-timeframe support
-- ✅ Technical indicators
-- ✅ Stock detail screen (6 tabs)
-- ✅ Order book visualization
-- ✅ Discord bot
-- ✅ Docker deployment
-- ✅ CI/CD pipeline
-
----
-
-## 🔧 Configuration
-
-### Environment Variables
-
-```bash
-# API Keys
-export OPENAI_API_KEY="sk-..."
-export ANTHROPIC_API_KEY="sk-ant-..."
-export TELEGRAM_TOKEN="123456789:ABC..."
-export DISCORD_TOKEN="MTIzNDU2Nzg5..."
-
-# Data Sources
-export YAHOO_FINANCE_ENABLED=true
-export IDX_API_ENABLED=true
-
-# Cache
-export CACHE_TTL=300
-export CACHE_MAX_SIZE=1000
-
-# Logging
-export LOG_LEVEL=INFO
-```
-
-### Config File
-
-```json
-{
-  "api_keys": {
-    "openai": "sk-...",
-    "anthropic": "sk-ant-..."
-  },
-  "data_sources": {
-    "yahoo_finance": true,
-    "idx_api": true
-  },
-  "cache": {
-    "ttl": 300,
-    "max_size": 1000
-  },
-  "logging": {
-    "level": "INFO",
-    "file": "data/logs/niskala.log"
-  }
-}
-```
-
----
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see LICENSE file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- **FTXUI** - Terminal UI framework
-- **Transformers** - FinBERT models
-- **TA-Lib** - Technical analysis
-- **yfinance** - Market data
-- **Discord.py** - Discord bot framework
-- **python-telegram-bot** - Telegram bot framework
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-## 📞 Contact
+<div align="center">
 
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
+**Built for the Indonesian capital market**
 
----
+[@Allesgut7](https://github.com/Allesgut7)
 
-**Made with ❤️ for Indonesian traders**
-
-*Last updated: July 3, 2026*
+</div>
