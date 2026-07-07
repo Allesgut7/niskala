@@ -47,6 +47,15 @@ Thumbs.db
 *.so
 *.dylib
 *.exe
+*.app
+
+# Qt Build
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+*.pro.user
+*.pro.user.*
+.qmake.stash
 
 # Environment / Secrets
 .env
