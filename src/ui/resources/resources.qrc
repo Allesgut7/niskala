@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file alias="themes/dark_theme.qss">../ui/theme/dark_theme.qss</file>
-        <file alias="images/Logo-fix.png">Logo-fix.png</file>
+        <file alias="images/logo.svg">logo.svg</file>
     </qresource>
 </RCC>
