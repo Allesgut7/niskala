@@ -28,12 +28,12 @@ void SectorPerformanceWidget::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Header
-    painter.setPen(QColor("#25D9FF"));
+    painter.setPen(QColor("#CEE8FF"));
     painter.setFont(QFont("monospace", 11, QFont::Bold));
     painter.drawText(QRect(8, 4, width() - 16, 20), Qt::AlignLeft, "SECTOR PERFORMANCE (IHSG)");
 
     // Timeframe selector
-    painter.setPen(QColor("#B7C2D6"));
+    painter.setPen(QColor("#BACBB9"));
     painter.setFont(QFont("monospace", 9));
     painter.drawText(QRect(width() - 50, 4, 40, 20), Qt::AlignRight, "1D ▾");
 
@@ -51,20 +51,20 @@ void SectorPerformanceWidget::paintEvent(QPaintEvent *event)
         const auto &sector = m_sectors[i];
 
         // Rank
-        painter.setPen(QColor("#B7C2D6"));
+        painter.setPen(QColor("#BACBB9"));
         painter.setFont(QFont("monospace", 9));
         painter.drawText(QRect(8, y, 20, rowHeight), Qt::AlignLeft | Qt::AlignVCenter,
                          QString::number(i + 1) + ".");
 
         // Name
-        painter.setPen(QColor("#F7FAFC"));
+        painter.setPen(QColor("#E1E2E7"));
         painter.drawText(QRect(30, y, 140, rowHeight), Qt::AlignLeft | Qt::AlignVCenter,
                          sector.name);
 
         // Bar
         int barX = 175;
         int barWidth = static_cast<int>((sector.changePct / maxPct) * maxBarWidth / 2);
-        QColor barColor = sector.changePct >= 0 ? QColor("#1AF37B") : QColor("#FF5C72");
+        QColor barColor = sector.changePct >= 0 ? QColor("#75FF9E") : QColor("#FFB3AE");
 
         if (sector.changePct >= 0) {
             painter.setBrush(barColor);

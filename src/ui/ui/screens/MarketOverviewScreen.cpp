@@ -17,19 +17,19 @@ void MarketOverviewScreen::setupUI()
     mainLayout->setSpacing(8);
 
     auto *title = new QLabel("MARKET OVERVIEW");
-    title->setStyleSheet("color: #D84B63; font-size: 16px; font-weight: bold;");
+    title->setStyleSheet("color: #FFB4AB; font-size: 16px; font-weight: bold;");
     mainLayout->addWidget(title);
 
     auto *topLayout = new QHBoxLayout();
 
     // Indices
     auto *idxWidget = new QWidget();
-    idxWidget->setStyleSheet("QWidget { background-color: #101827; border: 1px solid #1D2B40; border-radius: 6px; }");
+    idxWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; }");
     auto *idxLayout = new QVBoxLayout(idxWidget);
     idxLayout->setContentsMargins(8, 8, 8, 8);
 
     auto *idxLabel = new QLabel("INDICES");
-    idxLabel->setStyleSheet("color: #25D9FF; font-weight: bold;");
+    idxLabel->setStyleSheet("color: #CEE8FF; font-weight: bold;");
     idxLayout->addWidget(idxLabel);
 
     m_indicesTable = new QTableWidget(6, 4);
@@ -43,12 +43,12 @@ void MarketOverviewScreen::setupUI()
 
     // Commodities
     auto *cmdWidget = new QWidget();
-    cmdWidget->setStyleSheet("QWidget { background-color: #101827; border: 1px solid #1D2B40; border-radius: 6px; }");
+    cmdWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; }");
     auto *cmdLayout = new QVBoxLayout(cmdWidget);
     cmdLayout->setContentsMargins(8, 8, 8, 8);
 
     auto *cmdLabel = new QLabel("COMMODITIES");
-    cmdLabel->setStyleSheet("color: #E6874C; font-weight: bold;");
+    cmdLabel->setStyleSheet("color: #CEE8FF; font-weight: bold;");
     cmdLayout->addWidget(cmdLabel);
 
     m_commoditiesTable = new QTableWidget(5, 4);
@@ -62,12 +62,12 @@ void MarketOverviewScreen::setupUI()
 
     // Forex
     auto *fxWidget = new QWidget();
-    fxWidget->setStyleSheet("QWidget { background-color: #101827; border: 1px solid #1D2B40; border-radius: 6px; }");
+    fxWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; }");
     auto *fxLayout = new QVBoxLayout(fxWidget);
     fxLayout->setContentsMargins(8, 8, 8, 8);
 
     auto *fxLabel = new QLabel("FOREX");
-    fxLabel->setStyleSheet("color: #D84B63; font-weight: bold;");
+    fxLabel->setStyleSheet("color: #FFB4AB; font-weight: bold;");
     fxLayout->addWidget(fxLabel);
 
     m_forexTable = new QTableWidget(5, 4);
@@ -85,12 +85,12 @@ void MarketOverviewScreen::setupUI()
     auto *glLayout = new QHBoxLayout();
 
     auto *gainWidget = new QWidget();
-    gainWidget->setStyleSheet("QWidget { background-color: #101827; border: 1px solid #1D2B40; border-radius: 6px; }");
+    gainWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; }");
     auto *gainLayout = new QVBoxLayout(gainWidget);
     gainLayout->setContentsMargins(8, 8, 8, 8);
 
     auto *gainLabel = new QLabel("TOP GAINERS");
-    gainLabel->setStyleSheet("color: #1AF37B; font-weight: bold;");
+    gainLabel->setStyleSheet("color: #75FF9E; font-weight: bold;");
     gainLayout->addWidget(gainLabel);
 
     m_gainersTable = new QTableWidget(5, 3);
@@ -102,12 +102,12 @@ void MarketOverviewScreen::setupUI()
     glLayout->addWidget(gainWidget);
 
     auto *loseWidget = new QWidget();
-    loseWidget->setStyleSheet("QWidget { background-color: #101827; border: 1px solid #1D2B40; border-radius: 6px; }");
+    loseWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; }");
     auto *loseLayout = new QVBoxLayout(loseWidget);
     loseLayout->setContentsMargins(8, 8, 8, 8);
 
     auto *loseLabel = new QLabel("TOP LOSERS");
-    loseLabel->setStyleSheet("color: #FF5C72; font-weight: bold;");
+    loseLabel->setStyleSheet("color: #FFB3AE; font-weight: bold;");
     loseLayout->addWidget(loseLabel);
 
     m_losersTable = new QTableWidget(5, 3);
@@ -140,12 +140,12 @@ void MarketOverviewScreen::populateData()
             QString::number(indices[i].val, 'f', 2)));
         auto *chgItem = new QTableWidgetItem(
             QString::number(indices[i].chg, 'f', 2));
-        chgItem->setForeground(indices[i].chg >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
+        chgItem->setForeground(indices[i].chg >= 0 ? QColor("#75FF9E") : QColor("#FFB3AE"));
         m_indicesTable->setItem(i, 2, chgItem);
         QString pctStr = (indices[i].pct >= 0 ? "+" : "") +
                          QString::number(indices[i].pct, 'f', 2) + "%";
         auto *pctItem = new QTableWidgetItem(pctStr);
-        pctItem->setForeground(indices[i].pct >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
+        pctItem->setForeground(indices[i].pct >= 0 ? QColor("#75FF9E") : QColor("#FFB3AE"));
         m_indicesTable->setItem(i, 3, pctItem);
     }
 
@@ -165,12 +165,12 @@ void MarketOverviewScreen::populateData()
             QString::number(commodities[i].price, 'f', 2)));
         auto *chgItem = new QTableWidgetItem(
             QString::number(commodities[i].chg, 'f', 2));
-        chgItem->setForeground(commodities[i].chg >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
+        chgItem->setForeground(commodities[i].chg >= 0 ? QColor("#75FF9E") : QColor("#FFB3AE"));
         m_commoditiesTable->setItem(i, 2, chgItem);
         QString pctStr = (commodities[i].pct >= 0 ? "+" : "") +
                          QString::number(commodities[i].pct, 'f', 2) + "%";
         auto *pctItem = new QTableWidgetItem(pctStr);
-        pctItem->setForeground(commodities[i].pct >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
+        pctItem->setForeground(commodities[i].pct >= 0 ? QColor("#75FF9E") : QColor("#FFB3AE"));
         m_commoditiesTable->setItem(i, 3, pctItem);
     }
 
@@ -190,12 +190,12 @@ void MarketOverviewScreen::populateData()
             QString::number(forex[i].rate, 'f', 2)));
         auto *chgItem = new QTableWidgetItem(
             QString::number(forex[i].chg, 'f', 2));
-        chgItem->setForeground(forex[i].chg >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
+        chgItem->setForeground(forex[i].chg >= 0 ? QColor("#75FF9E") : QColor("#FFB3AE"));
         m_forexTable->setItem(i, 2, chgItem);
         QString pctStr = (forex[i].pct >= 0 ? "+" : "") +
                          QString::number(forex[i].pct, 'f', 2) + "%";
         auto *pctItem = new QTableWidgetItem(pctStr);
-        pctItem->setForeground(forex[i].pct >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
+        pctItem->setForeground(forex[i].pct >= 0 ? QColor("#75FF9E") : QColor("#FFB3AE"));
         m_forexTable->setItem(i, 3, pctItem);
     }
 
@@ -217,7 +217,7 @@ void MarketOverviewScreen::populateData()
             QString::number(gainers[i].price, 'f', 0)));
         QString pctStr = "+" + QString::number(gainers[i].pct, 'f', 2) + "%";
         auto *pctItem = new QTableWidgetItem(pctStr);
-        pctItem->setForeground(QColor("#1AF37B"));
+        pctItem->setForeground(QColor("#75FF9E"));
         m_gainersTable->setItem(i, 2, pctItem);
     }
 
@@ -239,7 +239,7 @@ void MarketOverviewScreen::populateData()
             QString::number(losers[i].price, 'f', 0)));
         QString pctStr = QString::number(losers[i].pct, 'f', 2) + "%";
         auto *pctItem = new QTableWidgetItem(pctStr);
-        pctItem->setForeground(QColor("#FF5C72"));
+        pctItem->setForeground(QColor("#FFB3AE"));
         m_losersTable->setItem(i, 2, pctItem);
     }
 }

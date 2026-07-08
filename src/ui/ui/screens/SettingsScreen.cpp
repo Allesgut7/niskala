@@ -23,7 +23,7 @@ void SettingsScreen::setupUI()
     mainLayout->setSpacing(6);
 
     auto *title = new QLabel("SETTINGS");
-    title->setStyleSheet("color: #D84B63; font-size: 16px; font-weight: bold;");
+    title->setStyleSheet("color: #FFB4AB; font-size: 16px; font-weight: bold;");
     mainLayout->addWidget(title);
 
     setupGeneralSection();
@@ -36,14 +36,14 @@ void SettingsScreen::setupUI()
     auto *btnLayout = new QHBoxLayout();
     m_applyBtn = new QPushButton("Apply");
     m_applyBtn->setStyleSheet(
-        "QPushButton { background-color: #09111F; color: #F7FAFC; padding: 8px 24px; font-weight: bold; }"
-        "QPushButton:hover { background-color: #D84B63; }");
+        "QPushButton { background-color: #111417; color: #E1E2E7; padding: 8px 24px; font-weight: bold; }"
+        "QPushButton:hover { background-color: #FFB4AB; }");
     connect(m_applyBtn, &QPushButton::clicked, this, &SettingsScreen::onApplyClicked);
 
     m_resetBtn = new QPushButton("Reset to Default");
     m_resetBtn->setStyleSheet(
-        "QPushButton { background-color: transparent; color: #7E8AA3; padding: 8px 16px; border: 1px solid #09111F; }"
-        "QPushButton:hover { border-color: #D84B63; color: #F7FAFC; }");
+        "QPushButton { background-color: transparent; color: #859585; padding: 8px 16px; border: 1px solid #111417; }"
+        "QPushButton:hover { border-color: #FFB4AB; color: #E1E2E7; }");
     connect(m_resetBtn, &QPushButton::clicked, this, &SettingsScreen::onResetClicked);
 
     btnLayout->addStretch();
@@ -55,7 +55,7 @@ void SettingsScreen::setupUI()
 void SettingsScreen::setupGeneralSection()
 {
     auto *group = new QGroupBox("GENERAL");
-    group->setStyleSheet("QGroupBox { color: #25D9FF; }");
+    group->setStyleSheet("QGroupBox { color: #CEE8FF; }");
     auto *layout = new QFormLayout(group);
 
     m_themeCombo = new QComboBox();
@@ -76,7 +76,7 @@ void SettingsScreen::setupGeneralSection()
 void SettingsScreen::setupDataSection()
 {
     auto *group = new QGroupBox("DATA");
-    group->setStyleSheet("QGroupBox { color: #25D9FF; }");
+    group->setStyleSheet("QGroupBox { color: #CEE8FF; }");
     auto *layout = new QFormLayout(group);
 
     m_dataSourceCombo = new QComboBox();
@@ -101,7 +101,7 @@ void SettingsScreen::setupDataSection()
 void SettingsScreen::setupDisplaySection()
 {
     auto *group = new QGroupBox("DISPLAY");
-    group->setStyleSheet("QGroupBox { color: #E6874C; }");
+    group->setStyleSheet("QGroupBox { color: #CEE8FF; }");
     auto *layout = new QGridLayout(group);
 
     m_showGridLines = new QCheckBox("Show Grid Lines");
@@ -122,7 +122,7 @@ void SettingsScreen::setupDisplaySection()
 void SettingsScreen::setupKeyboardShortcuts()
 {
     auto *group = new QGroupBox("KEYBOARD SHORTCUTS");
-    group->setStyleSheet("QGroupBox { color: #D84B63; }");
+    group->setStyleSheet("QGroupBox { color: #FFB4AB; }");
     auto *layout = new QVBoxLayout(group);
 
     QStringList shortcuts = {
@@ -138,7 +138,7 @@ void SettingsScreen::setupKeyboardShortcuts()
 
     for (const auto &s : shortcuts) {
         auto *label = new QLabel(s);
-        label->setStyleSheet("color: #F7FAFC; font-family: monospace;");
+        label->setStyleSheet("color: #E1E2E7; font-family: 'JetBrains Mono', monospace;");
         layout->addWidget(label);
     }
 

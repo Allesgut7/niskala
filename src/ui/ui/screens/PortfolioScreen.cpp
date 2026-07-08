@@ -17,7 +17,7 @@ void PortfolioScreen::setupUI()
     mainLayout->setSpacing(8);
 
     auto *title = new QLabel("PORTFOLIO");
-    title->setStyleSheet("color: #D84B63; font-size: 16px; font-weight: bold;");
+    title->setStyleSheet("color: #FFB4AB; font-size: 16px; font-weight: bold;");
     mainLayout->addWidget(title);
 
     auto *summaryLayout = new QHBoxLayout();
@@ -26,11 +26,11 @@ void PortfolioScreen::setupUI()
     auto createCard = [](const QString &label, const QString &value, const QString &color) -> QWidget * {
         auto *card = new QWidget();
         card->setStyleSheet(
-            "QWidget { background-color: #101827; border: 1px solid #1D2B40; border-radius: 6px; padding: 8px; }");
+            "QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; padding: 8px; }");
         auto *layout = new QVBoxLayout(card);
         layout->setContentsMargins(12, 8, 12, 8);
         auto *lbl = new QLabel(label);
-        lbl->setStyleSheet("color: #7E8AA3; font-size: 10px;");
+        lbl->setStyleSheet("color: #859585; font-size: 10px;");
         layout->addWidget(lbl);
         auto *val = new QLabel(value);
         val->setStyleSheet(QString("color: %1; font-size: 18px; font-weight: bold;").arg(color));
@@ -38,14 +38,14 @@ void PortfolioScreen::setupUI()
         return card;
     };
 
-    summaryLayout->addWidget(createCard("BALANCE", "Rp 150,000,000", "#F7FAFC"));
-    summaryLayout->addWidget(createCard("INVESTED", "Rp 85,000,000", "#25D9FF"));
-    summaryLayout->addWidget(createCard("UNREALIZED P&L", "+Rp 12,500,000", "#1AF37B"));
-    summaryLayout->addWidget(createCard("REALIZED P&L", "+Rp 3,200,000", "#E6874C"));
+    summaryLayout->addWidget(createCard("BALANCE", "Rp 150,000,000", "#E1E2E7"));
+    summaryLayout->addWidget(createCard("INVESTED", "Rp 85,000,000", "#CEE8FF"));
+    summaryLayout->addWidget(createCard("UNREALIZED P&L", "+Rp 12,500,000", "#75FF9E"));
+    summaryLayout->addWidget(createCard("REALIZED P&L", "+Rp 3,200,000", "#CEE8FF"));
     mainLayout->addLayout(summaryLayout);
 
     auto *posLabel = new QLabel("OPEN POSITIONS");
-    posLabel->setStyleSheet("color: #1AF37B; font-weight: bold; font-size: 12px;");
+    posLabel->setStyleSheet("color: #75FF9E; font-weight: bold; font-size: 12px;");
     mainLayout->addWidget(posLabel);
 
     m_positionsTable = new QTableWidget(0, 7);
@@ -60,7 +60,7 @@ void PortfolioScreen::setupUI()
     mainLayout->addWidget(m_positionsTable);
 
     auto *tradesLabel = new QLabel("RECENT TRADES");
-    tradesLabel->setStyleSheet("color: #E6874C; font-weight: bold; font-size: 12px;");
+    tradesLabel->setStyleSheet("color: #CEE8FF; font-weight: bold; font-size: 12px;");
     mainLayout->addWidget(tradesLabel);
 
     m_tradesTable = new QTableWidget(0, 6);
@@ -102,14 +102,14 @@ void PortfolioScreen::populateSampleData()
         QString pnlStr = (p.unrealizedPnl >= 0 ? "+" : "") +
                          QString::number(p.unrealizedPnl, 'f', 0);
         auto *pnlItem = new QTableWidgetItem(pnlStr);
-        pnlItem->setForeground(p.unrealizedPnl >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
+        pnlItem->setForeground(p.unrealizedPnl >= 0 ? QColor("#75FF9E") : QColor("#FFB3AE"));
         pnlItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_positionsTable->setItem(i, 4, pnlItem);
 
         QString pctStr = (p.unrealizedPnlPct >= 0 ? "+" : "") +
                          QString::number(p.unrealizedPnlPct, 'f', 2) + "%";
         auto *pctItem = new QTableWidgetItem(pctStr);
-        pctItem->setForeground(p.unrealizedPnlPct >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
+        pctItem->setForeground(p.unrealizedPnlPct >= 0 ? QColor("#75FF9E") : QColor("#FFB3AE"));
         pctItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_positionsTable->setItem(i, 5, pctItem);
 
@@ -134,7 +134,7 @@ void PortfolioScreen::populateSampleData()
         m_tradesTable->setItem(i, 1, new QTableWidgetItem(t.symbol));
 
         auto *sideItem = new QTableWidgetItem(t.side);
-        sideItem->setForeground(t.side == "BUY" ? QColor("#1AF37B") : QColor("#FF5C72"));
+        sideItem->setForeground(t.side == "BUY" ? QColor("#75FF9E") : QColor("#FFB3AE"));
         m_tradesTable->setItem(i, 2, sideItem);
 
         m_tradesTable->setItem(i, 3, new QTableWidgetItem(QString::number(t.quantity)));
@@ -143,8 +143,8 @@ void PortfolioScreen::populateSampleData()
         QString pnlStr = t.pnl != 0 ?
             ((t.pnl >= 0 ? "+" : "") + QString::number(t.pnl, 'f', 0)) : "-";
         auto *pnlItem = new QTableWidgetItem(pnlStr);
-        if (t.pnl > 0) pnlItem->setForeground(QColor("#1AF37B"));
-        else if (t.pnl < 0) pnlItem->setForeground(QColor("#FF5C72"));
+        if (t.pnl > 0) pnlItem->setForeground(QColor("#75FF9E"));
+        else if (t.pnl < 0) pnlItem->setForeground(QColor("#FFB3AE"));
         m_tradesTable->setItem(i, 5, pnlItem);
     }
 }

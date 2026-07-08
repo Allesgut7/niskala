@@ -32,7 +32,7 @@ void SectorHeatmap::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Background
-    painter.fillRect(rect(), QColor("#101827"));
+    painter.fillRect(rect(), QColor("#1D2023"));
 
     int cols = 3;
     int rows = 3;
@@ -42,7 +42,7 @@ void SectorHeatmap::paintEvent(QPaintEvent *event)
     int offsetY = 5;
 
     // Title
-    painter.setPen(QColor("#D84B63"));
+    painter.setPen(QColor("#FFB4AB"));
     painter.setFont(QFont("monospace", 10, QFont::Bold));
     painter.drawText(QRect(0, 0, width(), 20), Qt::AlignCenter, "SECTOR HEATMAP");
 
@@ -59,7 +59,7 @@ void SectorHeatmap::paintEvent(QPaintEvent *event)
         QColor bgColor = getHeatColor(m_sectors[i].changePct);
         bgColor.setAlpha(180);
         painter.setBrush(bgColor);
-        painter.setPen(QPen(QColor("#1B2940"), 1));
+        painter.setPen(QPen(QColor("#323538"), 1));
         painter.drawRoundedRect(cellRect, 4, 4);
 
         // Sector code
@@ -87,7 +87,7 @@ QColor SectorHeatmap::getHeatColor(double pct) const
 {
     if (pct >= 2.0) return QColor("#00d989");
     if (pct >= 1.0) return QColor("#00a676");
-    if (pct >= 0.0) return QColor("#1B2940");
+    if (pct >= 0.0) return QColor("#323538");
     if (pct >= -1.0) return QColor("#5c3d2e");
     return QColor("#8b2500");
 }

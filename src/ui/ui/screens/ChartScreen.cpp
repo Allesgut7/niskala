@@ -21,7 +21,7 @@ void ChartScreen::setupUI()
     auto *topBar = new QHBoxLayout();
 
     auto *symbolLabel = new QLabel("Symbol:");
-    symbolLabel->setStyleSheet("color: #7E8AA3;");
+    symbolLabel->setStyleSheet("color: #859585;");
     topBar->addWidget(symbolLabel);
 
     m_symbolCombo = new QComboBox();
@@ -31,7 +31,7 @@ void ChartScreen::setupUI()
     topBar->addWidget(m_symbolCombo);
 
     auto *tfLabel = new QLabel("  Timeframe:");
-    tfLabel->setStyleSheet("color: #7E8AA3;");
+    tfLabel->setStyleSheet("color: #859585;");
     topBar->addWidget(tfLabel);
 
     m_timeframeCombo = new QComboBox();
@@ -45,19 +45,19 @@ void ChartScreen::setupUI()
     // Indicators
     m_ma5Check = new QCheckBox("MA5");
     m_ma5Check->setChecked(true);
-    m_ma5Check->setStyleSheet("color: #E6874C;");
+    m_ma5Check->setStyleSheet("color: #CEE8FF;");
     connect(m_ma5Check, &QCheckBox::toggled, this, &ChartScreen::onIndicatorToggled);
     topBar->addWidget(m_ma5Check);
 
     m_ma20Check = new QCheckBox("MA20");
     m_ma20Check->setChecked(true);
-    m_ma20Check->setStyleSheet("color: #25D9FF;");
+    m_ma20Check->setStyleSheet("color: #CEE8FF;");
     connect(m_ma20Check, &QCheckBox::toggled, this, &ChartScreen::onIndicatorToggled);
     topBar->addWidget(m_ma20Check);
 
     m_volumeCheck = new QCheckBox("Volume");
     m_volumeCheck->setChecked(true);
-    m_volumeCheck->setStyleSheet("color: #F7FAFC;");
+    m_volumeCheck->setStyleSheet("color: #E1E2E7;");
     topBar->addWidget(m_volumeCheck);
 
     mainLayout->addLayout(topBar);
