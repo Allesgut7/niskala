@@ -104,13 +104,18 @@ void DataManager::onAutoRefresh()
 
 void DataManager::onMarketDataReceived(const QJsonObject &data)
 {
+    qDebug() << "DataManager: Received data, keys:" << data.keys();
+    
     // Handle single symbol response
     if (data.contains("symbol")) {
         QString symbol = data["symbol"].toString();
+        qDebug() << "DataManager: Symbol:" << symbol << "Price:" << data["price"];
         QStringList overviewSymbols = {"^JKSE", "GC=F", "CL=F", "USDIDR=X", "^N225", "^HSI", "^KS11", "^GSPC", "^IXIC"};
         if (overviewSymbols.contains(symbol)) {
+            qDebug() << "DataManager: Emitting marketOverviewUpdated";
             emit marketOverviewUpdated(data);
         } else {
+            qDebug() << "DataManager: Emitting watchlistUpdated";
             emit watchlistUpdated(data);
         }
     }

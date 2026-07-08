@@ -236,6 +236,8 @@ void PythonBridge::processNextCommand()
     
     // Get next command
     auto cmd = m_commandQueue.dequeue();
+    qDebug() << "PythonBridge: Processing command:" << cmd.first;
+    qDebug() << "PythonBridge: Working dir:" << m_workDir;
     
     // Start new process
     m_process->start(cmd.first, cmd.second);
@@ -247,6 +249,11 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
     QByteArray error = m_process->readAllStandardError();
 
     QString outputStr = QString::fromUtf8(output).trimmed();
+    qDebug() << "PythonBridge: Exit code:" << exitCode;
+    qDebug() << "PythonBridge: Output length:" << outputStr.length();
+    if (!outputStr.isEmpty()) {
+        qDebug() << "PythonBridge: Output:" << outputStr.left(500);
+    }
     
     if (exitStatus == QProcess::NormalExit && exitCode == 0) {
         QJsonDocument doc = QJsonDocument::fromJson(outputStr.toUtf8());

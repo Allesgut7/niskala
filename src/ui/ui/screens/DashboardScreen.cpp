@@ -220,9 +220,12 @@ void DashboardScreen::setupDataManager()
 
 void DashboardScreen::onWatchlistUpdated(const QJsonObject &data)
 {
+    qDebug() << "DashboardScreen: onWatchlistUpdated, keys:" << data.keys();
+    
     // Handle single symbol update (from real-time)
     if (data.contains("symbol") && data.contains("price")) {
         QString symbol = data["symbol"].toString();
+        qDebug() << "DashboardScreen: Updating index" << symbol << "price:" << data["price"];
         m_indicesStrip->updateData(symbol,
             data["price"].toDouble(),
             data["change"].toDouble(),
