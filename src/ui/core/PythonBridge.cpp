@@ -2,17 +2,26 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QCoreApplication>
+#include <QDir>
 
 PythonBridge::PythonBridge(QObject *parent)
     : QObject(parent)
 {
     m_process = new QProcess(this);
+    
+    // Set working directory to niskala root (5 levels up from build/bin/)
+    QDir appDir(QCoreApplication::applicationDirPath());
+    m_workDir = appDir.absoluteFilePath("../../../../..");
+    m_process->setWorkingDirectory(m_workDir);
+    
     connect(m_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             this, &PythonBridge::onProcessFinished);
     connect(m_process, &QProcess::errorOccurred,
             this, &PythonBridge::onProcessError);
 
     m_webSocketProcess = new QProcess(this);
+    m_webSocketProcess->setWorkingDirectory(m_workDir);
     connect(m_webSocketProcess, &QProcess::readyReadStandardOutput,
             this, &PythonBridge::onWebSocketReadyRead);
     connect(m_webSocketProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),

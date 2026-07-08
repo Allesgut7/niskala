@@ -42,4 +42,5 @@ private slots:
 private:
     QProcess *m_process = nullptr;
     QProcess *m_webSocketProcess = nullptr;
+    QString m_workDir;
 };
