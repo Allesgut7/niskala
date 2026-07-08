@@ -14,6 +14,15 @@ void MarketBreadthWidget::setupData()
     m_total = m_naik + m_turun + m_stagnan;
 }
 
+void MarketBreadthWidget::updateData(int naik, int turun, int stagnan)
+{
+    m_naik = naik;
+    m_turun = turun;
+    m_stagnan = stagnan;
+    m_total = m_naik + m_turun + m_stagnan;
+    update();
+}
+
 void MarketBreadthWidget::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);

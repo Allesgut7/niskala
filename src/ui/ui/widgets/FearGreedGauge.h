@@ -12,6 +12,7 @@ public:
 
     void setScore(int score);
     void setDelta(int delta);
+    void setScoreFromJson(const QJsonObject &data);
     int score() const { return m_score; }
 
 signals:

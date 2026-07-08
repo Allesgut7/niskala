@@ -11,6 +11,8 @@ class CommodityTable : public QWidget
 public:
     explicit CommodityTable(QWidget *parent = nullptr);
 
+    void updateData(int row, double price, double change, double changePct);
+
 private:
     void setupUI();
     void populateData();

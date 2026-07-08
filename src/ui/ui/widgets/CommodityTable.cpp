@@ -35,6 +35,26 @@ void CommodityTable::setupUI()
     layout->addWidget(m_table);
 }
 
+void CommodityTable::updateData(int row, double price, double change, double changePct)
+{
+    if (row < 0 || row >= m_table->rowCount()) return;
+
+    auto *priceItem = new QTableWidgetItem(QString::number(price, 'f', 2));
+    priceItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_table->setItem(row, 1, priceItem);
+
+    auto *chgItem = new QTableWidgetItem(QString::number(change, 'f', 2));
+    chgItem->setForeground(change >= 0 ? QColor("#75FF9E") : QColor("#FFB3AE"));
+    chgItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_table->setItem(row, 2, chgItem);
+
+    QString pctStr = (changePct >= 0 ? "+" : "") + QString::number(changePct, 'f', 2) + "%";
+    auto *pctItem = new QTableWidgetItem(pctStr);
+    pctItem->setForeground(changePct >= 0 ? QColor("#75FF9E") : QColor("#FFB3AE"));
+    pctItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_table->setItem(row, 3, pctItem);
+}
+
 void CommodityTable::populateData()
 {
     struct Commodity { QString name; double price; double change; double pct; };

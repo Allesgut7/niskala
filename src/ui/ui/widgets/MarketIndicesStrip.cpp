@@ -33,3 +33,13 @@ void MarketIndicesStrip::setupUI()
 
     setStyleSheet("MarketIndicesStrip { background-color: #1D2023; }");
 }
+
+void MarketIndicesStrip::updateData(const QString &name, double value, double change, double changePct)
+{
+    for (auto *card : m_cards) {
+        if (card->objectName() == name) {
+            card->updateData(value, change, changePct);
+            break;
+        }
+    }
+}

@@ -8,6 +8,14 @@ AIMarketRegimeWidget::AIMarketRegimeWidget(QWidget *parent)
     setMinimumHeight(140);
 }
 
+void AIMarketRegimeWidget::updateData(const QString &regime, int confidence, const QString &analysis)
+{
+    m_regime = regime;
+    m_confidence = confidence;
+    m_analysis = analysis;
+    update();
+}
+
 void AIMarketRegimeWidget::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);

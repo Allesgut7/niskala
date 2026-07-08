@@ -1,5 +1,6 @@
 #include "FearGreedGauge.h"
 #include <QPainterPath>
+#include <QJsonObject>
 #include <cmath>
 
 FearGreedGauge::FearGreedGauge(const QString &label, QWidget *parent)
@@ -20,6 +21,16 @@ void FearGreedGauge::setDelta(int delta)
 {
     m_delta = delta;
     update();
+}
+
+void FearGreedGauge::setScoreFromJson(const QJsonObject &data)
+{
+    if (data.contains("score")) {
+        setScore(data["score"].toInt());
+    }
+    if (data.contains("delta")) {
+        setDelta(data["delta"].toInt());
+    }
 }
 
 void FearGreedGauge::paintEvent(QPaintEvent *event)

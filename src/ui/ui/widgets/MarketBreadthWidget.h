@@ -11,6 +11,8 @@ class MarketBreadthWidget : public QWidget
 public:
     explicit MarketBreadthWidget(QWidget *parent = nullptr);
 
+    void updateData(int naik, int turun, int stagnan);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 

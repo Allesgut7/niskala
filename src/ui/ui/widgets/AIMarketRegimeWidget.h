@@ -10,6 +10,8 @@ class AIMarketRegimeWidget : public QWidget
 public:
     explicit AIMarketRegimeWidget(QWidget *parent = nullptr);
 
+    void updateData(const QString &regime, int confidence, const QString &analysis);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 

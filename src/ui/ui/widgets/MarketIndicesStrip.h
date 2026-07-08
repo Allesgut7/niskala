@@ -11,6 +11,8 @@ class MarketIndicesStrip : public QWidget
 public:
     explicit MarketIndicesStrip(QWidget *parent = nullptr);
 
+    void updateData(const QString &name, double value, double change, double changePct);
+
 private:
     void setupUI();
 

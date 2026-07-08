@@ -10,12 +10,15 @@
 #include "../widgets/AIMarketRegimeWidget.h"
 #include "../widgets/SectorPerformanceWidget.h"
 #include "../widgets/FooterWidget.h"
+#include "../core/DataManager.h"
 #include "NewsScreen.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QScrollArea>
 #include <QLabel>
+#include <QJsonArray>
+#include <QJsonObject>
 
 DashboardScreen::DashboardScreen(QWidget *parent)
     : QWidget(parent)
@@ -188,4 +191,96 @@ void DashboardScreen::setupUI()
     // === Footer ===
     auto *footer = new FooterWidget();
     mainLayout->addWidget(footer);
+
+    // === Data Manager Integration ===
+    setupDataManager();
+}
+
+void DashboardScreen::setupDataManager()
+{
+    m_dataManager = new DataManager(this);
+
+    // Connect DataManager signals to widget updates
+    connect(m_dataManager, &DataManager::watchlistUpdated,
+            this, &DashboardScreen::onWatchlistUpdated);
+    connect(m_dataManager, &DataManager::marketOverviewUpdated,
+            this, &DashboardScreen::onMarketOverviewUpdated);
+    connect(m_dataManager, &DataManager::fearGreedUpdated,
+            this, &DashboardScreen::onFearGreedUpdated);
+    connect(m_dataManager, &DataManager::sentimentUpdated,
+            this, &DashboardScreen::onSentimentUpdated);
+
+    // Start auto-refresh every 30 seconds
+    m_dataManager->startAutoRefresh(30);
+}
+
+void DashboardScreen::onWatchlistUpdated(const QJsonObject &data)
+{
+    QJsonArray indices = data["indices"].toArray();
+    for (const auto &item : indices) {
+        QJsonObject obj = item.toObject();
+        m_indicesStrip->updateData(
+            obj["name"].toString(),
+            obj["value"].toDouble(),
+            obj["change"].toDouble(),
+            obj["changePct"].toDouble()
+        );
+    }
+}
+
+void DashboardScreen::onMarketOverviewUpdated(const QJsonObject &data)
+{
+    QJsonArray commodities = data["commodities"].toArray();
+    for (int i = 0; i < commodities.size() && i < 7; ++i) {
+        QJsonObject obj = commodities[i].toObject();
+        m_commodityTable->updateData(
+            i,
+            obj["price"].toDouble(),
+            obj["change"].toDouble(),
+            obj["changePct"].toDouble()
+        );
+    }
+}
+
+void DashboardScreen::onFearGreedUpdated(const QJsonObject &data)
+{
+    if (data.contains("indo")) {
+        QJsonObject indo = data["indo"].toObject();
+        m_fgIndo->setScore(indo["score"].toInt());
+        m_fgIndo->setDelta(indo["delta"].toInt());
+    }
+    if (data.contains("asia")) {
+        QJsonObject asia = data["asia"].toObject();
+        m_fgAsia->setScore(asia["score"].toInt());
+        m_fgAsia->setDelta(asia["delta"].toInt());
+    }
+    if (data.contains("global")) {
+        QJsonObject global = data["global"].toObject();
+        m_fgGlobal->setScore(global["score"].toInt());
+        m_fgGlobal->setDelta(global["delta"].toInt());
+    }
+    if (data.contains("breadth")) {
+        QJsonObject breadth = data["breadth"].toObject();
+        m_breadth->updateData(
+            breadth["naik"].toInt(),
+            breadth["turun"].toInt(),
+            breadth["stagnan"].toInt()
+        );
+    }
+    if (data.contains("regime")) {
+        QJsonObject regime = data["regime"].toObject();
+        m_aiRegime->updateData(
+            regime["regime"].toString(),
+            regime["confidence"].toInt(),
+            regime["analysis"].toString()
+        );
+    }
+}
+
+void DashboardScreen::onSentimentUpdated(const QString &symbol, const QJsonObject &data)
+{
+    // Update news sentiment for specific symbol
+    Q_UNUSED(symbol);
+    Q_UNUSED(data);
+    // NewsScreen handles its own data
 }
