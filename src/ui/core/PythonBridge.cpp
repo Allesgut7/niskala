@@ -194,9 +194,11 @@ void PythonBridge::stopWebSocket()
 void PythonBridge::executeCommand(const QString &command, const QStringList &args)
 {
     if (m_process->state() == QProcess::Running) {
-        m_process->kill();
+        m_process->waitForFinished(5000);
+        if (m_process->state() == QProcess::Running) {
+            m_process->kill();
+        }
     }
-
     m_process->start(command, args);
 }
 
