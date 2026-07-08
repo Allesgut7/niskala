@@ -25,10 +25,10 @@ void MarketBreadthWidget::paintEvent(QPaintEvent *event)
     painter.setFont(QFont("monospace", 11, QFont::Bold));
     painter.drawText(QRect(8, 4, width() - 16, 20), Qt::AlignLeft, "MARKET BREADTH (IHSG)");
 
-    // Semi-circle gauge
-    int centerX = width() / 2;
+    // Semi-circle gauge (shifted left for more room on right)
+    int centerX = static_cast<int>(width() * 0.35);
     int centerY = 130;
-    int radius = 70;
+    int radius = 55;
 
     // Background arc
     painter.setPen(QPen(QColor("#1f2937"), 12, Qt::SolidLine, Qt::RoundCap));
@@ -54,7 +54,7 @@ void MarketBreadthWidget::paintEvent(QPaintEvent *event)
                     static_cast<int>((naikAngle + turunAngle) * 16), static_cast<int>(stagnanAngle * 16));
 
     // Stats on right
-    int statsX = width() - 100;
+    int statsX = static_cast<int>(width() * 0.6);
     int statsY = 35;
 
     painter.setFont(QFont("monospace", 12, QFont::Bold));
