@@ -196,6 +196,9 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
     QByteArray output = m_process->readAllStandardOutput();
     QByteArray error = m_process->readAllStandardError();
 
+    // Debug: print raw output
+    qDebug() << "PythonBridge output:" << QString::fromUtf8(output).left(200);
+    
     if (exitStatus == QProcess::NormalExit && exitCode == 0) {
         QString outputStr = QString::fromUtf8(output).trimmed();
         QJsonDocument doc = QJsonDocument::fromJson(outputStr.toUtf8());

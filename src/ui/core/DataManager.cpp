@@ -110,6 +110,7 @@ void DataManager::onAutoRefresh()
 void DataManager::onMarketDataReceived(const QJsonObject &data)
 {
     QString symbol = data["symbol"].toString();
+    qDebug() << "DataManager: Received data for" << symbol << "price:" << data["price"];
     
     // Check if this is a market overview symbol
     QStringList overviewSymbols = {"^JKSE", "GC=F", "CL=F", "USDIDR=X", "^N225", "^HSI", "^KS11", "^GSPC", "^IXIC"};
