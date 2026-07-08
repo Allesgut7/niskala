@@ -11,7 +11,7 @@
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QSplitter>
+#include <QGridLayout>
 #include <QLabel>
 
 DashboardScreen::DashboardScreen(QWidget *parent)
@@ -38,34 +38,26 @@ void DashboardScreen::setupUI()
     m_indicesStrip = new MarketIndicesStrip();
     mainLayout->addWidget(m_indicesStrip);
 
-    // Main Content Area (Chart + Right Panel)
-    auto *contentWidget = new QWidget();
-    auto *contentLayout = new QHBoxLayout(contentWidget);
-    contentLayout->setContentsMargins(8, 8, 8, 0);
-    contentLayout->setSpacing(8);
+    // Main Content Area (QGridLayout)
+    auto *mainContent = new QGridLayout();
+    mainContent->setContentsMargins(8, 8, 8, 0);
+    mainContent->setSpacing(6);
 
-    // Left: Chart
-    auto *chartWidget = new QWidget();
-    auto *chartLayout = new QVBoxLayout(chartWidget);
-    chartLayout->setContentsMargins(0, 0, 0, 0);
-
+    // Row 0-4, Col 0-1: CandlestickChart (spans 2 columns)
     m_chart = new CandlestickChart();
-    chartLayout->addWidget(m_chart);
+    mainContent->addWidget(m_chart, 0, 0, 5, 2);
 
-    contentLayout->addWidget(chartWidget, 6);
+    // Row 0-1, Col 2: Fear & Greed Index
+    auto *fgWidget = new QWidget();
+    auto *fgLayout = new QVBoxLayout(fgWidget);
+    fgLayout->setContentsMargins(0, 0, 0, 0);
+    fgLayout->setSpacing(4);
 
-    // Right Panel
-    auto *rightPanel = new QWidget();
-    auto *rightLayout = new QVBoxLayout(rightPanel);
-    rightLayout->setContentsMargins(0, 0, 0, 0);
-    rightLayout->setSpacing(6);
-
-    // Fear & Greed Index
     auto *fgHeader = new QLabel("FEAR & GREED INDEX");
     fgHeader->setStyleSheet("color: #3b82f6; font-weight: bold; font-size: 12px;");
-    rightLayout->addWidget(fgHeader);
+    fgLayout->addWidget(fgHeader);
 
-    auto *fgLayout = new QHBoxLayout();
+    auto *fgGauges = new QHBoxLayout();
     m_fgIndo = new FearGreedGauge("INDONESIA");
     m_fgIndo->setScore(63);
     m_fgIndo->setDelta(8);
@@ -75,38 +67,34 @@ void DashboardScreen::setupUI()
     m_fgGlobal = new FearGreedGauge("GLOBAL");
     m_fgGlobal->setScore(48);
     m_fgGlobal->setDelta(-2);
-    fgLayout->addWidget(m_fgIndo);
-    fgLayout->addWidget(m_fgAsia);
-    fgLayout->addWidget(m_fgGlobal);
-    rightLayout->addLayout(fgLayout);
+    fgGauges->addWidget(m_fgIndo);
+    fgGauges->addWidget(m_fgAsia);
+    fgGauges->addWidget(m_fgGlobal);
+    fgLayout->addLayout(fgGauges);
 
-    // Commodity Table
+    mainContent->addWidget(fgWidget, 0, 2, 2, 1);
+
+    // Row 2-4, Col 2: Commodity Table
     m_commodityTable = new CommodityTable();
-    rightLayout->addWidget(m_commodityTable);
+    mainContent->addWidget(m_commodityTable, 2, 2, 3, 1);
 
-    // Market Breadth
-    m_breadth = new MarketBreadthWidget();
-    rightLayout->addWidget(m_breadth);
-
-    contentLayout->addWidget(rightPanel, 4);
-
-    mainLayout->addWidget(contentWidget, 1);
-
-    // Bottom Section (News + Sector Performance)
-    auto *bottomWidget = new QWidget();
-    auto *bottomLayout = new QHBoxLayout(bottomWidget);
-    bottomLayout->setContentsMargins(8, 4, 8, 4);
-    bottomLayout->setSpacing(8);
-
-    // News
+    // Row 5-6, Col 0: News & AI Sentiment
     m_news = new NewsScreen();
-    bottomLayout->addWidget(m_news, 5);
+    mainContent->addWidget(m_news, 5, 0, 2, 1);
 
-    // Sector Performance
+    // Row 5-6, Col 1: Sector Performance
     m_sectorPerf = new SectorPerformanceWidget();
-    bottomLayout->addWidget(m_sectorPerf, 5);
+    mainContent->addWidget(m_sectorPerf, 5, 1, 2, 1);
 
-    mainLayout->addWidget(bottomWidget, 1);
+    // Row 5-6, Col 2: Market Breadth
+    m_breadth = new MarketBreadthWidget();
+    mainContent->addWidget(m_breadth, 5, 2, 2, 1);
+
+    mainContent->setColumnStretch(0, 3);
+    mainContent->setColumnStretch(1, 3);
+    mainContent->setColumnStretch(2, 4);
+
+    mainLayout->addLayout(mainContent, 1);
 
     // Bottom Ticker
     auto *bottomTicker = new QWidget();
