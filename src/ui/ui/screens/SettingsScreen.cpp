@@ -76,7 +76,7 @@ void SettingsScreen::setupGeneralSection()
 void SettingsScreen::setupDataSection()
 {
     auto *group = new QGroupBox("DATA");
-    group->setStyleSheet("QGroupBox { color: #1AF37B; }");
+    group->setStyleSheet("QGroupBox { color: #25D9FF; }");
     auto *layout = new QFormLayout(group);
 
     m_dataSourceCombo = new QComboBox();

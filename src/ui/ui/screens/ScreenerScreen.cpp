@@ -119,14 +119,14 @@ void ScreenerScreen::populateData()
 
         auto *chgItem = new QTableWidgetItem(
             QString::number(s.change, 'f', 0));
-        chgItem->setForeground(s.change >= 0 ? QColor("#25D9FF") : QColor("#ff4757"));
+        chgItem->setForeground(s.change >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
         chgItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_table->setItem(i, 3, chgItem);
 
         QString pctStr = (s.changePct >= 0 ? "+" : "") +
                          QString::number(s.changePct, 'f', 2) + "%";
         auto *pctItem = new QTableWidgetItem(pctStr);
-        pctItem->setForeground(s.changePct >= 0 ? QColor("#25D9FF") : QColor("#ff4757"));
+        pctItem->setForeground(s.changePct >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
         pctItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_table->setItem(i, 4, pctItem);
 
