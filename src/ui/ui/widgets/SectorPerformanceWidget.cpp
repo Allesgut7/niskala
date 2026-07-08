@@ -1,5 +1,7 @@
 #include "SectorPerformanceWidget.h"
 #include <QPainter>
+#include <QJsonArray>
+#include <QJsonObject>
 
 SectorPerformanceWidget::SectorPerformanceWidget(QWidget *parent)
     : QWidget(parent)
@@ -19,6 +21,16 @@ SectorPerformanceWidget::SectorPerformanceWidget(QWidget *parent)
         {"Konsumen Non-Primer", -0.65},
         {"Transportasi", -0.91}
     };
+}
+
+void SectorPerformanceWidget::updateData(const QJsonArray &sectors)
+{
+    m_sectors.clear();
+    for (const auto &item : sectors) {
+        QJsonObject obj = item.toObject();
+        m_sectors.append({obj["name"].toString(), obj["changePct"].toDouble()});
+    }
+    update();
 }
 
 void SectorPerformanceWidget::paintEvent(QPaintEvent *event)

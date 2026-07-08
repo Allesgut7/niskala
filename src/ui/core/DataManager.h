@@ -20,6 +20,9 @@ public:
     void refreshWatchlist();
     void refreshMarketOverview();
     void refreshFearGreedIndex();
+    void refreshMarketBreadth();
+    void refreshSectorPerformance();
+    void refreshAIRegime();
 
     bool isRefreshing() const { return m_refreshing; }
 
@@ -27,6 +30,9 @@ signals:
     void watchlistUpdated(const QJsonObject &data);
     void marketOverviewUpdated(const QJsonObject &data);
     void fearGreedUpdated(const QJsonObject &data);
+    void marketBreadthUpdated(const QJsonObject &data);
+    void sectorPerformanceUpdated(const QJsonObject &data);
+    void aiRegimeUpdated(const QJsonObject &data);
     void sentimentUpdated(const QString &symbol, const QJsonObject &data);
     void refreshStarted();
     void refreshFinished();

@@ -10,6 +10,8 @@ class SectorPerformanceWidget : public QWidget
 public:
     explicit SectorPerformanceWidget(QWidget *parent = nullptr);
 
+    void updateData(const QJsonArray &sectors);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 

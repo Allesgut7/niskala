@@ -209,6 +209,12 @@ void DashboardScreen::setupDataManager()
             this, &DashboardScreen::onFearGreedUpdated);
     connect(m_dataManager, &DataManager::sentimentUpdated,
             this, &DashboardScreen::onSentimentUpdated);
+    connect(m_dataManager, &DataManager::marketBreadthUpdated,
+            this, &DashboardScreen::onMarketBreadthUpdated);
+    connect(m_dataManager, &DataManager::sectorPerformanceUpdated,
+            this, &DashboardScreen::onSectorPerformanceUpdated);
+    connect(m_dataManager, &DataManager::aiRegimeUpdated,
+            this, &DashboardScreen::onAIRegimeUpdated);
 
     // Start auto-refresh every 30 seconds
     m_dataManager->startAutoRefresh(30);
@@ -283,4 +289,29 @@ void DashboardScreen::onSentimentUpdated(const QString &symbol, const QJsonObjec
     Q_UNUSED(symbol);
     Q_UNUSED(data);
     // NewsScreen handles its own data
+}
+
+void DashboardScreen::onMarketBreadthUpdated(const QJsonObject &data)
+{
+    m_breadth->updateData(
+        data["naik"].toInt(),
+        data["turun"].toInt(),
+        data["stagnan"].toInt()
+    );
+}
+
+void DashboardScreen::onSectorPerformanceUpdated(const QJsonObject &data)
+{
+    QJsonArray sectors = data["sectors"].toArray();
+    // SectorPerformanceWidget handles its own data
+    Q_UNUSED(sectors);
+}
+
+void DashboardScreen::onAIRegimeUpdated(const QJsonObject &data)
+{
+    m_aiRegime->updateData(
+        data["regime"].toString(),
+        data["confidence"].toInt(),
+        data["analysis"].toString()
+    );
 }

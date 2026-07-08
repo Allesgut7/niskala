@@ -12,6 +12,20 @@ DataManager::DataManager(QObject *parent)
             this, &DataManager::onMarketDataReceived);
     connect(m_bridge, &PythonBridge::fearGreedReceived,
             this, &DataManager::onFearGreedReceived);
+    connect(m_bridge, &PythonBridge::marketBreadthReceived,
+            this, [this](const QJsonObject &data) {
+        emit marketBreadthUpdated(data);
+    });
+    connect(m_bridge, &PythonBridge::sectorPerformanceReceived,
+            this, [this](const QJsonArray &data) {
+        QJsonObject obj;
+        obj["sectors"] = data;
+        emit sectorPerformanceUpdated(obj);
+    });
+    connect(m_bridge, &PythonBridge::aiRegimeReceived,
+            this, [this](const QJsonObject &data) {
+        emit aiRegimeUpdated(data);
+    });
     connect(m_bridge, &PythonBridge::commandError,
             this, &DataManager::onCommandError);
 
@@ -35,6 +49,9 @@ void DataManager::refreshAll()
 
     refreshWatchlist();
     refreshFearGreedIndex();
+    refreshMarketBreadth();
+    refreshSectorPerformance();
+    refreshAIRegime();
 }
 
 void DataManager::refreshWatchlist()
@@ -55,6 +72,21 @@ void DataManager::refreshMarketOverview()
 void DataManager::refreshFearGreedIndex()
 {
     m_bridge->fetchFearGreedIndex();
+}
+
+void DataManager::refreshMarketBreadth()
+{
+    m_bridge->fetchMarketBreadth();
+}
+
+void DataManager::refreshSectorPerformance()
+{
+    m_bridge->fetchSectorPerformance();
+}
+
+void DataManager::refreshAIRegime()
+{
+    m_bridge->fetchAIRegime();
 }
 
 void DataManager::onAutoRefresh()

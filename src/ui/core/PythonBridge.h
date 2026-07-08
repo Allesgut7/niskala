@@ -15,12 +15,18 @@ public:
     void fetchMarketData(const QString &symbol);
     void fetchSentiment(const QString &symbol);
     void fetchFearGreedIndex();
+    void fetchMarketBreadth();
+    void fetchSectorPerformance();
+    void fetchAIRegime();
     void executeCommand(const QString &command, const QStringList &args = {});
 
 signals:
     void marketDataReceived(const QJsonObject &data);
     void sentimentReceived(const QJsonObject &data);
     void fearGreedReceived(const QJsonObject &data);
+    void marketBreadthReceived(const QJsonObject &data);
+    void sectorPerformanceReceived(const QJsonArray &data);
+    void aiRegimeReceived(const QJsonObject &data);
     void commandOutput(const QString &output);
     void commandError(const QString &error);
 

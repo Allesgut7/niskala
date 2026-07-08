@@ -26,6 +26,9 @@ private slots:
     void onMarketOverviewUpdated(const QJsonObject &data);
     void onFearGreedUpdated(const QJsonObject &data);
     void onSentimentUpdated(const QString &symbol, const QJsonObject &data);
+    void onMarketBreadthUpdated(const QJsonObject &data);
+    void onSectorPerformanceUpdated(const QJsonObject &data);
+    void onAIRegimeUpdated(const QJsonObject &data);
 
 private:
     void setupUI();
