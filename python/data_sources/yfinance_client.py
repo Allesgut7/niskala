@@ -117,7 +117,7 @@ class YFinanceClient:
                 'name': self._get_index_name(index_symbol),
                 'price': float(current_price),
                 'change': float(change),
-                'change_pct': float(change_pct),
+                'changePct': float(change_pct),
                 'volume': int(hist['Volume'].iloc[-1]),
                 'timestamp': datetime.now().isoformat()
             }
@@ -170,6 +170,8 @@ class YFinanceClient:
             '^GSPC': 'S&P 500',
             '^N225': 'Nikkei 225',
             '^HSI': 'Hang Seng',
+            '^KS11': 'KOSPI',
+            '^IXIC': 'NASDAQ',
             '^STI': 'STI',
             'GC=F': 'Gold',
             'CL=F': 'Crude Oil',
