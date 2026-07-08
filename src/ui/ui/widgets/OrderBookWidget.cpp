@@ -19,11 +19,11 @@ void OrderBookWidget::setupUI()
     // Header
     auto *headerLayout = new QHBoxLayout();
     m_symbolLabel = new QLabel("ORDER BOOK - BBCA");
-    m_symbolLabel->setStyleSheet("color: #e94560; font-weight: bold; font-size: 12px;");
+    m_symbolLabel->setStyleSheet("color: #D84B63; font-weight: bold; font-size: 12px;");
     headerLayout->addWidget(m_symbolLabel);
 
     m_spreadLabel = new QLabel("Spread: 50 (0.54%)");
-    m_spreadLabel->setStyleSheet("color: #888888; font-size: 10px;");
+    m_spreadLabel->setStyleSheet("color: #7E8AA3; font-size: 10px;");
     m_spreadLabel->setAlignment(Qt::AlignRight);
     headerLayout->addWidget(m_spreadLabel);
     mainLayout->addLayout(headerLayout);
@@ -38,14 +38,14 @@ void OrderBookWidget::setupUI()
     m_askTable->setShowGrid(false);
     m_askTable->setFocusPolicy(Qt::NoFocus);
     m_askTable->setStyleSheet(
-        "QTableWidget { background-color: #1a1a2e; alternate-background-color: #16213e; }"
+        "QTableWidget { background-color: #101827; alternate-background-color: #09111F; }"
     );
     mainLayout->addWidget(m_askTable);
 
     // Spread indicator
     auto *spreadBar = new QLabel("───── SPREAD ─────");
     spreadBar->setAlignment(Qt::AlignCenter);
-    spreadBar->setStyleSheet("color: #ffc107; font-weight: bold; background-color: #0f3460; padding: 2px;");
+    spreadBar->setStyleSheet("color: #E6874C; font-weight: bold; background-color: #1B2940; padding: 2px;");
     mainLayout->addWidget(spreadBar);
 
     // BIDS table
@@ -58,7 +58,7 @@ void OrderBookWidget::setupUI()
     m_bidTable->setShowGrid(false);
     m_bidTable->setFocusPolicy(Qt::NoFocus);
     m_bidTable->setStyleSheet(
-        "QTableWidget { background-color: #1a1a2e; alternate-background-color: #16213e; }"
+        "QTableWidget { background-color: #101827; alternate-background-color: #09111F; }"
     );
     mainLayout->addWidget(m_bidTable);
 }
@@ -75,7 +75,7 @@ void OrderBookWidget::populateSampleData()
         askTotal += askVolumes[i];
 
         auto *priceItem = new QTableWidgetItem(QString::number(price, 'f', 0));
-        priceItem->setForeground(QColor("#ff4757"));
+        priceItem->setForeground(QColor("#FF5C72"));
         priceItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_askTable->setItem(i, 0, priceItem);
 
@@ -84,7 +84,7 @@ void OrderBookWidget::populateSampleData()
         m_askTable->setItem(i, 1, volItem);
 
         auto *totalItem = new QTableWidgetItem(QString::number((int)askTotal));
-        totalItem->setForeground(QColor("#888888"));
+        totalItem->setForeground(QColor("#7E8AA3"));
         totalItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_askTable->setItem(i, 2, totalItem);
     }
@@ -99,7 +99,7 @@ void OrderBookWidget::populateSampleData()
         bidTotal += bidVolumes[i];
 
         auto *priceItem = new QTableWidgetItem(QString::number(price, 'f', 0));
-        priceItem->setForeground(QColor("#00d989"));
+        priceItem->setForeground(QColor("#1AF37B"));
         priceItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_bidTable->setItem(i, 0, priceItem);
 
@@ -108,7 +108,7 @@ void OrderBookWidget::populateSampleData()
         m_bidTable->setItem(i, 1, volItem);
 
         auto *totalItem = new QTableWidgetItem(QString::number((int)bidTotal));
-        totalItem->setForeground(QColor("#888888"));
+        totalItem->setForeground(QColor("#7E8AA3"));
         totalItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_bidTable->setItem(i, 2, totalItem);
     }

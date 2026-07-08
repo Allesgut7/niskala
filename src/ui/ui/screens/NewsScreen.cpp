@@ -18,13 +18,13 @@ void NewsScreen::setupUI()
 
     auto *headerLayout = new QHBoxLayout();
     auto *title = new QLabel("NEWS & AI SENTIMENT");
-    title->setStyleSheet("color: #3b82f6; font-weight: bold; font-size: 12px;");
+    title->setStyleSheet("color: #25D9FF; font-weight: bold; font-size: 12px;");
     headerLayout->addWidget(title);
 
     headerLayout->addStretch();
 
     auto *seeAll = new QLabel("Lihat Semua");
-    seeAll->setStyleSheet("color: #3b82f6; font-size: 10px;");
+    seeAll->setStyleSheet("color: #25D9FF; font-size: 10px;");
     headerLayout->addWidget(seeAll);
 
     mainLayout->addLayout(headerLayout);
@@ -36,7 +36,7 @@ void NewsScreen::setupUI()
     m_searchEdit = new QLineEdit();
     m_searchEdit->setPlaceholderText("Search news...");
     m_searchEdit->setStyleSheet(
-        "QLineEdit { background-color: #111827; color: #e5e7eb; border: 1px solid #1f2937; "
+        "QLineEdit { background-color: #101827; color: #F7FAFC; border: 1px solid #1D2B40; "
         "padding: 6px; font-size: 11px; border-radius: 4px; }");
     connect(m_searchEdit, &QLineEdit::textChanged, this, &NewsScreen::onFilterChanged);
     filterLayout->addWidget(m_searchEdit);
@@ -44,7 +44,7 @@ void NewsScreen::setupUI()
     m_sourceFilter = new QComboBox();
     m_sourceFilter->addItems({"All Sources", "CNBC", "IDX", "Kontan", "Bisnis", "Reuters", "Tempo"});
     m_sourceFilter->setStyleSheet(
-        "QComboBox { background-color: #111827; color: #e5e7eb; border: 1px solid #1f2937; "
+        "QComboBox { background-color: #101827; color: #F7FAFC; border: 1px solid #1D2B40; "
         "padding: 4px; font-size: 11px; border-radius: 4px; }");
     connect(m_sourceFilter, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &NewsScreen::onFilterChanged);
@@ -56,8 +56,8 @@ void NewsScreen::setupUI()
     m_newsList = new QListWidget();
     m_newsList->setStyleSheet(
         "QListWidget { background-color: transparent; border: none; }"
-        "QListWidget::item { padding: 8px; border-bottom: 1px solid #1f2937; }"
-        "QListWidget::item:selected { background-color: #1f2937; }");
+        "QListWidget::item { padding: 8px; border-bottom: 1px solid #1D2B40; }"
+        "QListWidget::item:selected { background-color: #1D2B40; }");
     mainLayout->addWidget(m_newsList);
 }
 
@@ -99,11 +99,11 @@ void NewsScreen::populateData()
         // Time + Source + Sentiment Badge
         auto *topLayout = new QHBoxLayout();
         auto *timeLabel = new QLabel(n.time);
-        timeLabel->setStyleSheet("color: #6b7280; font-size: 10px;");
+        timeLabel->setStyleSheet("color: #7E8AA3; font-size: 10px;");
         topLayout->addWidget(timeLabel);
 
         auto *sourceLabel = new QLabel(n.source);
-        sourceLabel->setStyleSheet("color: #9ca3af; font-size: 10px; font-weight: bold;");
+        sourceLabel->setStyleSheet("color: #B7C2D6; font-size: 10px; font-weight: bold;");
         topLayout->addWidget(sourceLabel);
 
         topLayout->addStretch();
@@ -113,17 +113,17 @@ void NewsScreen::populateData()
         if (n.sentiment == 1) {
             badge->setText("Positive");
             badge->setStyleSheet(
-                "QLabel { background-color: #065f46; color: #10b981; padding: 2px 8px; "
+                "QLabel { background-color: #064E3B; color: #1AF37B; padding: 2px 8px; "
                 "border-radius: 4px; font-size: 10px; font-weight: bold; }");
         } else if (n.sentiment == -1) {
             badge->setText("Negative");
             badge->setStyleSheet(
-                "QLabel { background-color: #7f1d1d; color: #ef4444; padding: 2px 8px; "
+                "QLabel { background-color: #450A0A; color: #FF5C72; padding: 2px 8px; "
                 "border-radius: 4px; font-size: 10px; font-weight: bold; }");
         } else {
             badge->setText("Neutral");
             badge->setStyleSheet(
-                "QLabel { background-color: #78350f; color: #f59e0b; padding: 2px 8px; "
+                "QLabel { background-color: #451A03; color: #E6874C; padding: 2px 8px; "
                 "border-radius: 4px; font-size: 10px; font-weight: bold; }");
         }
         topLayout->addWidget(badge);
@@ -132,19 +132,19 @@ void NewsScreen::populateData()
 
         // Headline
         auto *headlineLabel = new QLabel(n.headline);
-        headlineLabel->setStyleSheet("color: #e5e7eb; font-size: 13px; font-weight: bold;");
+        headlineLabel->setStyleSheet("color: #F7FAFC; font-size: 13px; font-weight: bold;");
         headlineLabel->setWordWrap(true);
         itemLayout->addWidget(headlineLabel);
 
         // AI Analisis
         auto *aiLabel = new QLabel("AI Analisis: " + n.aiAnalisis);
-        aiLabel->setStyleSheet("color: #6b7280; font-size: 10px;");
+        aiLabel->setStyleSheet("color: #7E8AA3; font-size: 10px;");
         aiLabel->setWordWrap(true);
         itemLayout->addWidget(aiLabel);
 
         // Dampak Sektor
         auto *dampakLabel = new QLabel("Dampak Sektor: " + n.dampakSektor);
-        dampakLabel->setStyleSheet("color: #9ca3af; font-size: 10px;");
+        dampakLabel->setStyleSheet("color: #B7C2D6; font-size: 10px;");
         dampakLabel->setWordWrap(true);
         itemLayout->addWidget(dampakLabel);
 

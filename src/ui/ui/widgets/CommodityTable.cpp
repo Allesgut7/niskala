@@ -16,7 +16,7 @@ void CommodityTable::setupUI()
     layout->setSpacing(4);
 
     auto *header = new QLabel("COMMODITY");
-    header->setStyleSheet("color: #3b82f6; font-weight: bold; font-size: 12px; padding-left: 8px;");
+    header->setStyleSheet("color: #25D9FF; font-weight: bold; font-size: 12px; padding-left: 8px;");
     layout->addWidget(header);
 
     m_table = new QTableWidget(7, 4);
@@ -29,9 +29,9 @@ void CommodityTable::setupUI()
     m_table->setShowGrid(false);
     m_table->setAlternatingRowColors(true);
     m_table->setStyleSheet(
-        "QTableWidget { background-color: transparent; color: #e5e7eb; border: none; }"
+        "QTableWidget { background-color: transparent; color: #F7FAFC; border: none; }"
         "QTableWidget::item { padding: 4px; }"
-        "QHeaderView::section { background-color: transparent; color: #9ca3af; border: none; font-weight: bold; }");
+        "QHeaderView::section { background-color: transparent; color: #B7C2D6; border: none; font-weight: bold; }");
     layout->addWidget(m_table);
 }
 
@@ -58,13 +58,13 @@ void CommodityTable::populateData()
         m_table->setItem(i, 1, priceItem);
 
         auto *chgItem = new QTableWidgetItem(QString::number(c.change, 'f', 2));
-        chgItem->setForeground(c.change >= 0 ? QColor("#10b981") : QColor("#ef4444"));
+        chgItem->setForeground(c.change >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
         chgItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_table->setItem(i, 2, chgItem);
 
         QString pctStr = (c.pct >= 0 ? "+" : "") + QString::number(c.pct, 'f', 2) + "%";
         auto *pctItem = new QTableWidgetItem(pctStr);
-        pctItem->setForeground(c.pct >= 0 ? QColor("#10b981") : QColor("#ef4444"));
+        pctItem->setForeground(c.pct >= 0 ? QColor("#1AF37B") : QColor("#FF5C72"));
         pctItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_table->setItem(i, 3, pctItem);
     }

@@ -35,10 +35,10 @@ void BottomBanner::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Background
-    painter.fillRect(rect(), QColor("#0f3460"));
+    painter.fillRect(rect(), QColor("#09111F"));
 
     // Gainers
-    painter.setPen(QColor("#00d989"));
+    painter.setPen(QColor("#1AF37B"));
     painter.setFont(QFont("monospace", 9, QFont::Bold));
 
     int x = 10;
@@ -47,18 +47,18 @@ void BottomBanner::paintEvent(QPaintEvent *event)
     painter.drawText(x, y + painter.fontMetrics().ascent(), "GAINERS: ");
     x += painter.fontMetrics().horizontalAdvance("GAINERS: ");
 
-    painter.setPen(QColor("#00d989"));
+    painter.setPen(QColor("#1AF37B"));
     for (const auto &g : m_gainers) {
         painter.drawText(x, y + painter.fontMetrics().ascent(), g);
         x += painter.fontMetrics().horizontalAdvance(g) + 20;
     }
 
     // Losers
-    painter.setPen(QColor("#888888"));
+    painter.setPen(QColor("#7E8AA3"));
     painter.drawText(x, y + painter.fontMetrics().ascent(), "  |  ");
     x += painter.fontMetrics().horizontalAdvance("  |  ");
 
-    painter.setPen(QColor("#ff4757"));
+    painter.setPen(QColor("#FF5C72"));
     painter.drawText(x, y + painter.fontMetrics().ascent(), "LOSERS: ");
     x += painter.fontMetrics().horizontalAdvance("LOSERS: ");
 
@@ -68,6 +68,6 @@ void BottomBanner::paintEvent(QPaintEvent *event)
     }
 
     // Top border
-    painter.setPen(QPen(QColor("#e94560"), 1));
+    painter.setPen(QPen(QColor("#1D2B40"), 1));
     painter.drawLine(0, 0, width(), 0);
 }

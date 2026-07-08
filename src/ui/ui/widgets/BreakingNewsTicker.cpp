@@ -37,7 +37,7 @@ void BreakingNewsTicker::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Background
-    painter.fillRect(rect(), QColor("#0a0e17"));
+    painter.fillRect(rect(), QColor("#060B16"));
 
     // BREAKING badge
     painter.setBrush(QColor("#dc2626"));

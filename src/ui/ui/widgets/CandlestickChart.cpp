@@ -26,15 +26,15 @@ void CandlestickChart::setupUI()
 
     m_chartView = new QChartView(m_chart);
     m_chartView->setRenderHint(QPainter::Antialiasing);
-    m_chartView->setStyleSheet("background-color: #1a1a2e;");
+    m_chartView->setStyleSheet("background-color: #101827;");
     layout->addWidget(m_chartView);
 }
 
 void CandlestickChart::setupChart()
 {
     m_chart = new QChart();
-    m_chart->setBackgroundBrush(QBrush(QColor("#1a1a2e")));
-    m_chart->setTitleBrush(QBrush(QColor("#e0e0e0")));
+    m_chart->setBackgroundBrush(QBrush(QColor("#101827")));
+    m_chart->setTitleBrush(QBrush(QColor("#F7FAFC")));
     m_chart->setTitleFont(QFont("monospace", 12, QFont::Bold));
     m_chart->setTitle("BBCA - Daily Chart");
     m_chart->setAnimationOptions(QChart::SeriesAnimations);
@@ -42,25 +42,25 @@ void CandlestickChart::setupChart()
 
     m_candleSeries = new QCandlestickSeries();
     m_candleSeries->setName("Price");
-    m_candleSeries->setIncreasingColor(QColor("#00d989"));
-    m_candleSeries->setDecreasingColor(QColor("#ff4757"));
+    m_candleSeries->setIncreasingColor(QColor("#1AF37B"));
+    m_candleSeries->setDecreasingColor(QColor("#FF5C72"));
     m_candleSeries->setBodyOutlineVisible(false);
 
     m_ma5Series = new QLineSeries();
     m_ma5Series->setName("MA5");
-    m_ma5Series->setPen(QPen(QColor("#ffc107"), 1, Qt::SolidLine));
+    m_ma5Series->setPen(QPen(QColor("#E6874C"), 1, Qt::SolidLine));
 
     m_ma20Series = new QLineSeries();
     m_ma20Series->setName("MA20");
-    m_ma20Series->setPen(QPen(QColor("#00bcd4"), 1, Qt::DashLine));
+    m_ma20Series->setPen(QPen(QColor("#25D9FF"), 1, Qt::DashLine));
 
     m_axisX = new QValueAxis();
     m_axisX->setLabelsVisible(false);
-    m_axisX->setGridLinePen(QPen(QColor("#0f3460"), 1, Qt::DotLine));
+    m_axisX->setGridLinePen(QPen(QColor("#1D2B40"), 1, Qt::DotLine));
 
     m_axisY = new QValueAxis();
-    m_axisY->setLabelsColor(QColor("#888888"));
-    m_axisY->setGridLinePen(QPen(QColor("#0f3460"), 1, Qt::DotLine));
+    m_axisY->setLabelsColor(QColor("#7E8AA3"));
+    m_axisY->setGridLinePen(QPen(QColor("#1D2B40"), 1, Qt::DotLine));
 
     m_chart->addSeries(m_candleSeries);
     m_chart->addSeries(m_ma5Series);

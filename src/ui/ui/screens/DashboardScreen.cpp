@@ -54,7 +54,7 @@ void DashboardScreen::setupUI()
     fgLayout->setSpacing(4);
 
     auto *fgHeader = new QLabel("FEAR & GREED INDEX");
-    fgHeader->setStyleSheet("color: #3b82f6; font-weight: bold; font-size: 12px;");
+    fgHeader->setStyleSheet("color: #25D9FF; font-weight: bold; font-size: 12px;");
     fgLayout->addWidget(fgHeader);
 
     auto *fgGauges = new QHBoxLayout();
@@ -99,32 +99,32 @@ void DashboardScreen::setupUI()
     // Bottom Ticker
     auto *bottomTicker = new QWidget();
     bottomTicker->setFixedHeight(32);
-    bottomTicker->setStyleSheet("background-color: #0a0e17; border-top: 1px solid #1f2937;");
+    bottomTicker->setStyleSheet("background-color: #060B16; border-top: 1px solid #1D2B40;");
     auto *btLayout = new QHBoxLayout(bottomTicker);
     btLayout->setContentsMargins(8, 4, 8, 4);
 
     auto *gainersLabel = new QLabel("TOP GAINERS  1. DCII +24.2%  2. CUAN +16.7%  3. BREN +13.1%  4. BRMS +11.8%  5. ADRO +9.6%");
-    gainersLabel->setStyleSheet("color: #10b981; font-family: monospace; font-size: 10px;");
+    gainersLabel->setStyleSheet("color: #1AF37B; font-family: monospace; font-size: 10px;");
     btLayout->addWidget(gainersLabel);
 
     auto *losersLabel = new QLabel("TOP LOSERS  1. BUKA -7.8%  2. EMTK -6.2%  3. SMGR -4.1%  4. INCO -3.8%  5. TLKM -3.2%");
-    losersLabel->setStyleSheet("color: #ef4444; font-family: monospace; font-size: 10px;");
+    losersLabel->setStyleSheet("color: #FF5C72; font-family: monospace; font-size: 10px;");
     btLayout->addWidget(losersLabel);
 
     btLayout->addStretch();
 
     auto *foreignLabel = new QLabel("FOREIGN FLOW (ALL MARKET)");
-    foreignLabel->setStyleSheet("color: #9ca3af; font-family: monospace; font-size: 9px;");
+    foreignLabel->setStyleSheet("color: #7E8AA3; font-family: monospace; font-size: 9px;");
     btLayout->addWidget(foreignLabel);
 
     auto *foreignValue = new QLabel("Net Buy +1.24 T");
-    foreignValue->setStyleSheet("color: #10b981; font-family: monospace; font-size: 10px; font-weight: bold;");
+    foreignValue->setStyleSheet("color: #1AF37B; font-family: monospace; font-size: 10px; font-weight: bold;");
     btLayout->addWidget(foreignValue);
 
     btLayout->addSpacing(20);
 
     auto *versionLabel = new QLabel("NISKALA Terminal v1.0.0");
-    versionLabel->setStyleSheet("color: #6b7280; font-family: monospace; font-size: 9px;");
+    versionLabel->setStyleSheet("color: #7E8AA3; font-family: monospace; font-size: 9px;");
     btLayout->addWidget(versionLabel);
 
     mainLayout->addWidget(bottomTicker);

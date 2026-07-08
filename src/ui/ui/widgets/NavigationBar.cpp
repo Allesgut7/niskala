@@ -75,7 +75,7 @@ void NavigationBar::setupUI()
         "border: 2px solid #10b981; border-radius: 14px; padding: 4px 6px; }");
     layout->addWidget(userBtn);
 
-    setStyleSheet("NavigationBar { background-color: #0a0e17; border-bottom: 1px solid #1f2937; }");
+    setStyleSheet("NavigationBar { background-color: #060B16; border-bottom: 1px solid #1f2937; }");
 }
 
 void NavigationBar::updateTabStyles()

@@ -47,7 +47,7 @@ void TopBannerWidget::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Background
-    painter.fillRect(rect(), QColor("#0f3460"));
+    painter.fillRect(rect(), QColor("#09111F"));
 
     // Build ticker string
     QStringList all;
@@ -56,7 +56,7 @@ void TopBannerWidget::paintEvent(QPaintEvent *event)
     ticker = ticker + "   |   " + ticker; // Duplicate for scrolling
 
     // Draw scrolling text
-    painter.setPen(QColor("#e0e0e0"));
+    painter.setPen(QColor("#F7FAFC"));
     painter.setFont(QFont("monospace", 10));
 
     int textWidth = painter.fontMetrics().horizontalAdvance(ticker);
@@ -71,7 +71,7 @@ void TopBannerWidget::paintEvent(QPaintEvent *event)
     }
 
     // Border bottom
-    painter.setPen(QPen(QColor("#e94560"), 2));
+    painter.setPen(QPen(QColor("#1D2B40"), 2));
     painter.drawLine(0, height() - 2, width(), height() - 2);
 }
 

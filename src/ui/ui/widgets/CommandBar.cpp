@@ -21,22 +21,22 @@ void CommandBar::setupUI()
     layout->setSpacing(6);
 
     m_promptLabel = new QLabel(">");
-    m_promptLabel->setStyleSheet("color: #e94560; font-weight: bold; font-size: 14px;");
+    m_promptLabel->setStyleSheet("color: #D84B63; font-weight: bold; font-size: 14px;");
 
     m_input = new QLineEdit();
     m_input->setPlaceholderText("Type command... (DASH, CHART, NEWS, SCREENER, HELP)");
     m_input->setStyleSheet(
         "QLineEdit {"
-        "  background-color: #16213e;"
-        "  color: #00d989;"
-        "  border: 1px solid #0f3460;"
+        "  background-color: #101827;"
+        "  color: #25D9FF;"
+        "  border: 1px solid #1D2B40;"
         "  border-radius: 3px;"
         "  padding: 4px 8px;"
         "  font-family: 'SF Mono', 'Consolas', monospace;"
         "  font-size: 13px;"
         "}"
         "QLineEdit:focus {"
-        "  border-color: #e94560;"
+        "  border-color: #D84B63;"
         "}"
     );
 

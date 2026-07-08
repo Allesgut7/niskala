@@ -31,19 +31,19 @@ void SentimentGauge::drawGauge(QPainter &painter, const QRect &rect)
     int centerY = rect.bottom() - 5;
     int radius = qMin(rect.width() / 2, rect.height() - 5) - 5;
 
-    painter.setPen(QPen(QColor("#0f3460"), 6, Qt::SolidLine, Qt::RoundCap));
+    painter.setPen(QPen(QColor("#1B2940"), 6, Qt::SolidLine, Qt::RoundCap));
     painter.drawArc(centerX - radius, centerY - radius, radius * 2, radius * 2,
                     0, 180 * 16);
 
-    painter.setPen(QPen(QColor("#ff4757"), 6, Qt::SolidLine, Qt::RoundCap));
+    painter.setPen(QPen(QColor("#FF5C72"), 6, Qt::SolidLine, Qt::RoundCap));
     painter.drawArc(centerX - radius, centerY - radius, radius * 2, radius * 2,
                     0, 90 * 16);
 
-    painter.setPen(QPen(QColor("#ffc107"), 6, Qt::SolidLine, Qt::RoundCap));
+    painter.setPen(QPen(QColor("#E6874C"), 6, Qt::SolidLine, Qt::RoundCap));
     painter.drawArc(centerX - radius, centerY - radius, radius * 2, radius * 2,
                     90 * 16, 15 * 16);
 
-    painter.setPen(QPen(QColor("#00d989"), 6, Qt::SolidLine, Qt::RoundCap));
+    painter.setPen(QPen(QColor("#1AF37B"), 6, Qt::SolidLine, Qt::RoundCap));
     painter.drawArc(centerX - radius, centerY - radius, radius * 2, radius * 2,
                     105 * 16, 75 * 16);
 
@@ -59,14 +59,14 @@ void SentimentGauge::drawGauge(QPainter &painter, const QRect &rect)
     );
 
     QColor needleColor;
-    if (m_score > 20) needleColor = QColor("#00d989");
-    else if (m_score < -20) needleColor = QColor("#ff4757");
-    else needleColor = QColor("#ffc107");
+    if (m_score > 20) needleColor = QColor("#1AF37B");
+    else if (m_score < -20) needleColor = QColor("#FF5C72");
+    else needleColor = QColor("#E6874C");
 
     painter.setPen(QPen(needleColor, 2));
     painter.drawLine(needleStart, needleEnd);
 
-    painter.setBrush(QColor("#e94560"));
+    painter.setBrush(QColor("#D84B63"));
     painter.setPen(Qt::NoPen);
     painter.drawEllipse(centerX - 3, centerY - 3, 6, 6);
 
@@ -81,7 +81,7 @@ void SentimentGauge::drawGauge(QPainter &painter, const QRect &rect)
     else label = "NEUTRAL";
 
     QRect labelRect(centerX - 30, centerY - 25, 60, 15);
-    painter.setPen(QColor("#888888"));
+    painter.setPen(QColor("#7E8AA3"));
     painter.setFont(QFont("monospace", 8));
     painter.drawText(labelRect, Qt::AlignCenter, label);
 }

@@ -24,25 +24,25 @@ void MarketIndexCard::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Background
-    painter.fillRect(rect(), QColor("#111827"));
-    painter.setPen(QPen(QColor("#1f2937"), 1));
+    painter.fillRect(rect(), QColor("#09111F"));
+    painter.setPen(QPen(QColor("#1D2B40"), 1));
     painter.drawRect(rect().adjusted(0, 0, -1, -1));
 
     // Name
-    painter.setPen(QColor("#9ca3af"));
+    painter.setPen(QColor("#B7C2D6"));
     painter.setFont(QFont("monospace", 9));
     QRect nameRect(8, 6, width() - 16, 16);
     painter.drawText(nameRect, Qt::AlignLeft | Qt::AlignVCenter, m_name);
 
     // Value
-    painter.setPen(QColor("#e5e7eb"));
+    painter.setPen(QColor("#F7FAFC"));
     painter.setFont(QFont("monospace", 14, QFont::Bold));
     QRect valueRect(8, 22, width() - 16, 22);
     QString valueStr = QString::number(m_value, 'f', 2);
     painter.drawText(valueRect, Qt::AlignLeft | Qt::AlignVCenter, valueStr);
 
     // Change
-    QColor changeColor = m_change >= 0 ? QColor("#10b981") : QColor("#ef4444");
+    QColor changeColor = m_change >= 0 ? QColor("#1AF37B") : QColor("#FF5C72");
     painter.setPen(changeColor);
     painter.setFont(QFont("monospace", 10));
 

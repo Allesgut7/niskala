@@ -38,7 +38,7 @@ void RunningTradeTicker::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Background
-    painter.fillRect(rect(), QColor("#16213e"));
+    painter.fillRect(rect(), QColor("#101827"));
 
     // Build ticker
     QString ticker;
@@ -48,7 +48,7 @@ void RunningTradeTicker::paintEvent(QPaintEvent *event)
     ticker += ticker; // Duplicate for scrolling
 
     // Draw text
-    painter.setPen(QColor("#ffc107"));
+    painter.setPen(QColor("#E6874C"));
     painter.setFont(QFont("monospace", 10, QFont::Bold));
 
     int textWidth = painter.fontMetrics().horizontalAdvance(ticker);
@@ -58,6 +58,6 @@ void RunningTradeTicker::paintEvent(QPaintEvent *event)
     painter.drawText(x, y + painter.fontMetrics().ascent(), ticker);
 
     // Border
-    painter.setPen(QPen(QColor("#0f3460"), 1));
+    painter.setPen(QPen(QColor("#1D2B40"), 1));
     painter.drawLine(0, height() - 1, width(), height() - 1);
 }

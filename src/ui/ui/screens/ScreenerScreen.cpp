@@ -20,7 +20,7 @@ void ScreenerScreen::setupUI()
 
     // Title
     auto *title = new QLabel("STOCK SCREENER");
-    title->setStyleSheet("color: #e94560; font-weight: bold; font-size: 14px;");
+    title->setStyleSheet("color: #D84B63; font-weight: bold; font-size: 14px;");
     mainLayout->addWidget(title);
 
     // Filters
@@ -29,7 +29,7 @@ void ScreenerScreen::setupUI()
     m_searchEdit = new QLineEdit();
     m_searchEdit->setPlaceholderText("Search symbol...");
     m_searchEdit->setStyleSheet(
-        "QLineEdit { background-color: #16213e; color: #00d989; border: 1px solid #0f3460; "
+        "QLineEdit { background-color: #101827; color: #25D9FF; border: 1px solid #1D2B40; "
         "padding: 6px; font-family: monospace; }"
     );
     connect(m_searchEdit, &QLineEdit::textChanged, this, &ScreenerScreen::onSearchTextChanged);
@@ -57,7 +57,7 @@ void ScreenerScreen::setupUI()
 
     // Result count
     m_resultCount = new QLabel("Found: 0 stocks");
-    m_resultCount->setStyleSheet("color: #888888; font-size: 11px;");
+    m_resultCount->setStyleSheet("color: #7E8AA3; font-size: 11px;");
     mainLayout->addWidget(m_resultCount);
 
     // Table
@@ -71,7 +71,7 @@ void ScreenerScreen::setupUI()
     m_table->setAlternatingRowColors(true);
     m_table->verticalHeader()->setVisible(false);
     m_table->setStyleSheet(
-        "QTableWidget { background-color: #1a1a2e; alternate-background-color: #16213e; }"
+        "QTableWidget { background-color: #101827; alternate-background-color: #101827; }"
     );
     connect(m_table, &QTableWidget::cellClicked, this, &ScreenerScreen::onRowClicked);
     mainLayout->addWidget(m_table);
@@ -119,14 +119,14 @@ void ScreenerScreen::populateData()
 
         auto *chgItem = new QTableWidgetItem(
             QString::number(s.change, 'f', 0));
-        chgItem->setForeground(s.change >= 0 ? QColor("#00d989") : QColor("#ff4757"));
+        chgItem->setForeground(s.change >= 0 ? QColor("#25D9FF") : QColor("#ff4757"));
         chgItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_table->setItem(i, 3, chgItem);
 
         QString pctStr = (s.changePct >= 0 ? "+" : "") +
                          QString::number(s.changePct, 'f', 2) + "%";
         auto *pctItem = new QTableWidgetItem(pctStr);
-        pctItem->setForeground(s.changePct >= 0 ? QColor("#00d989") : QColor("#ff4757"));
+        pctItem->setForeground(s.changePct >= 0 ? QColor("#25D9FF") : QColor("#ff4757"));
         pctItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_table->setItem(i, 4, pctItem);
 
