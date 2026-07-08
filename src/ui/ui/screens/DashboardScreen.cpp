@@ -8,7 +8,6 @@
 #include "../widgets/CommodityTable.h"
 #include "../widgets/MarketBreadthWidget.h"
 #include "../widgets/AIMarketRegimeWidget.h"
-#include "../widgets/ForeignFlowWidget.h"
 #include "../widgets/SectorPerformanceWidget.h"
 #include "../widgets/FooterWidget.h"
 #include "NewsScreen.h"
@@ -133,7 +132,7 @@ void DashboardScreen::setupUI()
     m_commodityTable = new CommodityTable();
     commodityLayout->addWidget(m_commodityTable);
 
-    rightLayout->addWidget(commodityWidget);
+    rightLayout->addWidget(commodityWidget, 1);
 
     // Market Breadth
     auto *breadthWidget = new QWidget();
@@ -154,10 +153,6 @@ void DashboardScreen::setupUI()
     // AI Market Regime
     auto *aiWidget = new AIMarketRegimeWidget();
     rightLayout->addWidget(aiWidget);
-
-    // Foreign Flow
-    auto *flowWidget = new ForeignFlowWidget();
-    rightLayout->addWidget(flowWidget);
 
     rightLayout->addStretch();
 
