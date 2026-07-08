@@ -23,6 +23,7 @@ public:
     explicit FinancialChart(QWidget *parent = nullptr);
 
     void loadData(const QVector<OHLCData> &data);
+    void addCandle(const OHLCData &candle);
     void setMA5Visible(bool visible);
     void setMA20Visible(bool visible);
     void setVolumeVisible(bool visible);

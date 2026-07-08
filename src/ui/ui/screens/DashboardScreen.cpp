@@ -298,8 +298,7 @@ void DashboardScreen::onMarketBreadthUpdated(const QJsonObject &data)
 void DashboardScreen::onSectorPerformanceUpdated(const QJsonObject &data)
 {
     QJsonArray sectors = data["sectors"].toArray();
-    // SectorPerformanceWidget handles its own data
-    Q_UNUSED(sectors);
+    m_sectorPerf->updateData(sectors);
 }
 
 void DashboardScreen::onAIRegimeUpdated(const QJsonObject &data)
@@ -313,15 +312,23 @@ void DashboardScreen::onAIRegimeUpdated(const QJsonObject &data)
 
 void DashboardScreen::onRealTimeUpdate(const QString &symbol, const QJsonObject &data)
 {
-    Q_UNUSED(symbol);
-    
-    // Update chart with real-time data
-    if (m_chart && data.contains("price")) {
-        // Chart will be updated with new candlestick data
+    // Update market indices with real-time price
+    if (data.contains("price")) {
+        m_indicesStrip->updateData(symbol, 
+            data["price"].toDouble(),
+            data["change"].toDouble(),
+            data["changePct"].toDouble());
     }
     
-    // Update market indices if applicable
-    if (data.contains("changePct")) {
-        // Update relevant widget
+    // Update chart with new candle data
+    if (m_chart && data.contains("ohlc")) {
+        OHLCData candle;
+        candle.open = data["open"].toDouble();
+        candle.high = data["high"].toDouble();
+        candle.low = data["low"].toDouble();
+        candle.close = data["close"].toDouble();
+        candle.volume = data["volume"].toInt();
+        candle.timestamp = data["timestamp"].toInt();
+        m_chart->addRealTimeCandle(candle);
     }
 }

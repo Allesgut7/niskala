@@ -2,8 +2,7 @@
 
 #include <QWidget>
 #include <QTimer>
-
-class FinancialChart;
+#include "FinancialChart.h"
 
 class CandlestickChart : public QWidget
 {
@@ -17,6 +16,7 @@ public:
     void setMA5Visible(bool visible);
     void setMA20Visible(bool visible);
     void setVolumeVisible(bool visible);
+    void addRealTimeCandle(const OHLCData &candle);
 
 signals:
     void symbolClicked(const QString &symbol);

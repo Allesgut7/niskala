@@ -31,6 +31,23 @@ void FinancialChart::loadData(const QVector<OHLCData> &data)
     update();
 }
 
+void FinancialChart::addCandle(const OHLCData &candle)
+{
+    m_data.append(candle);
+
+    // Update price range
+    m_priceMin = qMin(m_priceMin, candle.low);
+    m_priceMax = qMax(m_priceMax, candle.high);
+    m_volumeMax = qMax(m_volumeMax, candle.volume);
+
+    // Keep last 100 candles max
+    if (m_data.size() > 100) {
+        m_data.removeFirst();
+    }
+
+    update();
+}
+
 void FinancialChart::setMA5Visible(bool visible) { m_ma5Visible = visible; update(); }
 void FinancialChart::setMA20Visible(bool visible) { m_ma20Visible = visible; update(); }
 void FinancialChart::setVolumeVisible(bool visible) { m_volumeVisible = visible; update(); }

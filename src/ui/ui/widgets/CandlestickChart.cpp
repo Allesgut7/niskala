@@ -70,3 +70,8 @@ void CandlestickChart::setVolumeVisible(bool visible)
 {
     m_chart->setVolumeVisible(visible);
 }
+
+void CandlestickChart::addRealTimeCandle(const OHLCData &candle)
+{
+    m_chart->addCandle(candle);
+}
