@@ -18,7 +18,8 @@ void NavigationBar::setupUI()
 
     // Logo
     auto *logoLabel = new QLabel();
-    logoLabel->setPixmap(QPixmap(":/images/logo.svg").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    logoLabel->setPixmap(QPixmap(":/images/logo.svg").scaled(80, 53, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    logoLabel->setStyleSheet("background-color: transparent;");
     layout->addWidget(logoLabel);
 
     layout->addSpacing(8);
