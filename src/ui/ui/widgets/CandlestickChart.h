@@ -24,6 +24,7 @@ signals:
 private:
     void setupUI();
     void generateSampleData();
+    void fetchRealData();
 
     FinancialChart *m_chart = nullptr;
     QString m_currentSymbol = "BBCA";

@@ -8,9 +8,10 @@ CandlestickChart::CandlestickChart(QWidget *parent)
     setupUI();
     generateSampleData();
 
+    // Timer untuk refresh data real (bukan random)
     m_refreshTimer = new QTimer(this);
-    connect(m_refreshTimer, &QTimer::timeout, this, &CandlestickChart::generateSampleData);
-    m_refreshTimer->start(10000);
+    connect(m_refreshTimer, &QTimer::timeout, this, &CandlestickChart::fetchRealData);
+    m_refreshTimer->start(30000); // 30 detik
 }
 
 void CandlestickChart::setupUI()
@@ -74,4 +75,10 @@ void CandlestickChart::setVolumeVisible(bool visible)
 void CandlestickChart::addRealTimeCandle(const OHLCData &candle)
 {
     m_chart->addCandle(candle);
+}
+
+void CandlestickChart::fetchRealData()
+{
+    // Placeholder - data akan datang dari DataManager melalui addRealTimeCandle
+    // Timer ini hanya untuk periodic refresh jika diperlukan
 }

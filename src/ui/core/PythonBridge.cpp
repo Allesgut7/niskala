@@ -13,6 +13,8 @@ PythonBridge::PythonBridge(QObject *parent)
             this, &PythonBridge::onProcessError);
 
     m_webSocketProcess = new QProcess(this);
+    connect(m_webSocketProcess, &QProcess::readyReadStandardOutput,
+            this, &PythonBridge::onWebSocketReadyRead);
     connect(m_webSocketProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             this, &PythonBridge::onWebSocketFinished);
 }
@@ -28,7 +30,7 @@ void PythonBridge::fetchMarketData(const QString &symbol)
                 "try: "
                 "    from python.data_sources.yfinance_client import YFinanceClient; "
                 "    client = YFinanceClient(); "
-                "    data = client.get_stock_data('%1'); "
+                "    data = client.get_stock('%1'); "
                 "    print(json.dumps(data)) "
                 "except Exception as e: "
                 "    print(json.dumps({'error': str(e)})) "
@@ -206,6 +208,17 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
             } else {
                 emit commandOutput(outputStr);
                 emit marketDataReceived(obj);
+                
+                // Emit specific signals based on data content
+                if (obj.contains("score") || obj.contains("indo")) {
+                    emit fearGreedReceived(obj);
+                }
+                if (obj.contains("naik") || obj.contains("turun")) {
+                    emit marketBreadthReceived(obj);
+                }
+                if (obj.contains("regime") || obj.contains("confidence")) {
+                    emit aiRegimeReceived(obj);
+                }
             }
         } else if (doc.isArray()) {
             QJsonArray arr = doc.array();
@@ -258,6 +271,26 @@ void PythonBridge::onWebSocketFinished(int exitCode, QProcess::ExitStatus exitSt
         if (doc.isObject()) {
             QJsonObject obj = doc.object();
             emit realTimeUpdate(obj);
+        }
+    }
+}
+
+void PythonBridge::onWebSocketReadyRead()
+{
+    QByteArray output = m_webSocketProcess->readAllStandardOutput();
+    QString outputStr = QString::fromUtf8(output).trimmed();
+    
+    // Process each line as separate JSON
+    QStringList lines = outputStr.split('\n');
+    for (const QString &line : lines) {
+        if (line.isEmpty()) continue;
+        
+        QJsonDocument doc = QJsonDocument::fromJson(line.toUtf8());
+        if (doc.isObject()) {
+            QJsonObject obj = doc.object();
+            if (!obj.contains("error")) {
+                emit realTimeUpdate(obj);
+            }
         }
     }
 }

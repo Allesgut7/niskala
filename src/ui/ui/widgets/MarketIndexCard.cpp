@@ -57,10 +57,14 @@ void MarketIndexCard::paintEvent(QPaintEvent *event)
     int chartW = 40;
     int chartH = 30;
 
+    // Generate stable sparkline based on change percentage
     QList<double> points;
-    double base = m_value * 0.99;
+    double base = m_value;
+    double trend = m_changePct / 10.0; // Scale trend
+    
     for (int i = 0; i < 10; ++i) {
-        points.append(base + (rand() % 100 - 50));
+        double noise = (i * 7 + static_cast<int>(m_value)) % 20 - 10; // Deterministic noise
+        points.append(base + trend * i * 10 + noise);
     }
 
     QPainterPath path;

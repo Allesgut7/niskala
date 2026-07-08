@@ -37,6 +37,7 @@ private slots:
     void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void onProcessError(QProcess::ProcessError error);
     void onWebSocketFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void onWebSocketReadyRead();
 
 private:
     QProcess *m_process = nullptr;

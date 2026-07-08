@@ -136,8 +136,8 @@ void DashboardScreen::setupUI()
     rightLayout->addWidget(breadthWidget);
 
     // AI Market Regime
-    auto *aiWidget = new AIMarketRegimeWidget();
-    rightLayout->addWidget(aiWidget);
+    m_aiRegime = new AIMarketRegimeWidget();
+    rightLayout->addWidget(m_aiRegime);
 
     rightLayout->addStretch();
 
@@ -335,8 +335,8 @@ void DashboardScreen::onRealTimeUpdate(const QString &symbol, const QJsonObject 
             data["changePct"].toDouble());
     }
     
-    // Update chart with new candle data
-    if (m_chart && data.contains("ohlc")) {
+    // Update chart with new candle data (top-level keys)
+    if (m_chart && data.contains("open") && data.contains("close")) {
         OHLCData candle;
         candle.open = data["open"].toDouble();
         candle.high = data["high"].toDouble();

@@ -1,5 +1,6 @@
 #include "MarketIndicesStrip.h"
 #include <QHBoxLayout>
+#include <QMap>
 
 MarketIndicesStrip::MarketIndicesStrip(QWidget *parent)
     : QWidget(parent)
@@ -37,8 +38,23 @@ void MarketIndicesStrip::setupUI()
 
 void MarketIndicesStrip::updateData(const QString &name, double value, double change, double changePct)
 {
+    // Map Yahoo Finance symbols ke display names
+    QMap<QString, QString> symbolMap = {
+        {"^JKSE", "IHSG"},
+        {"^N225", "NIKKEI 225"},
+        {"^HSI", "HANG SENG"},
+        {"^KS11", "KOSPI"},
+        {"^GSPC", "S&P 500"},
+        {"^IXIC", "NASDAQ"},
+        {"USDIDR=X", "USD/IDR"},
+        {"^JKSE.OI", "IHSG"},
+        {"^N225.K", "NIKKEI 225"}
+    };
+    
+    QString displayName = symbolMap.value(name, name);
+    
     for (auto *card : m_cards) {
-        if (card->objectName() == name) {
+        if (card->objectName() == displayName) {
             card->updateData(value, change, changePct);
             break;
         }
