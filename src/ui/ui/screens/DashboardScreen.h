@@ -2,7 +2,6 @@
 
 #include <QWidget>
 
-class NavigationBar;
 class BreakingNewsTicker;
 class MarketIndicesStrip;
 class CandlestickChart;
@@ -37,7 +36,6 @@ private:
     void setupUI();
     void setupDataManager();
 
-    NavigationBar *m_navBar = nullptr;
     BreakingNewsTicker *m_ticker = nullptr;
     MarketIndicesStrip *m_indicesStrip = nullptr;
     CandlestickChart *m_chart = nullptr;

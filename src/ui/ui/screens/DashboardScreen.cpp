@@ -1,5 +1,4 @@
 #include "DashboardScreen.h"
-#include "../widgets/NavigationBar.h"
 #include "../widgets/BreakingNewsTicker.h"
 #include "../widgets/MarketIndicesStrip.h"
 #include "../widgets/CandlestickChart.h"
@@ -31,10 +30,6 @@ void DashboardScreen::setupUI()
     auto *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(12, 12, 12, 12);
     mainLayout->setSpacing(0);
-
-    // === Navigation Bar ===
-    m_navBar = new NavigationBar();
-    mainLayout->addWidget(m_navBar);
 
     // === Breaking News Ticker ===
     m_ticker = new BreakingNewsTicker();
@@ -194,9 +189,6 @@ void DashboardScreen::setupUI()
 
     // === Data Manager Integration ===
     setupDataManager();
-
-    // Connect NavigationBar to screen switching
-    connect(m_navBar, &NavigationBar::tabClicked, this, &DashboardScreen::screenChanged);
 }
 
 void DashboardScreen::setupDataManager()

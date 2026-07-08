@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QWidget>
+#include <QToolBar>
 #include <QPushButton>
 #include <QLabel>
 #include <QHBoxLayout>
 
-class NavigationBar : public QWidget
+class NavigationBar : public QToolBar
 {
     Q_OBJECT
 

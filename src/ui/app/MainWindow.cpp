@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "../ui/widgets/NavigationBar.h"
 #include "../ui/screens/DashboardScreen.h"
 #include "../ui/screens/ChartScreen.h"
 #include "../ui/screens/ScreenerScreen.h"
@@ -38,6 +39,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::setupScreens()
 {
+    // NavigationBar (shared across all screens)
+    m_navBar = new NavigationBar();
+    addToolBar(m_navBar);
+
+    // Connect NavigationBar to screen switching
+    connect(m_navBar, &NavigationBar::tabClicked,
+            this, &MainWindow::switchToScreen);
+
+    // QStackedWidget for all screens
     m_stackedWidget = new QStackedWidget();
 
     m_dashboardScreen = new DashboardScreen();
@@ -48,19 +58,15 @@ void MainWindow::setupScreens()
     m_newsScreen = new NewsScreen();
     m_settingsScreen = new SettingsScreen();
 
-    m_stackedWidget->addWidget(m_dashboardScreen);     // 0
-    m_stackedWidget->addWidget(m_chartScreen);         // 1
-    m_stackedWidget->addWidget(m_screenerScreen);      // 2
-    m_stackedWidget->addWidget(m_portfolioScreen);     // 3
+    m_stackedWidget->addWidget(m_dashboardScreen);      // 0
+    m_stackedWidget->addWidget(m_chartScreen);          // 1
+    m_stackedWidget->addWidget(m_screenerScreen);       // 2
+    m_stackedWidget->addWidget(m_portfolioScreen);      // 3
     m_stackedWidget->addWidget(m_marketOverviewScreen); // 4
-    m_stackedWidget->addWidget(m_newsScreen);          // 5
-    m_stackedWidget->addWidget(m_settingsScreen);      // 6
+    m_stackedWidget->addWidget(m_newsScreen);           // 5
+    m_stackedWidget->addWidget(m_settingsScreen);       // 6
 
     setCentralWidget(m_stackedWidget);
-
-    // Connect NavigationBar signal to screen switching
-    connect(m_dashboardScreen, &DashboardScreen::screenChanged,
-            this, &MainWindow::switchToScreen);
 }
 
 void MainWindow::switchToScreen(int index)

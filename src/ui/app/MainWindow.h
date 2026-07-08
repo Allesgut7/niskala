@@ -4,6 +4,7 @@
 #include <QStackedWidget>
 #include <QSettings>
 
+class NavigationBar;
 class DashboardScreen;
 class ChartScreen;
 class ScreenerScreen;
@@ -30,6 +31,7 @@ private:
     void setupScreens();
     void setupKeyboardShortcuts();
 
+    NavigationBar *m_navBar = nullptr;
     QStackedWidget *m_stackedWidget = nullptr;
     DashboardScreen *m_dashboardScreen = nullptr;
     ChartScreen *m_chartScreen = nullptr;
