@@ -39,15 +39,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::setupScreens()
 {
-    // NavigationBar (shared across all screens)
+    // Central widget dengan layout
+    auto *centralWidget = new QWidget();
+    auto *mainLayout = new QVBoxLayout(centralWidget);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+
+    // NavigationBar (widget biasa, di atas)
     m_navBar = new NavigationBar();
-    addToolBar(m_navBar);
+    mainLayout->addWidget(m_navBar);
 
-    // Connect NavigationBar to screen switching
-    connect(m_navBar, &NavigationBar::tabClicked,
-            this, &MainWindow::switchToScreen);
-
-    // QStackedWidget for all screens
+    // QStackedWidget (di bawah)
     m_stackedWidget = new QStackedWidget();
 
     m_dashboardScreen = new DashboardScreen();
@@ -66,7 +68,13 @@ void MainWindow::setupScreens()
     m_stackedWidget->addWidget(m_newsScreen);           // 5
     m_stackedWidget->addWidget(m_settingsScreen);       // 6
 
-    setCentralWidget(m_stackedWidget);
+    mainLayout->addWidget(m_stackedWidget, 1);
+
+    setCentralWidget(centralWidget);
+
+    // Connect NavigationBar ke screen switching
+    connect(m_navBar, &NavigationBar::tabClicked,
+            this, &MainWindow::switchToScreen);
 }
 
 void MainWindow::switchToScreen(int index)

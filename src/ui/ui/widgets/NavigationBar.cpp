@@ -4,10 +4,9 @@
 #include <QSpacerItem>
 
 NavigationBar::NavigationBar(QWidget *parent)
-    : QToolBar(parent)
+    : QWidget(parent)
 {
     setFixedHeight(55);
-    setMovable(false);
     setupUI();
 }
 

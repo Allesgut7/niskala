@@ -2,6 +2,7 @@
 
 #include <QMainWindow>
 #include <QStackedWidget>
+#include <QVBoxLayout>
 #include <QSettings>
 
 class NavigationBar;
