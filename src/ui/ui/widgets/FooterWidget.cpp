@@ -32,7 +32,8 @@ void FooterWidget::updateDateTime()
     QDateTime now = QDateTime::currentDateTime();
     // GMT+7 (WIB)
     now.setTimeSpec(Qt::LocalTime);
-    m_currentTime = now.toString("HH:mm:ss") + " WIB";
+    // Format: "Senin, 08 Jul 2026 08:24:15 WIB"
+    m_currentTime = now.toString("dddd, dd MMM yyyy HH:mm:ss") + " WIB";
     update();
 }
 
@@ -66,5 +67,5 @@ void FooterWidget::paintEvent(QPaintEvent *event)
     painter.setPen(QColor("#859585"));
     painter.setFont(QFont("JetBrains Mono", 9));
     QString rightText = m_currentTime + "  |  Do Your Own Research!";
-    painter.drawText(QRect(width() - 400, 0, 384, height()), Qt::AlignVCenter | Qt::AlignRight, rightText);
+    painter.drawText(QRect(width() - 550, 0, 534, height()), Qt::AlignVCenter | Qt::AlignRight, rightText);
 }
