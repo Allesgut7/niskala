@@ -79,6 +79,7 @@ void CandlestickChart::addRealTimeCandle(const OHLCData &candle)
 
 void CandlestickChart::fetchRealData()
 {
-    // Placeholder - data akan datang dari DataManager melalui addRealTimeCandle
-    // Timer ini hanya untuk periodic refresh jika diperlukan
+    // Request historical data from DataManager via signal
+    // This is a placeholder - actual data comes from DashboardScreen
+    // via addRealTimeCandle() when data is received
 }

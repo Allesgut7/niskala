@@ -16,8 +16,8 @@ void ChartToolbarWidget::setupUI()
     layout->setSpacing(4);
 
     // Symbol name
-    auto *symbolLabel = new QLabel("IHSG INDEX");
-    symbolLabel->setStyleSheet("color: #75FF9E; font-family: 'Inter'; font-size: 12px; font-weight: bold;");
+    auto *symbolLabel = new QLabel("Select Symbol");
+    symbolLabel->setStyleSheet("color: #859585; font-family: 'Inter'; font-size: 12px;");
     layout->addWidget(symbolLabel);
 
     layout->addSpacing(12);
@@ -61,8 +61,8 @@ void ChartToolbarWidget::setupUI()
     layout->addStretch();
 
     // Current price
-    auto *priceLabel = new QLabel("7,164.57");
-    priceLabel->setStyleSheet("color: #75FF9E; font-family: 'JetBrains Mono'; font-size: 12px; font-weight: bold;");
+    auto *priceLabel = new QLabel("--");
+    priceLabel->setStyleSheet("color: #859585; font-family: 'JetBrains Mono'; font-size: 12px;");
     layout->addWidget(priceLabel);
 
     layout->addSpacing(8);

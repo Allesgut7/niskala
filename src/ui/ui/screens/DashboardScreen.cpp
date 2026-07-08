@@ -96,14 +96,14 @@ void DashboardScreen::setupUI()
     auto *fgGauges = new QHBoxLayout();
     fgGauges->setSpacing(4);
     m_fgIndo = new FearGreedGauge("Indonesia");
-    m_fgIndo->setScore(63);
-    m_fgIndo->setDelta(8);
+    m_fgIndo->setScore(0);
+    m_fgIndo->setDelta(0);
     m_fgAsia = new FearGreedGauge("Asia");
-    m_fgAsia->setScore(55);
-    m_fgAsia->setDelta(3);
+    m_fgAsia->setScore(0);
+    m_fgAsia->setDelta(0);
     m_fgGlobal = new FearGreedGauge("Global");
-    m_fgGlobal->setScore(48);
-    m_fgGlobal->setDelta(-2);
+    m_fgGlobal->setScore(0);
+    m_fgGlobal->setDelta(0);
     fgGauges->addWidget(m_fgIndo);
     fgGauges->addWidget(m_fgAsia);
     fgGauges->addWidget(m_fgGlobal);
@@ -162,8 +162,8 @@ void DashboardScreen::setupUI()
         "padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: bold; }");
     btLayout->addWidget(gainersBadge);
 
-    // Gainers data
-    auto *gainersData = new QLabel("DCII +24.2%  CUAN +16.7%  BREN +13.1%  BRMS +11.8%  ADRO +9.6%");
+    // Gainers data (dynamic - will be updated by data)
+    auto *gainersData = new QLabel("Loading...");
     gainersData->setStyleSheet("color: #E1E2E7; font-family: 'JetBrains Mono', monospace; font-size: 11px;");
     btLayout->addWidget(gainersData);
 
@@ -175,8 +175,8 @@ void DashboardScreen::setupUI()
         "QLabel { color: #FFB3AE; font-size: 10px; font-weight: bold; }");
     btLayout->addWidget(losersBadge);
 
-    // Losers data
-    auto *losersData = new QLabel("BUKA -7.8%  EMTK -6.2%  SMGR -4.1%  INCO -3.8%  TLKM -3.2%");
+    // Losers data (dynamic)
+    auto *losersData = new QLabel("Loading...");
     losersData->setStyleSheet("color: #E1E2E7; font-family: 'JetBrains Mono', monospace; font-size: 11px;");
     btLayout->addWidget(losersData);
 

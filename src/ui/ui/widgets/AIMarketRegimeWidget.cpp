@@ -6,6 +6,9 @@ AIMarketRegimeWidget::AIMarketRegimeWidget(QWidget *parent)
     : QWidget(parent)
 {
     setMinimumHeight(140);
+    m_regime = "LOADING...";
+    m_confidence = 0;
+    m_analysis = "Waiting for market data...";
 }
 
 void AIMarketRegimeWidget::updateData(const QString &regime, int confidence, const QString &analysis)
