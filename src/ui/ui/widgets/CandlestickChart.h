@@ -17,6 +17,8 @@ public:
 
     void loadSymbol(const QString &symbol);
     void setTimeframe(const QString &tf);
+    void setMA5Visible(bool visible);
+    void setMA20Visible(bool visible);
 
 signals:
     void symbolClicked(const QString &symbol);

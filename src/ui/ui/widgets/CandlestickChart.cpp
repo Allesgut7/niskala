@@ -128,6 +128,16 @@ void CandlestickChart::setTimeframe(const QString &tf)
     generateSampleData();
 }
 
+void CandlestickChart::setMA5Visible(bool visible)
+{
+    m_ma5Series->setVisible(visible);
+}
+
+void CandlestickChart::setMA20Visible(bool visible)
+{
+    m_ma20Series->setVisible(visible);
+}
+
 void CandlestickChart::updateChart()
 {
     if (rand() % 10 == 0) {

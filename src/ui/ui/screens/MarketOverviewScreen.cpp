@@ -24,8 +24,9 @@ void MarketOverviewScreen::setupUI()
 
     // Indices
     auto *idxWidget = new QWidget();
+    idxWidget->setStyleSheet("QWidget { background-color: #101827; border: 1px solid #1D2B40; border-radius: 6px; }");
     auto *idxLayout = new QVBoxLayout(idxWidget);
-    idxLayout->setContentsMargins(0, 0, 0, 0);
+    idxLayout->setContentsMargins(8, 8, 8, 8);
 
     auto *idxLabel = new QLabel("INDICES");
     idxLabel->setStyleSheet("color: #25D9FF; font-weight: bold;");
@@ -42,8 +43,9 @@ void MarketOverviewScreen::setupUI()
 
     // Commodities
     auto *cmdWidget = new QWidget();
+    cmdWidget->setStyleSheet("QWidget { background-color: #101827; border: 1px solid #1D2B40; border-radius: 6px; }");
     auto *cmdLayout = new QVBoxLayout(cmdWidget);
-    cmdLayout->setContentsMargins(0, 0, 0, 0);
+    cmdLayout->setContentsMargins(8, 8, 8, 8);
 
     auto *cmdLabel = new QLabel("COMMODITIES");
     cmdLabel->setStyleSheet("color: #E6874C; font-weight: bold;");
@@ -60,8 +62,9 @@ void MarketOverviewScreen::setupUI()
 
     // Forex
     auto *fxWidget = new QWidget();
+    fxWidget->setStyleSheet("QWidget { background-color: #101827; border: 1px solid #1D2B40; border-radius: 6px; }");
     auto *fxLayout = new QVBoxLayout(fxWidget);
-    fxLayout->setContentsMargins(0, 0, 0, 0);
+    fxLayout->setContentsMargins(8, 8, 8, 8);
 
     auto *fxLabel = new QLabel("FOREX");
     fxLabel->setStyleSheet("color: #D84B63; font-weight: bold;");
@@ -82,8 +85,9 @@ void MarketOverviewScreen::setupUI()
     auto *glLayout = new QHBoxLayout();
 
     auto *gainWidget = new QWidget();
+    gainWidget->setStyleSheet("QWidget { background-color: #101827; border: 1px solid #1D2B40; border-radius: 6px; }");
     auto *gainLayout = new QVBoxLayout(gainWidget);
-    gainLayout->setContentsMargins(0, 0, 0, 0);
+    gainLayout->setContentsMargins(8, 8, 8, 8);
 
     auto *gainLabel = new QLabel("TOP GAINERS");
     gainLabel->setStyleSheet("color: #1AF37B; font-weight: bold;");
@@ -98,8 +102,9 @@ void MarketOverviewScreen::setupUI()
     glLayout->addWidget(gainWidget);
 
     auto *loseWidget = new QWidget();
+    loseWidget->setStyleSheet("QWidget { background-color: #101827; border: 1px solid #1D2B40; border-radius: 6px; }");
     auto *loseLayout = new QVBoxLayout(loseWidget);
-    loseLayout->setContentsMargins(0, 0, 0, 0);
+    loseLayout->setContentsMargins(8, 8, 8, 8);
 
     auto *loseLabel = new QLabel("TOP LOSERS");
     loseLabel->setStyleSheet("color: #FF5C72; font-weight: bold;");

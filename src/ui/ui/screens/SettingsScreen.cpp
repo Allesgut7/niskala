@@ -19,8 +19,8 @@ SettingsScreen::SettingsScreen(QWidget *parent)
 void SettingsScreen::setupUI()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(16, 16, 16, 16);
-    mainLayout->setSpacing(12);
+    mainLayout->setContentsMargins(8, 8, 8, 8);
+    mainLayout->setSpacing(6);
 
     auto *title = new QLabel("SETTINGS");
     title->setStyleSheet("color: #D84B63; font-size: 16px; font-weight: bold;");

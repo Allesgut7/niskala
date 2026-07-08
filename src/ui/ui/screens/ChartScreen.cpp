@@ -14,8 +14,8 @@ ChartScreen::ChartScreen(QWidget *parent)
 void ChartScreen::setupUI()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(4, 4, 4, 4);
-    mainLayout->setSpacing(4);
+    mainLayout->setContentsMargins(8, 8, 8, 8);
+    mainLayout->setSpacing(6);
 
     // Top bar
     auto *topBar = new QHBoxLayout();
@@ -82,5 +82,6 @@ void ChartScreen::onTimeframeChanged(int index)
 
 void ChartScreen::onIndicatorToggled()
 {
-    // TODO: Toggle MA visibility
+    m_chart->setMA5Visible(m_ma5Check->isChecked());
+    m_chart->setMA20Visible(m_ma20Check->isChecked());
 }

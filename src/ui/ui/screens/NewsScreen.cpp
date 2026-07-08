@@ -18,7 +18,7 @@ void NewsScreen::setupUI()
 
     auto *headerLayout = new QHBoxLayout();
     auto *title = new QLabel("NEWS & AI SENTIMENT");
-    title->setStyleSheet("color: #25D9FF; font-weight: bold; font-size: 12px;");
+    title->setStyleSheet("color: #D84B63; font-weight: bold; font-size: 12px;");
     headerLayout->addWidget(title);
 
     headerLayout->addStretch();
@@ -149,7 +149,8 @@ void NewsScreen::populateData()
         itemLayout->addWidget(dampakLabel);
 
         auto *listItem = new QListWidgetItem();
-        listItem->setSizeHint(itemWidget->sizeHint());
+        listItem->setData(Qt::UserRole, n.source);
+        listItem->setSizeHint(QSize(0, 200));
         m_newsList->addItem(listItem);
         m_newsList->setItemWidget(listItem, itemWidget);
     }
@@ -159,18 +160,36 @@ void NewsScreen::onFilterChanged()
 {
     QString search = m_searchEdit->text().toUpper();
     int sourceIdx = m_sourceFilter->currentIndex();
+    QStringList sources = {"All Sources", "CNBC", "IDX", "Kontan", "Bisnis", "Reuters", "Tempo"};
 
     for (int i = 0; i < m_newsList->count(); ++i) {
         auto *item = m_newsList->item(i);
-        auto *widget = m_newsList->itemWidget(item);
-        if (!widget) continue;
+        if (!item) continue;
 
         bool visible = true;
 
-        // Source filter (simplified - check all labels in widget)
-        if (sourceIdx > 0) {
-            QStringList sources = {"CNBC", "IDX", "Kontan", "Bisnis", "Reuters", "Tempo"};
-            // In a real app, we'd store source data in the item
+        // Source filter
+        if (sourceIdx > 0 && sourceIdx < sources.size()) {
+            QString itemSource = item->data(Qt::UserRole).toString();
+            if (!itemSource.contains(sources[sourceIdx], Qt::CaseInsensitive)) {
+                visible = false;
+            }
+        }
+
+        // Search filter
+        if (!search.isEmpty()) {
+            auto *widget = m_newsList->itemWidget(item);
+            if (widget) {
+                QList<QLabel*> labels = widget->findChildren<QLabel*>();
+                bool found = false;
+                for (auto *label : labels) {
+                    if (label->text().toUpper().contains(search)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) visible = false;
+            }
         }
 
         item->setHidden(!visible);
