@@ -11,6 +11,10 @@ PythonBridge::PythonBridge(QObject *parent)
             this, &PythonBridge::onProcessFinished);
     connect(m_process, &QProcess::errorOccurred,
             this, &PythonBridge::onProcessError);
+
+    m_webSocketProcess = new QProcess(this);
+    connect(m_webSocketProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            this, &PythonBridge::onWebSocketFinished);
 }
 
 void PythonBridge::fetchMarketData(const QString &symbol)
@@ -149,6 +153,34 @@ void PythonBridge::fetchAIRegime()
     executeCommand("python3", args);
 }
 
+void PythonBridge::startWebSocket(const QStringList &symbols)
+{
+    if (m_webSocketProcess->state() == QProcess::Running) {
+        m_webSocketProcess->kill();
+    }
+
+    QStringList args;
+    args << "-c"
+         << QString(
+                "import json; "
+                "import sys; "
+                "sys.path.insert(0, '../'); "
+                "from python.data_sources.yfinance_websocket import YFinanceWebSocket; "
+                "ws = YFinanceWebSocket(); "
+                "ws.connect(['%1']); "
+                "ws.run() "
+             ).arg(symbols.join("', '"));
+
+    m_webSocketProcess->start("python3", args);
+}
+
+void PythonBridge::stopWebSocket()
+{
+    if (m_webSocketProcess->state() == QProcess::Running) {
+        m_webSocketProcess->kill();
+    }
+}
+
 void PythonBridge::executeCommand(const QString &command, const QStringList &args)
 {
     if (m_process->state() == QProcess::Running) {
@@ -207,4 +239,25 @@ void PythonBridge::onProcessError(QProcess::ProcessError error)
             errorMsg = "Unknown Python process error";
     }
     emit commandError(errorMsg);
+}
+
+void PythonBridge::onWebSocketFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    Q_UNUSED(exitCode);
+    Q_UNUSED(exitStatus);
+    
+    QByteArray output = m_webSocketProcess->readAllStandardOutput();
+    QString outputStr = QString::fromUtf8(output).trimmed();
+    
+    // Process each line as separate JSON
+    QStringList lines = outputStr.split('\n');
+    for (const QString &line : lines) {
+        if (line.isEmpty()) continue;
+        
+        QJsonDocument doc = QJsonDocument::fromJson(line.toUtf8());
+        if (doc.isObject()) {
+            QJsonObject obj = doc.object();
+            emit realTimeUpdate(obj);
+        }
+    }
 }

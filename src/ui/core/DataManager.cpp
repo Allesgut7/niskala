@@ -26,6 +26,8 @@ DataManager::DataManager(QObject *parent)
             this, [this](const QJsonObject &data) {
         emit aiRegimeUpdated(data);
     });
+    connect(m_bridge, &PythonBridge::realTimeUpdate,
+            this, &DataManager::onRealTimeUpdate);
     connect(m_bridge, &PythonBridge::commandError,
             this, &DataManager::onCommandError);
 
@@ -63,10 +65,10 @@ void DataManager::refreshWatchlist()
 
 void DataManager::refreshMarketOverview()
 {
-    m_bridge->fetchMarketData("^JKSE"); // IHSG
-    m_bridge->fetchMarketData("GC=F");  // Gold
-    m_bridge->fetchMarketData("CL=F");  // Crude Oil
-    m_bridge->fetchMarketData("USDIDR=X"); // USD/IDR
+    m_bridge->fetchMarketData("^JKSE");
+    m_bridge->fetchMarketData("GC=F");
+    m_bridge->fetchMarketData("CL=F");
+    m_bridge->fetchMarketData("USDIDR=X");
 }
 
 void DataManager::refreshFearGreedIndex()
@@ -89,6 +91,16 @@ void DataManager::refreshAIRegime()
     m_bridge->fetchAIRegime();
 }
 
+void DataManager::startRealTimeStream(const QStringList &symbols)
+{
+    m_bridge->startWebSocket(symbols);
+}
+
+void DataManager::stopRealTimeStream()
+{
+    m_bridge->stopWebSocket();
+}
+
 void DataManager::onAutoRefresh()
 {
     refreshAll();
@@ -105,6 +117,12 @@ void DataManager::onMarketDataReceived(const QJsonObject &data)
 void DataManager::onFearGreedReceived(const QJsonObject &data)
 {
     emit fearGreedUpdated(data);
+}
+
+void DataManager::onRealTimeUpdate(const QJsonObject &data)
+{
+    QString symbol = data["symbol"].toString();
+    emit realTimeUpdate(symbol, data);
 }
 
 void DataManager::onCommandError(const QString &error)

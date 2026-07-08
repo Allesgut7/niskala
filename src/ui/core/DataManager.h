@@ -23,8 +23,11 @@ public:
     void refreshMarketBreadth();
     void refreshSectorPerformance();
     void refreshAIRegime();
+    void startRealTimeStream(const QStringList &symbols);
+    void stopRealTimeStream();
 
     bool isRefreshing() const { return m_refreshing; }
+    QStringList watchlist() const { return m_watchlist; }
 
 signals:
     void watchlistUpdated(const QJsonObject &data);
@@ -34,6 +37,7 @@ signals:
     void sectorPerformanceUpdated(const QJsonObject &data);
     void aiRegimeUpdated(const QJsonObject &data);
     void sentimentUpdated(const QString &symbol, const QJsonObject &data);
+    void realTimeUpdate(const QString &symbol, const QJsonObject &data);
     void refreshStarted();
     void refreshFinished();
     void errorOccurred(const QString &error);
@@ -43,6 +47,7 @@ private slots:
     void onMarketDataReceived(const QJsonObject &data);
     void onFearGreedReceived(const QJsonObject &data);
     void onCommandError(const QString &error);
+    void onRealTimeUpdate(const QJsonObject &data);
 
 private:
     PythonBridge *m_bridge = nullptr;

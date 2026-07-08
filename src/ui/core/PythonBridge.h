@@ -18,6 +18,8 @@ public:
     void fetchMarketBreadth();
     void fetchSectorPerformance();
     void fetchAIRegime();
+    void startWebSocket(const QStringList &symbols);
+    void stopWebSocket();
     void executeCommand(const QString &command, const QStringList &args = {});
 
 signals:
@@ -27,13 +29,16 @@ signals:
     void marketBreadthReceived(const QJsonObject &data);
     void sectorPerformanceReceived(const QJsonArray &data);
     void aiRegimeReceived(const QJsonObject &data);
+    void realTimeUpdate(const QJsonObject &data);
     void commandOutput(const QString &output);
     void commandError(const QString &error);
 
 private slots:
     void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void onProcessError(QProcess::ProcessError error);
+    void onWebSocketFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
     QProcess *m_process = nullptr;
+    QProcess *m_webSocketProcess = nullptr;
 };

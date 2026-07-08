@@ -31,6 +31,7 @@ private slots:
     void onMarketBreadthUpdated(const QJsonObject &data);
     void onSectorPerformanceUpdated(const QJsonObject &data);
     void onAIRegimeUpdated(const QJsonObject &data);
+    void onRealTimeUpdate(const QString &symbol, const QJsonObject &data);
 
 private:
     void setupUI();

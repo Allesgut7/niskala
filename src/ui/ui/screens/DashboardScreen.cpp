@@ -205,9 +205,14 @@ void DashboardScreen::setupDataManager()
             this, &DashboardScreen::onSectorPerformanceUpdated);
     connect(m_dataManager, &DataManager::aiRegimeUpdated,
             this, &DashboardScreen::onAIRegimeUpdated);
+    connect(m_dataManager, &DataManager::realTimeUpdate,
+            this, &DashboardScreen::onRealTimeUpdate);
 
     // Start auto-refresh every 30 seconds
     m_dataManager->startAutoRefresh(30);
+    
+    // Start real-time stream for watchlist
+    m_dataManager->startRealTimeStream(m_dataManager->watchlist());
 }
 
 void DashboardScreen::onWatchlistUpdated(const QJsonObject &data)
@@ -304,4 +309,19 @@ void DashboardScreen::onAIRegimeUpdated(const QJsonObject &data)
         data["confidence"].toInt(),
         data["analysis"].toString()
     );
+}
+
+void DashboardScreen::onRealTimeUpdate(const QString &symbol, const QJsonObject &data)
+{
+    Q_UNUSED(symbol);
+    
+    // Update chart with real-time data
+    if (m_chart && data.contains("price")) {
+        // Chart will be updated with new candlestick data
+    }
+    
+    // Update market indices if applicable
+    if (data.contains("changePct")) {
+        // Update relevant widget
+    }
 }
