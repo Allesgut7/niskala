@@ -6,6 +6,7 @@
 #include <QSettings>
 
 class NavigationBar;
+class FooterWidget;
 class DashboardScreen;
 class ChartScreen;
 class ScreenerScreen;
@@ -33,6 +34,7 @@ private:
     void setupKeyboardShortcuts();
 
     NavigationBar *m_navBar = nullptr;
+    FooterWidget *m_footer = nullptr;
     QStackedWidget *m_stackedWidget = nullptr;
     DashboardScreen *m_dashboardScreen = nullptr;
     ChartScreen *m_chartScreen = nullptr;

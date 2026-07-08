@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "../ui/widgets/NavigationBar.h"
+#include "../ui/widgets/FooterWidget.h"
 #include "../ui/screens/DashboardScreen.h"
 #include "../ui/screens/ChartScreen.h"
 #include "../ui/screens/ScreenerScreen.h"
@@ -69,6 +70,11 @@ void MainWindow::setupScreens()
     m_stackedWidget->addWidget(m_settingsScreen);       // 6
 
     mainLayout->addWidget(m_stackedWidget, 1);
+
+    // FooterWidget (bottom)
+    m_footer = new FooterWidget();
+    m_footer->setVersion("v2.0.0");
+    mainLayout->addWidget(m_footer);
 
     setCentralWidget(centralWidget);
 

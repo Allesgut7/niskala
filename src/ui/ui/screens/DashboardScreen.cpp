@@ -8,7 +8,6 @@
 #include "../widgets/MarketBreadthWidget.h"
 #include "../widgets/AIMarketRegimeWidget.h"
 #include "../widgets/SectorPerformanceWidget.h"
-#include "../widgets/FooterWidget.h"
 #include "../core/DataManager.h"
 #include "NewsScreen.h"
 
@@ -182,10 +181,6 @@ void DashboardScreen::setupUI()
     btLayout->addWidget(losersData);
 
     mainLayout->addWidget(bottomTicker);
-
-    // === Footer ===
-    auto *footer = new FooterWidget();
-    mainLayout->addWidget(footer);
 
     // === Data Manager Integration ===
     setupDataManager();
