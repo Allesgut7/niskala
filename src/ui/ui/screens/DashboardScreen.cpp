@@ -194,6 +194,9 @@ void DashboardScreen::setupUI()
 
     // === Data Manager Integration ===
     setupDataManager();
+
+    // Connect NavigationBar to screen switching
+    connect(m_navBar, &NavigationBar::tabClicked, this, &DashboardScreen::screenChanged);
 }
 
 void DashboardScreen::setupDataManager()

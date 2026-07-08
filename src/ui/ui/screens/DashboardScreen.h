@@ -21,6 +21,9 @@ class DashboardScreen : public QWidget
 public:
     explicit DashboardScreen(QWidget *parent = nullptr);
 
+signals:
+    void screenChanged(int index);
+
 private slots:
     void onWatchlistUpdated(const QJsonObject &data);
     void onMarketOverviewUpdated(const QJsonObject &data);
