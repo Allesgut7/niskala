@@ -211,21 +211,36 @@ void DashboardScreen::setupDataManager()
     // Start auto-refresh every 30 seconds
     m_dataManager->startAutoRefresh(30);
     
-    // Start real-time stream for watchlist
-    m_dataManager->startRealTimeStream(m_dataManager->watchlist());
+    // Start real-time stream untuk watchlist + market indices
+    QStringList symbols = m_dataManager->watchlist();
+    symbols << "^JKSE" << "^N225" << "^HSI" << "^KS11" 
+            << "^GSPC" << "^IXIC" << "USDIDR=X";
+    m_dataManager->startRealTimeStream(symbols);
 }
 
 void DashboardScreen::onWatchlistUpdated(const QJsonObject &data)
 {
-    QJsonArray indices = data["indices"].toArray();
-    for (const auto &item : indices) {
-        QJsonObject obj = item.toObject();
-        m_indicesStrip->updateData(
-            obj["name"].toString(),
-            obj["value"].toDouble(),
-            obj["change"].toDouble(),
-            obj["changePct"].toDouble()
-        );
+    // Handle single symbol update (from real-time)
+    if (data.contains("symbol") && data.contains("price")) {
+        QString symbol = data["symbol"].toString();
+        m_indicesStrip->updateData(symbol,
+            data["price"].toDouble(),
+            data["change"].toDouble(),
+            data["changePct"].toDouble());
+    }
+    
+    // Handle batch update (from refreshWatchlist)
+    if (data.contains("indices")) {
+        QJsonArray indices = data["indices"].toArray();
+        for (const auto &item : indices) {
+            QJsonObject obj = item.toObject();
+            m_indicesStrip->updateData(
+                obj["name"].toString(),
+                obj["value"].toDouble(),
+                obj["change"].toDouble(),
+                obj["changePct"].toDouble()
+            );
+        }
     }
 }
 

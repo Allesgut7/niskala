@@ -50,6 +50,7 @@ void DataManager::refreshAll()
     m_refreshing = true;
 
     refreshWatchlist();
+    refreshMarketOverview();
     refreshFearGreedIndex();
     refreshMarketBreadth();
     refreshSectorPerformance();

@@ -27,6 +27,7 @@ void MarketIndicesStrip::setupUI()
 
     for (const auto &idx : indices) {
         auto *card = new MarketIndexCard(idx.name, idx.value, idx.change, idx.pct);
+        card->setObjectName(idx.name);
         m_cards.append(card);
         layout->addWidget(card);
     }
