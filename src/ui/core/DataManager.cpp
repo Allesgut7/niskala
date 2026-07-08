@@ -64,10 +64,7 @@ void DataManager::refreshWatchlist()
 
 void DataManager::refreshMarketOverview()
 {
-    m_bridge->fetchMarketData("^JKSE");
-    m_bridge->fetchMarketData("GC=F");
-    m_bridge->fetchMarketData("CL=F");
-    m_bridge->fetchMarketData("USDIDR=X");
+    m_bridge->fetchWatchlistBatch({"^JKSE", "GC=F", "CL=F", "USDIDR=X"});
 }
 
 void DataManager::refreshFearGreedIndex()
@@ -107,16 +104,8 @@ void DataManager::onAutoRefresh()
 
 void DataManager::onMarketDataReceived(const QJsonObject &data)
 {
-    // Handle batch response (array of stocks)
-    if (data.contains("results")) {
-        QJsonArray results = data["results"].toArray();
-        for (const auto &item : results) {
-            QJsonObject stockData = item.toObject();
-            emit watchlistUpdated(stockData);
-        }
-    }
-    // Handle single stock response
-    else if (data.contains("symbol")) {
+    // Handle single symbol response
+    if (data.contains("symbol")) {
         QString symbol = data["symbol"].toString();
         QStringList overviewSymbols = {"^JKSE", "GC=F", "CL=F", "USDIDR=X", "^N225", "^HSI", "^KS11", "^GSPC", "^IXIC"};
         if (overviewSymbols.contains(symbol)) {

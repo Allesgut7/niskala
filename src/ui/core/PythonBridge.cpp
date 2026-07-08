@@ -4,13 +4,14 @@
 #include <QJsonArray>
 #include <QCoreApplication>
 #include <QDir>
+#include <QDebug>
 
 PythonBridge::PythonBridge(QObject *parent)
     : QObject(parent)
 {
     m_process = new QProcess(this);
     
-    // Set working directory to niskala root (5 levels up from build/bin/)
+    // Set working directory to niskala root
     QDir appDir(QCoreApplication::applicationDirPath());
     m_workDir = appDir.absoluteFilePath("../../../../..");
     m_process->setWorkingDirectory(m_workDir);
@@ -44,7 +45,6 @@ void PythonBridge::fetchMarketData(const QString &symbol)
                 "except Exception as e: "
                 "    print(json.dumps({'error': str(e)})) "
              ).arg(symbol);
-
     executeCommand("python3", args);
 }
 
@@ -87,7 +87,6 @@ void PythonBridge::fetchSentiment(const QString &symbol)
                 "except Exception as e: "
                 "    print(json.dumps({'error': str(e)})) "
              ).arg(symbol);
-
     executeCommand("python3", args);
 }
 
@@ -107,7 +106,6 @@ void PythonBridge::fetchFearGreedIndex()
                 "except Exception as e: "
                 "    print(json.dumps({'error': str(e)})) "
             );
-
     executeCommand("python3", args);
 }
 
@@ -127,7 +125,6 @@ void PythonBridge::fetchMarketBreadth()
                 "except Exception as e: "
                 "    print(json.dumps({'naik': 0, 'turun': 0, 'stagnan': 0, 'error': str(e)})) "
             );
-
     executeCommand("python3", args);
 }
 
@@ -142,7 +139,6 @@ void PythonBridge::fetchSectorPerformance()
                 "try: "
                 "    from python.data_sources.yfinance_client import YFinanceClient; "
                 "    client = YFinanceClient(); "
-                "    # Calculate sector performance from IDX stocks "
                 "    sectors = [ "
                 "      {'name': 'Teknologi', 'changePct': 0.0}, "
                 "      {'name': 'Keuangan', 'changePct': 0.0}, "
@@ -154,7 +150,6 @@ void PythonBridge::fetchSectorPerformance()
                 "except Exception as e: "
                 "    print(json.dumps([])) "
             );
-
     executeCommand("python3", args);
 }
 
@@ -169,7 +164,6 @@ void PythonBridge::fetchAIRegime()
                 "try: "
                 "    from python.data_sources.yfinance_client import YFinanceClient; "
                 "    client = YFinanceClient(); "
-                "    # Simple regime detection based on IHSG "
                 "    data = client.get_index('^JKSE') "
                 "    regime = 'BULL' if data.get('changePct', 0) > 0 else 'BEAR' "
                 "    confidence = min(90, max(50, 70 + abs(data.get('changePct', 0)) * 2)) "
@@ -182,7 +176,6 @@ void PythonBridge::fetchAIRegime()
                 "except Exception as e: "
                 "    print(json.dumps({'regime': 'NEUTRAL', 'confidence': 50, 'analysis': 'Insufficient data'})) "
             );
-
     executeCommand("python3", args);
 }
 
@@ -190,6 +183,7 @@ void PythonBridge::startWebSocket(const QStringList &symbols)
 {
     if (m_webSocketProcess->state() == QProcess::Running) {
         m_webSocketProcess->kill();
+        m_webSocketProcess->waitForFinished(2000);
     }
 
     QStringList args;
@@ -216,13 +210,35 @@ void PythonBridge::stopWebSocket()
 
 void PythonBridge::executeCommand(const QString &command, const QStringList &args)
 {
-    if (m_process->state() == QProcess::Running) {
-        m_process->waitForFinished(5000);
-        if (m_process->state() == QProcess::Running) {
-            m_process->kill();
-        }
+    // Queue the command
+    m_commandQueue.enqueue(qMakePair(command, args));
+    
+    // Process next if not already processing
+    if (!m_processingCommand) {
+        processNextCommand();
     }
-    m_process->start(command, args);
+}
+
+void PythonBridge::processNextCommand()
+{
+    if (m_commandQueue.isEmpty()) {
+        m_processingCommand = false;
+        return;
+    }
+    
+    m_processingCommand = true;
+    
+    // Kill any running process
+    if (m_process->state() == QProcess::Running) {
+        m_process->kill();
+        m_process->waitForFinished(1000);
+    }
+    
+    // Get next command
+    auto cmd = m_commandQueue.dequeue();
+    
+    // Start new process
+    m_process->start(cmd.first, cmd.second);
 }
 
 void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
@@ -230,11 +246,9 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
     QByteArray output = m_process->readAllStandardOutput();
     QByteArray error = m_process->readAllStandardError();
 
-    // Debug: print raw output
-    qDebug() << "PythonBridge output:" << QString::fromUtf8(output).left(200);
+    QString outputStr = QString::fromUtf8(output).trimmed();
     
     if (exitStatus == QProcess::NormalExit && exitCode == 0) {
-        QString outputStr = QString::fromUtf8(output).trimmed();
         QJsonDocument doc = QJsonDocument::fromJson(outputStr.toUtf8());
 
         if (doc.isObject()) {
@@ -245,7 +259,6 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
                 emit commandOutput(outputStr);
                 emit marketDataReceived(obj);
                 
-                // Emit specific signals based on data content
                 if (obj.contains("score") || obj.contains("indo")) {
                     emit fearGreedReceived(obj);
                 }
@@ -259,10 +272,21 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
         } else if (doc.isArray()) {
             QJsonArray arr = doc.array();
             emit sectorPerformanceReceived(arr);
+            
+            // Handle batch watchlist response
+            for (const auto &item : arr) {
+                QJsonObject obj = item.toObject();
+                if (obj.contains("symbol")) {
+                    emit watchlistUpdated(obj);
+                }
+            }
         }
-    } else {
+    } else if (!error.isEmpty()) {
         emit commandError(QString::fromUtf8(error));
     }
+    
+    // Process next command in queue
+    processNextCommand();
 }
 
 void PythonBridge::onProcessError(QProcess::ProcessError error)
@@ -288,27 +312,9 @@ void PythonBridge::onProcessError(QProcess::ProcessError error)
             errorMsg = "Unknown Python process error";
     }
     emit commandError(errorMsg);
-}
-
-void PythonBridge::onWebSocketFinished(int exitCode, QProcess::ExitStatus exitStatus)
-{
-    Q_UNUSED(exitCode);
-    Q_UNUSED(exitStatus);
     
-    QByteArray output = m_webSocketProcess->readAllStandardOutput();
-    QString outputStr = QString::fromUtf8(output).trimmed();
-    
-    // Process each line as separate JSON
-    QStringList lines = outputStr.split('\n');
-    for (const QString &line : lines) {
-        if (line.isEmpty()) continue;
-        
-        QJsonDocument doc = QJsonDocument::fromJson(line.toUtf8());
-        if (doc.isObject()) {
-            QJsonObject obj = doc.object();
-            emit realTimeUpdate(obj);
-        }
-    }
+    // Process next command even on error
+    processNextCommand();
 }
 
 void PythonBridge::onWebSocketReadyRead()
@@ -316,7 +322,6 @@ void PythonBridge::onWebSocketReadyRead()
     QByteArray output = m_webSocketProcess->readAllStandardOutput();
     QString outputStr = QString::fromUtf8(output).trimmed();
     
-    // Process each line as separate JSON
     QStringList lines = outputStr.split('\n');
     for (const QString &line : lines) {
         if (line.isEmpty()) continue;
@@ -327,6 +332,26 @@ void PythonBridge::onWebSocketReadyRead()
             if (!obj.contains("error")) {
                 emit realTimeUpdate(obj);
             }
+        }
+    }
+}
+
+void PythonBridge::onWebSocketFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    Q_UNUSED(exitCode);
+    Q_UNUSED(exitStatus);
+    
+    QByteArray output = m_webSocketProcess->readAllStandardOutput();
+    QString outputStr = QString::fromUtf8(output).trimmed();
+    
+    QStringList lines = outputStr.split('\n');
+    for (const QString &line : lines) {
+        if (line.isEmpty()) continue;
+        
+        QJsonDocument doc = QJsonDocument::fromJson(line.toUtf8());
+        if (doc.isObject()) {
+            QJsonObject obj = doc.object();
+            emit realTimeUpdate(obj);
         }
     }
 }
