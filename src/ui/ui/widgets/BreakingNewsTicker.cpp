@@ -37,16 +37,13 @@ void BreakingNewsTicker::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Background
-    painter.fillRect(rect(), QColor("#060B16"));
+    painter.fillRect(rect(), QColor("#111417"));
 
-    // BREAKING badge
-    painter.setBrush(QColor("#dc2626"));
-    painter.setPen(Qt::NoPen);
-    QRect badgeRect(8, 6, 80, 24);
-    painter.drawRoundedRect(badgeRect, 4, 4);
-    painter.setPen(QColor("#ffffff"));
-    painter.setFont(QFont("monospace", 10, QFont::Bold));
-    painter.drawText(badgeRect, Qt::AlignCenter, "BREAKING");
+    // BREAKING badge with bracket
+    painter.setPen(QColor("#FFB3AE"));
+    painter.setFont(QFont("Inter", 9, QFont::Bold));
+    QRect badgeRect(8, 8, 90, 20);
+    painter.drawText(badgeRect, Qt::AlignVCenter, "[ BREAKING ]");
 
     // Scrolling headlines
     QString ticker;
@@ -55,21 +52,22 @@ void BreakingNewsTicker::paintEvent(QPaintEvent *event)
     }
     ticker += ticker;
 
-    painter.setPen(QColor("#e5e7eb"));
-    painter.setFont(QFont("monospace", 10));
+    painter.setPen(QColor("#E1E2E7"));
+    painter.setFont(QFont("Inter", 10));
 
-    int x = 100 - m_scrollOffset;
+    int x = 110 - m_scrollOffset;
     int y = (height() - painter.fontMetrics().height()) / 2;
 
     painter.drawText(x, y + painter.fontMetrics().ascent(), ticker);
 
     // Time
     QString time = QTime::currentTime().toString("HH:mm") + " WIB";
-    painter.setPen(QColor("#9ca3af"));
+    painter.setPen(QColor("#859585"));
+    painter.setFont(QFont("JetBrains Mono", 9));
     QRect timeRect(width() - 120, 0, 110, height());
     painter.drawText(timeRect, Qt::AlignRight | Qt::AlignVCenter, time);
 
     // Bottom border
-    painter.setPen(QPen(QColor("#1f2937"), 1));
+    painter.setPen(QPen(QColor("#3B4A3D"), 1));
     painter.drawLine(0, height() - 1, width(), height() - 1);
 }

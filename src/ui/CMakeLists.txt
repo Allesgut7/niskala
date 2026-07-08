@@ -22,6 +22,7 @@ set(SOURCES
     ui/widgets/MarketBreadthWidget.cpp
     ui/widgets/SectorPerformanceWidget.cpp
     ui/widgets/CandlestickChart.cpp
+    ui/widgets/ChartToolbarWidget.cpp
     ui/widgets/OrderBookWidget.cpp
     ui/widgets/FearGreedGauge.cpp
     ui/widgets/SectorHeatmap.cpp
@@ -29,6 +30,9 @@ set(SOURCES
     ui/widgets/TopBannerWidget.cpp
     ui/widgets/RunningTradeTicker.cpp
     ui/widgets/BottomBanner.cpp
+    ui/widgets/AIMarketRegimeWidget.cpp
+    ui/widgets/ForeignFlowWidget.cpp
+    ui/widgets/FooterWidget.cpp
     ui/screens/DashboardScreen.cpp
     ui/screens/ChartScreen.cpp
     ui/screens/ScreenerScreen.cpp
@@ -52,6 +56,7 @@ set(HEADERS
     ui/widgets/MarketBreadthWidget.h
     ui/widgets/SectorPerformanceWidget.h
     ui/widgets/CandlestickChart.h
+    ui/widgets/ChartToolbarWidget.h
     ui/widgets/OrderBookWidget.h
     ui/widgets/FearGreedGauge.h
     ui/widgets/SectorHeatmap.h
@@ -59,6 +64,9 @@ set(HEADERS
     ui/widgets/TopBannerWidget.h
     ui/widgets/RunningTradeTicker.h
     ui/widgets/BottomBanner.h
+    ui/widgets/AIMarketRegimeWidget.h
+    ui/widgets/ForeignFlowWidget.h
+    ui/widgets/FooterWidget.h
     ui/screens/DashboardScreen.h
     ui/screens/ChartScreen.h
     ui/screens/ScreenerScreen.h

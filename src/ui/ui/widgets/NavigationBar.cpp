@@ -1,7 +1,7 @@
 #include "NavigationBar.h"
 #include <QHBoxLayout>
+#include <QLineEdit>
 #include <QSpacerItem>
-#include <QPixmap>
 
 NavigationBar::NavigationBar(QWidget *parent)
     : QWidget(parent)
@@ -16,28 +16,12 @@ void NavigationBar::setupUI()
     layout->setContentsMargins(16, 8, 16, 0);
     layout->setSpacing(4);
 
-    // Logo (image)
+    // Logo
     auto *logoLabel = new QLabel();
     logoLabel->setPixmap(QPixmap(":/images/Logo-fix.png").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     layout->addWidget(logoLabel);
 
-    // Brand
-    auto *brandWidget = new QWidget();
-    auto *brandLayout = new QVBoxLayout(brandWidget);
-    brandLayout->setContentsMargins(8, 0, 0, 0);
-    brandLayout->setSpacing(0);
-
-    auto *brandLabel = new QLabel("NISKALA");
-    brandLabel->setStyleSheet("color: #e5e7eb; font-size: 16px; font-weight: bold; letter-spacing: 2px;");
-    brandLayout->addWidget(brandLabel);
-
-    auto *tagline = new QLabel("REVEALING THE UNSEEN");
-    tagline->setStyleSheet("color: #6b7280; font-size: 7px; letter-spacing: 1px;");
-    brandLayout->addWidget(tagline);
-
-    layout->addWidget(brandWidget);
-
-    layout->addSpacing(30);
+    layout->addSpacing(8);
 
     // Tabs
     QStringList tabs = {"Dashboard", "Market", "News", "Screener", "Kalender Market", "Portofolio", "Settings"};
@@ -56,26 +40,30 @@ void NavigationBar::setupUI()
 
     layout->addStretch();
 
-    // Right icons
-    auto *searchBtn = new QLabel("🔍");
-    searchBtn->setStyleSheet("color: #9ca3af; font-size: 16px; padding: 0 10px;");
-    layout->addWidget(searchBtn);
+    // Search input
+    auto *searchInput = new QLineEdit();
+    searchInput->setPlaceholderText("Search Assets...");
+    searchInput->setFixedSize(200, 30);
+    searchInput->setStyleSheet(
+        "QLineEdit { background-color: #191C1F; color: #E1E2E7; border: 1px solid #3B4A3D; "
+        "border-radius: 4px; padding: 4px 8px; font-family: 'Inter'; font-size: 12px; }"
+        "QLineEdit:focus { border-color: #CEE8FF; }"
+        "QLineEdit::placeholder { color: #859585; }");
+    layout->addWidget(searchInput);
 
+    layout->addSpacing(8);
+
+    // Notification icon
     auto *notifBtn = new QLabel("🔔");
-    notifBtn->setStyleSheet("color: #9ca3af; font-size: 16px; padding: 0 10px;");
+    notifBtn->setStyleSheet("color: #859585; font-size: 16px; padding: 0 8px;");
     layout->addWidget(notifBtn);
 
-    auto *settingsBtn = new QLabel("⚙");
-    settingsBtn->setStyleSheet("color: #9ca3af; font-size: 16px; padding: 0 10px;");
-    layout->addWidget(settingsBtn);
-
-    auto *userBtn = new QLabel("N");
-    userBtn->setStyleSheet(
-        "QLabel { color: #10b981; font-size: 12px; font-weight: bold; "
-        "border: 2px solid #10b981; border-radius: 14px; padding: 4px 6px; }");
+    // User icon
+    auto *userBtn = new QLabel("👤");
+    userBtn->setStyleSheet("color: #859585; font-size: 16px; padding: 0 8px;");
     layout->addWidget(userBtn);
 
-    setStyleSheet("NavigationBar { background-color: #060B16; border-bottom: 1px solid #1f2937; }");
+    setStyleSheet("NavigationBar { background-color: #111417; border-bottom: 1px solid #3B4A3D; }");
 }
 
 void NavigationBar::updateTabStyles()
@@ -83,13 +71,13 @@ void NavigationBar::updateTabStyles()
     for (int i = 0; i < m_tabs.size(); ++i) {
         if (i == m_activeTab) {
             m_tabs[i]->setStyleSheet(
-                "QPushButton { background-color: #111827; color: #10b981; border: none; "
-                "border-bottom: 2px solid #10b981; padding: 8px 16px; font-size: 13px; font-weight: bold; }");
+                "QPushButton { background-color: transparent; color: #75FF9E; border: none; "
+                "border-bottom: 2px solid #75FF9E; padding: 8px 12px; font-size: 12px; font-weight: bold; }");
         } else {
             m_tabs[i]->setStyleSheet(
-                "QPushButton { background-color: transparent; color: #9ca3af; border: none; "
-                "border-bottom: 2px solid transparent; padding: 8px 16px; font-size: 13px; }"
-                "QPushButton:hover { color: #e5e7eb; }");
+                "QPushButton { background-color: transparent; color: #BACBB9; border: none; "
+                "border-bottom: 2px solid transparent; padding: 8px 12px; font-size: 12px; }"
+                "QPushButton:hover { color: #E1E2E7; }");
         }
     }
 }

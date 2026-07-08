@@ -3,15 +3,19 @@
 #include "../widgets/BreakingNewsTicker.h"
 #include "../widgets/MarketIndicesStrip.h"
 #include "../widgets/CandlestickChart.h"
+#include "../widgets/ChartToolbarWidget.h"
 #include "../widgets/FearGreedGauge.h"
 #include "../widgets/CommodityTable.h"
 #include "../widgets/MarketBreadthWidget.h"
+#include "../widgets/AIMarketRegimeWidget.h"
+#include "../widgets/ForeignFlowWidget.h"
 #include "../widgets/SectorPerformanceWidget.h"
+#include "../widgets/FooterWidget.h"
 #include "NewsScreen.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QGridLayout>
+#include <QScrollArea>
 #include <QLabel>
 
 DashboardScreen::DashboardScreen(QWidget *parent)
@@ -26,45 +30,82 @@ void DashboardScreen::setupUI()
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    // Navigation Bar
+    // === Navigation Bar (64px) ===
     m_navBar = new NavigationBar();
     mainLayout->addWidget(m_navBar);
 
-    // Breaking News Ticker
+    // === Breaking News Ticker (36px) ===
     m_ticker = new BreakingNewsTicker();
     mainLayout->addWidget(m_ticker);
 
-    // Market Indices Strip
+    // === Market Indices Strip (100px) ===
     m_indicesStrip = new MarketIndicesStrip();
     mainLayout->addWidget(m_indicesStrip);
 
-    // Main Content Area (QGridLayout)
-    auto *mainContent = new QGridLayout();
+    // === Main Content (70% left + 30% right) ===
+    auto *mainContent = new QHBoxLayout();
     mainContent->setContentsMargins(8, 8, 8, 0);
-    mainContent->setSpacing(6);
+    mainContent->setSpacing(8);
 
-    // Row 0-4, Col 0-1: CandlestickChart (spans 2 columns)
+    // --- Left Panel (70%) ---
+    auto *leftPanel = new QWidget();
+    auto *leftLayout = new QVBoxLayout(leftPanel);
+    leftLayout->setContentsMargins(0, 0, 0, 0);
+    leftLayout->setSpacing(6);
+
+    // Chart Toolbar
+    auto *chartToolbar = new ChartToolbarWidget();
+    leftLayout->addWidget(chartToolbar);
+
+    // Candlestick Chart (flex)
     m_chart = new CandlestickChart();
-    mainContent->addWidget(m_chart, 0, 0, 5, 2);
+    leftLayout->addWidget(m_chart, 1);
 
-    // Row 0-1, Col 2: Fear & Greed Index
+    // News + Sector Performance (bottom row)
+    auto *bottomRow = new QHBoxLayout();
+    bottomRow->setSpacing(6);
+
+    m_news = new NewsScreen();
+    bottomRow->addWidget(m_news, 1);
+
+    m_sectorPerf = new SectorPerformanceWidget();
+    bottomRow->addWidget(m_sectorPerf, 1);
+
+    leftLayout->addLayout(bottomRow);
+
+    mainContent->addWidget(leftPanel, 7);
+
+    // --- Right Panel (30%) with Scroll ---
+    auto *rightScroll = new QScrollArea();
+    rightScroll->setWidgetResizable(true);
+    rightScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    rightScroll->setFrameShape(QFrame::NoFrame);
+    rightScroll->setStyleSheet("QScrollArea { background-color: transparent; border: none; }");
+
+    auto *rightWidget = new QWidget();
+    auto *rightLayout = new QVBoxLayout(rightWidget);
+    rightLayout->setContentsMargins(0, 0, 0, 0);
+    rightLayout->setSpacing(6);
+
+    // Fear & Greed Index
     auto *fgWidget = new QWidget();
+    fgWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 4px; }");
     auto *fgLayout = new QVBoxLayout(fgWidget);
-    fgLayout->setContentsMargins(0, 0, 0, 0);
+    fgLayout->setContentsMargins(8, 8, 8, 8);
     fgLayout->setSpacing(4);
 
-    auto *fgHeader = new QLabel("FEAR & GREED INDEX");
-    fgHeader->setStyleSheet("color: #CEE8FF; font-weight: bold; font-size: 12px;");
+    auto *fgHeader = new QLabel("[ FEAR & GREED INDEX ]");
+    fgHeader->setStyleSheet("color: #CEE8FF; font-family: 'Inter'; font-size: 11px; font-weight: bold;");
     fgLayout->addWidget(fgHeader);
 
     auto *fgGauges = new QHBoxLayout();
-    m_fgIndo = new FearGreedGauge("INDONESIA");
+    m_fgIndo = new FearGreedGauge("Indonesia");
     m_fgIndo->setScore(63);
     m_fgIndo->setDelta(8);
-    m_fgAsia = new FearGreedGauge("ASIA");
+    m_fgAsia = new FearGreedGauge("Asia");
     m_fgAsia->setScore(55);
     m_fgAsia->setDelta(3);
-    m_fgGlobal = new FearGreedGauge("GLOBAL");
+    m_fgGlobal = new FearGreedGauge("Global");
     m_fgGlobal->setScore(48);
     m_fgGlobal->setDelta(-2);
     fgGauges->addWidget(m_fgIndo);
@@ -72,60 +113,96 @@ void DashboardScreen::setupUI()
     fgGauges->addWidget(m_fgGlobal);
     fgLayout->addLayout(fgGauges);
 
-    mainContent->addWidget(fgWidget, 0, 2, 2, 1);
+    rightLayout->addWidget(fgWidget);
 
-    // Row 2-4, Col 2: Commodity Table
+    // Commodity Table
+    auto *commodityWidget = new QWidget();
+    commodityWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 4px; }");
+    auto *commodityLayout = new QVBoxLayout(commodityWidget);
+    commodityLayout->setContentsMargins(8, 8, 8, 8);
+
+    auto *commodityHeader = new QLabel("[ COMMODITY MONITOR ]");
+    commodityHeader->setStyleSheet("color: #CEE8FF; font-family: 'Inter'; font-size: 11px; font-weight: bold;");
+    commodityLayout->addWidget(commodityHeader);
+
     m_commodityTable = new CommodityTable();
-    mainContent->addWidget(m_commodityTable, 2, 2, 3, 1);
+    commodityLayout->addWidget(m_commodityTable);
 
-    // Row 5-6, Col 0: News & AI Sentiment
-    m_news = new NewsScreen();
-    mainContent->addWidget(m_news, 5, 0, 2, 1);
+    rightLayout->addWidget(commodityWidget);
 
-    // Row 5-6, Col 1: Sector Performance
-    m_sectorPerf = new SectorPerformanceWidget();
-    mainContent->addWidget(m_sectorPerf, 5, 1, 2, 1);
+    // Market Breadth
+    auto *breadthWidget = new QWidget();
+    breadthWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 4px; }");
+    auto *breadthLayout = new QVBoxLayout(breadthWidget);
+    breadthLayout->setContentsMargins(8, 8, 8, 8);
 
-    // Row 5-6, Col 2: Market Breadth
+    auto *breadthHeader = new QLabel("[ MARKET BREADTH ]");
+    breadthHeader->setStyleSheet("color: #CEE8FF; font-family: 'Inter'; font-size: 11px; font-weight: bold;");
+    breadthLayout->addWidget(breadthHeader);
+
     m_breadth = new MarketBreadthWidget();
-    mainContent->addWidget(m_breadth, 5, 2, 2, 1);
+    breadthLayout->addWidget(m_breadth);
 
-    mainContent->setColumnStretch(0, 3);
-    mainContent->setColumnStretch(1, 3);
-    mainContent->setColumnStretch(2, 4);
+    rightLayout->addWidget(breadthWidget);
+
+    // AI Market Regime
+    auto *aiWidget = new AIMarketRegimeWidget();
+    rightLayout->addWidget(aiWidget);
+
+    // Foreign Flow
+    auto *flowWidget = new ForeignFlowWidget();
+    rightLayout->addWidget(flowWidget);
+
+    rightLayout->addStretch();
+
+    rightScroll->setWidget(rightWidget);
+    mainContent->addWidget(rightScroll, 3);
 
     mainLayout->addLayout(mainContent, 1);
 
-    // Bottom Ticker
+    // === Bottom Ticker (40px floating) ===
     auto *bottomTicker = new QWidget();
-    bottomTicker->setFixedHeight(32);
-    bottomTicker->setStyleSheet("background-color: #060B16; border-top: 1px solid #3B4A3D;");
+    bottomTicker->setFixedHeight(40);
+    bottomTicker->setStyleSheet(
+        "QWidget { background-color: #272A2E; border-top: 1px solid #3B4A3D; }");
     auto *btLayout = new QHBoxLayout(bottomTicker);
     btLayout->setContentsMargins(8, 4, 8, 4);
 
-    auto *gainersLabel = new QLabel("TOP GAINERS  1. DCII +24.2%  2. CUAN +16.7%  3. BREN +13.1%  4. BRMS +11.8%  5. ADRO +9.6%");
-    gainersLabel->setStyleSheet("color: #75FF9E; font-family: 'JetBrains Mono', monospace; font-size: 10px;");
-    btLayout->addWidget(gainersLabel);
+    // Gainers badge
+    auto *gainersBadge = new QLabel("🚀 TOP GAINERS");
+    gainersBadge->setStyleSheet(
+        "QLabel { background-color: rgba(117,255,158,0.1); color: #75FF9E; "
+        "padding: 2px 8px; border-radius: 4px; font-family: 'Inter'; font-size: 10px; font-weight: bold; }");
+    btLayout->addWidget(gainersBadge);
 
-    auto *losersLabel = new QLabel("TOP LOSERS  1. BUKA -7.8%  2. EMTK -6.2%  3. SMGR -4.1%  4. INCO -3.8%  5. TLKM -3.2%");
-    losersLabel->setStyleSheet("color: #FFB3AE; font-family: 'JetBrains Mono', monospace; font-size: 10px;");
-    btLayout->addWidget(losersLabel);
+    // Gainers data
+    auto *gainersData = new QLabel("DCII +24.2%  CUAN +16.7%  BREN +13.1%  BRMS +11.8%  ADRO +9.6%");
+    gainersData->setStyleSheet("color: #E1E2E7; font-family: 'JetBrains Mono'; font-size: 10px;");
+    btLayout->addWidget(gainersData);
+
+    // Separator
+    auto *sep = new QFrame();
+    sep->setFrameShape(QFrame::VLine);
+    sep->setStyleSheet("color: #3B4A3D;");
+    sep->setFixedHeight(20);
+    btLayout->addWidget(sep);
+
+    // Losers badge
+    auto *losersBadge = new QLabel("TOP LOSERS");
+    losersBadge->setStyleSheet(
+        "QLabel { color: #FFB3AE; font-family: 'Inter'; font-size: 10px; font-weight: bold; }");
+    btLayout->addWidget(losersBadge);
+
+    // Losers data
+    auto *losersData = new QLabel("BUKA -7.8%  EMTK -6.2%  SMGR -4.1%  INCO -3.8%  TLKM -3.2%");
+    losersData->setStyleSheet("color: #E1E2E7; font-family: 'JetBrains Mono'; font-size: 10px;");
+    btLayout->addWidget(losersData);
 
     btLayout->addStretch();
 
-    auto *foreignLabel = new QLabel("FOREIGN FLOW (ALL MARKET)");
-    foreignLabel->setStyleSheet("color: #859585; font-family: 'JetBrains Mono', monospace; font-size: 9px;");
-    btLayout->addWidget(foreignLabel);
-
-    auto *foreignValue = new QLabel("Net Buy +1.24 T");
-    foreignValue->setStyleSheet("color: #75FF9E; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: bold;");
-    btLayout->addWidget(foreignValue);
-
-    btLayout->addSpacing(20);
-
-    auto *versionLabel = new QLabel("NISKALA Terminal v1.0.0");
-    versionLabel->setStyleSheet("color: #859585; font-family: 'JetBrains Mono', monospace; font-size: 9px;");
-    btLayout->addWidget(versionLabel);
-
     mainLayout->addWidget(bottomTicker);
+
+    // === Footer (24px) ===
+    auto *footer = new FooterWidget();
+    mainLayout->addWidget(footer);
 }
