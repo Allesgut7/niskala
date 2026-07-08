@@ -13,6 +13,7 @@ public:
     explicit PythonBridge(QObject *parent = nullptr);
 
     void fetchMarketData(const QString &symbol);
+    void fetchWatchlistBatch(const QStringList &symbols);
     void fetchSentiment(const QString &symbol);
     void fetchFearGreedIndex();
     void fetchMarketBreadth();

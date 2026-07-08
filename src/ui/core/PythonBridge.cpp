@@ -33,18 +33,41 @@ void PythonBridge::fetchMarketData(const QString &symbol)
     QStringList args;
     args << "-c"
          << QString(
-                 "import json; "
-                 "import sys; "
-                 "sys.path.insert(0, '../../../../../'); "
-                 "try: "
-                 "    from python.data_sources.yfinance_client import YFinanceClient; "
-                 "    client = YFinanceClient(); "
-                 "    data = client.get_stock('%1'); "
-                 "    print(json.dumps(data)) "
-                 "except Exception as e: "
-                 "    print(json.dumps({'error': str(e)})) "
+                "import json; "
+                "import sys; "
+                "sys.path.insert(0, '../../../../../'); "
+                "try: "
+                "    from python.data_sources.yfinance_client import YFinanceClient; "
+                "    client = YFinanceClient(); "
+                "    data = client.get_stock('%1'); "
+                "    print(json.dumps(data)) "
+                "except Exception as e: "
+                "    print(json.dumps({'error': str(e)})) "
              ).arg(symbol);
 
+    executeCommand("python3", args);
+}
+
+void PythonBridge::fetchWatchlistBatch(const QStringList &symbols)
+{
+    QString symbolsStr = symbols.join("','");
+    QStringList args;
+    args << "-c"
+         << QString(
+                "import json; "
+                "import sys; "
+                "sys.path.insert(0, '../../../../../'); "
+                "from python.data_sources.yfinance_client import YFinanceClient; "
+                "client = YFinanceClient(); "
+                "results = [] "
+                "for sym in ['%1']: "
+                "    try: "
+                "        data = client.get_stock(sym) "
+                "        results.append(data) "
+                "    except: "
+                "        pass "
+                "print(json.dumps(results)) "
+             ).arg(symbolsStr);
     executeCommand("python3", args);
 }
 

@@ -59,9 +59,7 @@ void DataManager::refreshAll()
 
 void DataManager::refreshWatchlist()
 {
-    for (const auto &symbol : m_watchlist) {
-        m_bridge->fetchMarketData(symbol);
-    }
+    m_bridge->fetchWatchlistBatch(m_watchlist);
 }
 
 void DataManager::refreshMarketOverview()
@@ -109,15 +107,23 @@ void DataManager::onAutoRefresh()
 
 void DataManager::onMarketDataReceived(const QJsonObject &data)
 {
-    QString symbol = data["symbol"].toString();
-    qDebug() << "DataManager: Received data for" << symbol << "price:" << data["price"];
-    
-    // Check if this is a market overview symbol
-    QStringList overviewSymbols = {"^JKSE", "GC=F", "CL=F", "USDIDR=X", "^N225", "^HSI", "^KS11", "^GSPC", "^IXIC"};
-    if (overviewSymbols.contains(symbol)) {
-        emit marketOverviewUpdated(data);
-    } else {
-        emit watchlistUpdated(data);
+    // Handle batch response (array of stocks)
+    if (data.contains("results")) {
+        QJsonArray results = data["results"].toArray();
+        for (const auto &item : results) {
+            QJsonObject stockData = item.toObject();
+            emit watchlistUpdated(stockData);
+        }
+    }
+    // Handle single stock response
+    else if (data.contains("symbol")) {
+        QString symbol = data["symbol"].toString();
+        QStringList overviewSymbols = {"^JKSE", "GC=F", "CL=F", "USDIDR=X", "^N225", "^HSI", "^KS11", "^GSPC", "^IXIC"};
+        if (overviewSymbols.contains(symbol)) {
+            emit marketOverviewUpdated(data);
+        } else {
+            emit watchlistUpdated(data);
+        }
     }
     
     m_refreshing = false;
