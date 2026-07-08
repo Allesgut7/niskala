@@ -96,10 +96,6 @@ void DashboardScreen::setupUI()
     fgLayout->setContentsMargins(12, 10, 12, 12);
     fgLayout->setSpacing(6);
 
-    auto *fgHeader = new QLabel("[ FEAR & GREED INDEX ]");
-    fgHeader->setStyleSheet("color: #CEE8FF; font-size: 12px; font-weight: bold;");
-    fgLayout->addWidget(fgHeader);
-
     auto *fgGauges = new QHBoxLayout();
     fgGauges->setSpacing(4);
     m_fgIndo = new FearGreedGauge("Indonesia");
@@ -125,10 +121,6 @@ void DashboardScreen::setupUI()
     commodityLayout->setContentsMargins(12, 10, 12, 12);
     commodityLayout->setSpacing(6);
 
-    auto *commodityHeader = new QLabel("[ COMMODITY MONITOR ]");
-    commodityHeader->setStyleSheet("color: #CEE8FF; font-size: 12px; font-weight: bold;");
-    commodityLayout->addWidget(commodityHeader);
-
     m_commodityTable = new CommodityTable();
     commodityLayout->addWidget(m_commodityTable);
 
@@ -140,10 +132,6 @@ void DashboardScreen::setupUI()
     auto *breadthLayout = new QVBoxLayout(breadthWidget);
     breadthLayout->setContentsMargins(12, 10, 12, 12);
     breadthLayout->setSpacing(6);
-
-    auto *breadthHeader = new QLabel("[ MARKET BREADTH ]");
-    breadthHeader->setStyleSheet("color: #CEE8FF; font-size: 12px; font-weight: bold;");
-    breadthLayout->addWidget(breadthHeader);
 
     m_breadth = new MarketBreadthWidget();
     breadthLayout->addWidget(m_breadth);
