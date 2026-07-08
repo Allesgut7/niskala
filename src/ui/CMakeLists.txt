@@ -7,7 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Charts Network)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network)
 
 set(SOURCES
     main.cpp
@@ -22,6 +22,7 @@ set(SOURCES
     ui/widgets/MarketBreadthWidget.cpp
     ui/widgets/SectorPerformanceWidget.cpp
     ui/widgets/CandlestickChart.cpp
+    ui/widgets/FinancialChart.cpp
     ui/widgets/ChartToolbarWidget.cpp
     ui/widgets/OrderBookWidget.cpp
     ui/widgets/FearGreedGauge.cpp
@@ -56,6 +57,7 @@ set(HEADERS
     ui/widgets/MarketBreadthWidget.h
     ui/widgets/SectorPerformanceWidget.h
     ui/widgets/CandlestickChart.h
+    ui/widgets/FinancialChart.h
     ui/widgets/ChartToolbarWidget.h
     ui/widgets/OrderBookWidget.h
     ui/widgets/FearGreedGauge.h
@@ -95,7 +97,6 @@ target_link_libraries(niskala-ui PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
-    Qt6::Charts
     Qt6::Network
 )
 

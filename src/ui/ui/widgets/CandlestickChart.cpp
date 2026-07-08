@@ -1,10 +1,6 @@
 #include "CandlestickChart.h"
-#include <QBarCategoryAxis>
-#include <QValueAxis>
-#include <QCandlestickSet>
+#include "FinancialChart.h"
 #include <QVBoxLayout>
-#include <QDateTime>
-#include <cmath>
 
 CandlestickChart::CandlestickChart(QWidget *parent)
     : QWidget(parent)
@@ -13,134 +9,64 @@ CandlestickChart::CandlestickChart(QWidget *parent)
     generateSampleData();
 
     m_refreshTimer = new QTimer(this);
-    connect(m_refreshTimer, &QTimer::timeout, this, &CandlestickChart::updateChart);
-    m_refreshTimer->start(5000);
+    connect(m_refreshTimer, &QTimer::timeout, this, &CandlestickChart::generateSampleData);
+    m_refreshTimer->start(10000);
 }
 
 void CandlestickChart::setupUI()
 {
     auto *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(12, 12, 12, 12);
+    layout->setContentsMargins(0, 0, 0, 0);
 
-    setupChart();
-
-    m_chartView = new QChartView(m_chart);
-    m_chartView->setRenderHint(QPainter::Antialiasing);
-    m_chartView->setStyleSheet("background-color: #1D2023;");
-    layout->addWidget(m_chartView);
-}
-
-void CandlestickChart::setupChart()
-{
-    m_chart = new QChart();
-    m_chart->setBackgroundBrush(QBrush(QColor("#1D2023")));
-    m_chart->setTitleBrush(QBrush(QColor("#E1E2E7")));
-    m_chart->setTitleFont(QFont("monospace", 12, QFont::Bold));
-    m_chart->setTitle("BBCA - Daily Chart");
-    m_chart->setAnimationOptions(QChart::SeriesAnimations);
-    m_chart->legend()->setVisible(false);
-
-    m_candleSeries = new QCandlestickSeries();
-    m_candleSeries->setName("Price");
-    m_candleSeries->setIncreasingColor(QColor("#75FF9E"));
-    m_candleSeries->setDecreasingColor(QColor("#FFB3AE"));
-    m_candleSeries->setBodyOutlineVisible(false);
-
-    m_ma5Series = new QLineSeries();
-    m_ma5Series->setName("MA5");
-    m_ma5Series->setPen(QPen(QColor("#CEE8FF"), 1, Qt::SolidLine));
-
-    m_ma20Series = new QLineSeries();
-    m_ma20Series->setName("MA20");
-    m_ma20Series->setPen(QPen(QColor("#CEE8FF"), 1, Qt::DashLine));
-
-    m_axisX = new QValueAxis();
-    m_axisX->setLabelsVisible(false);
-    m_axisX->setGridLinePen(QPen(QColor("#3B4A3D"), 1, Qt::DotLine));
-
-    m_axisY = new QValueAxis();
-    m_axisY->setLabelsColor(QColor("#859585"));
-    m_axisY->setGridLinePen(QPen(QColor("#3B4A3D"), 1, Qt::DotLine));
-
-    m_chart->addSeries(m_candleSeries);
-    m_chart->addSeries(m_ma5Series);
-    m_chart->addSeries(m_ma20Series);
-    m_chart->addAxis(m_axisX, Qt::AlignBottom);
-    m_chart->addAxis(m_axisY, Qt::AlignRight);
-    m_candleSeries->attachAxis(m_axisX);
-    m_candleSeries->attachAxis(m_axisY);
-    m_ma5Series->attachAxis(m_axisX);
-    m_ma5Series->attachAxis(m_axisY);
-    m_ma20Series->attachAxis(m_axisX);
-    m_ma20Series->attachAxis(m_axisY);
+    m_chart = new FinancialChart();
+    layout->addWidget(m_chart);
 }
 
 void CandlestickChart::generateSampleData()
 {
-    m_candleSeries->clear();
-    m_ma5Series->clear();
-    m_ma20Series->clear();
-
+    QVector<OHLCData> data;
     double basePrice = 9000.0;
-    QList<double> closes;
 
-    for (int i = 0; i < 30; ++i) {
-        double open = basePrice + (rand() % 300 - 150);
-        double close = open + (rand() % 200 - 100);
-        double high = qMax(open, close) + (rand() % 100);
-        double low = qMin(open, close) - (rand() % 100);
+    for (int i = 0; i < 50; ++i) {
+        OHLCData candle;
+        candle.open = basePrice + (rand() % 300 - 150);
+        candle.close = candle.open + (rand() % 200 - 100);
+        candle.high = qMax(candle.open, candle.close) + (rand() % 100);
+        candle.low = qMin(candle.open, candle.close) - (rand() % 100);
+        candle.volume = 1000000 + rand() % 5000000;
+        candle.timestamp = i;
+        data.append(candle);
 
-        QCandlestickSet *set = new QCandlestickSet(i);
-        set->setOpen(open);
-        set->setHigh(high);
-        set->setLow(low);
-        set->setClose(close);
-        m_candleSeries->append(set);
-
-        closes.append(close);
-        m_ma5Series->append(i, close);
-
-        m_axisX->setRange(0, 29);
+        basePrice = candle.close;
     }
 
-    for (int i = 19; i < 30; ++i) {
-        double sum = 0;
-        for (int j = i - 19; j <= i; ++j) {
-            sum += closes[j];
-        }
-        m_ma20Series->append(i, sum / 20.0);
-    }
-
-    m_axisY->setRange(8500, 9800);
+    m_chart->loadData(data);
 }
 
 void CandlestickChart::loadSymbol(const QString &symbol)
 {
     m_currentSymbol = symbol;
-    m_chart->setTitle(symbol + " - " + m_timeframe + " Chart");
     generateSampleData();
 }
 
 void CandlestickChart::setTimeframe(const QString &tf)
 {
     m_timeframe = tf;
-    m_chart->setTitle(m_currentSymbol + " - " + tf + " Chart");
+    m_chart->setTimeframe(tf);
     generateSampleData();
 }
 
 void CandlestickChart::setMA5Visible(bool visible)
 {
-    m_ma5Series->setVisible(visible);
+    m_chart->setMA5Visible(visible);
 }
 
 void CandlestickChart::setMA20Visible(bool visible)
 {
-    m_ma20Series->setVisible(visible);
+    m_chart->setMA20Visible(visible);
 }
 
-void CandlestickChart::updateChart()
+void CandlestickChart::setVolumeVisible(bool visible)
 {
-    if (rand() % 10 == 0) {
-        generateSampleData();
-    }
+    m_chart->setVolumeVisible(visible);
 }
