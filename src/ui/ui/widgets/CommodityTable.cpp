@@ -12,7 +12,7 @@ CommodityTable::CommodityTable(QWidget *parent)
 void CommodityTable::setupUI()
 {
     auto *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(12, 12, 12, 12);
     layout->setSpacing(4);
 
     auto *header = new QLabel("COMMODITY");

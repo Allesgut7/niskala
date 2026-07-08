@@ -19,7 +19,7 @@ SettingsScreen::SettingsScreen(QWidget *parent)
 void SettingsScreen::setupUI()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(8, 8, 8, 8);
+    mainLayout->setContentsMargins(12, 12, 12, 12);
     mainLayout->setSpacing(6);
 
     auto *title = new QLabel("SETTINGS");
@@ -36,7 +36,7 @@ void SettingsScreen::setupUI()
     auto *btnLayout = new QHBoxLayout();
     m_applyBtn = new QPushButton("Apply");
     m_applyBtn->setStyleSheet(
-        "QPushButton { background-color: #111417; color: #E1E2E7; padding: 8px 24px; font-weight: bold; }"
+        "QPushButton { background-color: #1D2023; color: #E1E2E7; padding: 8px 24px; font-weight: bold; }"
         "QPushButton:hover { background-color: #FFB4AB; }");
     connect(m_applyBtn, &QPushButton::clicked, this, &SettingsScreen::onApplyClicked);
 

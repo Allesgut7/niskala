@@ -20,7 +20,7 @@ CandlestickChart::CandlestickChart(QWidget *parent)
 void CandlestickChart::setupUI()
 {
     auto *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(12, 12, 12, 12);
 
     setupChart();
 

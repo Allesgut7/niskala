@@ -13,7 +13,7 @@ OrderBookWidget::OrderBookWidget(QWidget *parent)
 void OrderBookWidget::setupUI()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(4, 4, 4, 4);
+    mainLayout->setContentsMargins(12, 12, 12, 12);
     mainLayout->setSpacing(2);
 
     // Header
@@ -38,7 +38,7 @@ void OrderBookWidget::setupUI()
     m_askTable->setShowGrid(false);
     m_askTable->setFocusPolicy(Qt::NoFocus);
     m_askTable->setStyleSheet(
-        "QTableWidget { background-color: #1D2023; alternate-background-color: #111417; }"
+        "QTableWidget { background-color: #1D2023; alternate-background-color: #1D2023; }"
     );
     mainLayout->addWidget(m_askTable);
 
@@ -58,7 +58,7 @@ void OrderBookWidget::setupUI()
     m_bidTable->setShowGrid(false);
     m_bidTable->setFocusPolicy(Qt::NoFocus);
     m_bidTable->setStyleSheet(
-        "QTableWidget { background-color: #1D2023; alternate-background-color: #111417; }"
+        "QTableWidget { background-color: #1D2023; alternate-background-color: #1D2023; }"
     );
     mainLayout->addWidget(m_bidTable);
 }

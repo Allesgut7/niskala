@@ -46,7 +46,7 @@ void NavigationBar::setupUI()
     searchInput->setFixedSize(200, 30);
     searchInput->setStyleSheet(
         "QLineEdit { background-color: #191C1F; color: #E1E2E7; border: 1px solid #3B4A3D; "
-        "border-radius: 4px; padding: 4px 8px; font-family: 'Inter'; font-size: 12px; }"
+        "border-radius: 6px; padding: 4px 8px; font-family: 'Inter'; font-size: 12px; }"
         "QLineEdit:focus { border-color: #CEE8FF; }"
         "QLineEdit::placeholder { color: #859585; }");
     layout->addWidget(searchInput);
@@ -63,7 +63,7 @@ void NavigationBar::setupUI()
     userBtn->setStyleSheet("color: #859585; font-size: 16px; padding: 0 8px;");
     layout->addWidget(userBtn);
 
-    setStyleSheet("NavigationBar { background-color: #111417; border-bottom: 1px solid #3B4A3D; }");
+    setStyleSheet("NavigationBar { background-color: #1D2023; border-bottom: 1px solid #3B4A3D; }");
 }
 
 void NavigationBar::updateTabStyles()

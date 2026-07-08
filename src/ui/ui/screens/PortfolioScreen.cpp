@@ -13,7 +13,7 @@ PortfolioScreen::PortfolioScreen(QWidget *parent)
 void PortfolioScreen::setupUI()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(8, 8, 8, 8);
+    mainLayout->setContentsMargins(12, 12, 12, 12);
     mainLayout->setSpacing(8);
 
     auto *title = new QLabel("PORTFOLIO");

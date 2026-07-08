@@ -14,7 +14,7 @@ ChartScreen::ChartScreen(QWidget *parent)
 void ChartScreen::setupUI()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(8, 8, 8, 8);
+    mainLayout->setContentsMargins(12, 12, 12, 12);
     mainLayout->setSpacing(6);
 
     // Top bar

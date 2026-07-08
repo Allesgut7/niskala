@@ -13,7 +13,7 @@ NewsScreen::NewsScreen(QWidget *parent)
 void NewsScreen::setupUI()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(8, 8, 8, 8);
+    mainLayout->setContentsMargins(12, 12, 12, 12);
     mainLayout->setSpacing(6);
 
     auto *headerLayout = new QHBoxLayout();
@@ -37,7 +37,7 @@ void NewsScreen::setupUI()
     m_searchEdit->setPlaceholderText("Search news...");
     m_searchEdit->setStyleSheet(
         "QLineEdit { background-color: #1D2023; color: #E1E2E7; border: 1px solid #3B4A3D; "
-        "padding: 6px; font-size: 11px; border-radius: 4px; }");
+        "padding: 6px; font-size: 11px; border-radius: 6px; }");
     connect(m_searchEdit, &QLineEdit::textChanged, this, &NewsScreen::onFilterChanged);
     filterLayout->addWidget(m_searchEdit);
 
@@ -45,7 +45,7 @@ void NewsScreen::setupUI()
     m_sourceFilter->addItems({"All Sources", "CNBC", "IDX", "Kontan", "Bisnis", "Reuters", "Tempo"});
     m_sourceFilter->setStyleSheet(
         "QComboBox { background-color: #1D2023; color: #E1E2E7; border: 1px solid #3B4A3D; "
-        "padding: 4px; font-size: 11px; border-radius: 4px; }");
+        "padding: 4px; font-size: 11px; border-radius: 6px; }");
     connect(m_sourceFilter, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &NewsScreen::onFilterChanged);
     filterLayout->addWidget(m_sourceFilter);
@@ -93,7 +93,7 @@ void NewsScreen::populateData()
     for (const auto &n : news) {
         QWidget *itemWidget = new QWidget();
         auto *itemLayout = new QVBoxLayout(itemWidget);
-        itemLayout->setContentsMargins(8, 8, 8, 8);
+        itemLayout->setContentsMargins(12, 12, 12, 12);
         itemLayout->setSpacing(4);
 
         // Time + Source + Sentiment Badge
@@ -114,17 +114,17 @@ void NewsScreen::populateData()
             badge->setText("Positive");
             badge->setStyleSheet(
                 "QLabel { background-color: #005226; color: #75FF9E; padding: 2px 8px; "
-                "border-radius: 4px; font-size: 10px; font-weight: bold; }");
+                "border-radius: 6px; font-size: 10px; font-weight: bold; }");
         } else if (n.sentiment == -1) {
             badge->setText("Negative");
             badge->setStyleSheet(
                 "QLabel { background-color: #A00118; color: #FFB3AE; padding: 2px 8px; "
-                "border-radius: 4px; font-size: 10px; font-weight: bold; }");
+                "border-radius: 6px; font-size: 10px; font-weight: bold; }");
         } else {
             badge->setText("Neutral");
             badge->setStyleSheet(
                 "QLabel { background-color: #00344F; color: #CEE8FF; padding: 2px 8px; "
-                "border-radius: 4px; font-size: 10px; font-weight: bold; }");
+                "border-radius: 6px; font-size: 10px; font-weight: bold; }");
         }
         topLayout->addWidget(badge);
 

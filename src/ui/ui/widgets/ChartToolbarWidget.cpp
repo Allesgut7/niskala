@@ -54,7 +54,7 @@ void ChartToolbarWidget::setupUI()
         iconBtn->setFixedSize(28, 24);
         iconBtn->setStyleSheet(
             "QPushButton { background: transparent; border: none; font-size: 14px; }"
-            "QPushButton:hover { background-color: #272A2E; border-radius: 4px; }");
+            "QPushButton:hover { background-color: #272A2E; border-radius: 6px; }");
         layout->addWidget(iconBtn);
     }
 

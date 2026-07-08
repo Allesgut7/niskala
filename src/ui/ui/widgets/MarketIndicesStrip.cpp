@@ -31,5 +31,5 @@ void MarketIndicesStrip::setupUI()
         layout->addWidget(card);
     }
 
-    setStyleSheet("MarketIndicesStrip { background-color: #060B16; }");
+    setStyleSheet("MarketIndicesStrip { background-color: #1D2023; }");
 }

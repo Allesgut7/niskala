@@ -13,7 +13,7 @@ MarketOverviewScreen::MarketOverviewScreen(QWidget *parent)
 void MarketOverviewScreen::setupUI()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(8, 8, 8, 8);
+    mainLayout->setContentsMargins(12, 12, 12, 12);
     mainLayout->setSpacing(8);
 
     auto *title = new QLabel("MARKET OVERVIEW");
@@ -26,7 +26,7 @@ void MarketOverviewScreen::setupUI()
     auto *idxWidget = new QWidget();
     idxWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; }");
     auto *idxLayout = new QVBoxLayout(idxWidget);
-    idxLayout->setContentsMargins(8, 8, 8, 8);
+    idxLayout->setContentsMargins(12, 12, 12, 12);
 
     auto *idxLabel = new QLabel("INDICES");
     idxLabel->setStyleSheet("color: #CEE8FF; font-weight: bold;");
@@ -45,7 +45,7 @@ void MarketOverviewScreen::setupUI()
     auto *cmdWidget = new QWidget();
     cmdWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; }");
     auto *cmdLayout = new QVBoxLayout(cmdWidget);
-    cmdLayout->setContentsMargins(8, 8, 8, 8);
+    cmdLayout->setContentsMargins(12, 12, 12, 12);
 
     auto *cmdLabel = new QLabel("COMMODITIES");
     cmdLabel->setStyleSheet("color: #CEE8FF; font-weight: bold;");
@@ -64,7 +64,7 @@ void MarketOverviewScreen::setupUI()
     auto *fxWidget = new QWidget();
     fxWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; }");
     auto *fxLayout = new QVBoxLayout(fxWidget);
-    fxLayout->setContentsMargins(8, 8, 8, 8);
+    fxLayout->setContentsMargins(12, 12, 12, 12);
 
     auto *fxLabel = new QLabel("FOREX");
     fxLabel->setStyleSheet("color: #FFB4AB; font-weight: bold;");
@@ -87,7 +87,7 @@ void MarketOverviewScreen::setupUI()
     auto *gainWidget = new QWidget();
     gainWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; }");
     auto *gainLayout = new QVBoxLayout(gainWidget);
-    gainLayout->setContentsMargins(8, 8, 8, 8);
+    gainLayout->setContentsMargins(12, 12, 12, 12);
 
     auto *gainLabel = new QLabel("TOP GAINERS");
     gainLabel->setStyleSheet("color: #75FF9E; font-weight: bold;");
@@ -104,7 +104,7 @@ void MarketOverviewScreen::setupUI()
     auto *loseWidget = new QWidget();
     loseWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; }");
     auto *loseLayout = new QVBoxLayout(loseWidget);
-    loseLayout->setContentsMargins(8, 8, 8, 8);
+    loseLayout->setContentsMargins(12, 12, 12, 12);
 
     auto *loseLabel = new QLabel("TOP LOSERS");
     loseLabel->setStyleSheet("color: #FFB3AE; font-weight: bold;");

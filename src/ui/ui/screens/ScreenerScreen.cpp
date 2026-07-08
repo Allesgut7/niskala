@@ -15,7 +15,7 @@ ScreenerScreen::ScreenerScreen(QWidget *parent)
 void ScreenerScreen::setupUI()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(8, 8, 8, 8);
+    mainLayout->setContentsMargins(12, 12, 12, 12);
     mainLayout->setSpacing(6);
 
     // Title
@@ -30,7 +30,7 @@ void ScreenerScreen::setupUI()
     m_searchEdit->setPlaceholderText("Search symbol...");
     m_searchEdit->setStyleSheet(
         "QLineEdit { background-color: #1D2023; color: #CEE8FF; border: 1px solid #3B4A3D; "
-        "padding: 6px; font-family: 'JetBrains Mono', monospace; border-radius: 4px; }"
+        "padding: 6px; font-family: 'JetBrains Mono', monospace; border-radius: 6px; }"
     );
     connect(m_searchEdit, &QLineEdit::textChanged, this, &ScreenerScreen::onSearchTextChanged);
     filterLayout->addWidget(m_searchEdit);
@@ -71,7 +71,7 @@ void ScreenerScreen::setupUI()
     m_table->setAlternatingRowColors(true);
     m_table->verticalHeader()->setVisible(false);
     m_table->setStyleSheet(
-        "QTableWidget { background-color: #1D2023; alternate-background-color: #111417; }"
+        "QTableWidget { background-color: #1D2023; alternate-background-color: #1D2023; }"
     );
     connect(m_table, &QTableWidget::cellClicked, this, &ScreenerScreen::onRowClicked);
     mainLayout->addWidget(m_table);
