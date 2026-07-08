@@ -54,40 +54,40 @@ void MarketBreadthWidget::paintEvent(QPaintEvent *event)
                     static_cast<int>((naikAngle + turunAngle) * 16), static_cast<int>(stagnanAngle * 16));
 
     // Stats on right
-    int statsX = width() - 120;
+    int statsX = width() - 100;
     int statsY = 35;
 
     painter.setFont(QFont("monospace", 12, QFont::Bold));
 
     // Naik
     painter.setPen(QColor("#10b981"));
-    painter.drawText(QRect(statsX, statsY, 60, 20), Qt::AlignRight, QString::number(m_naik));
+    painter.drawText(QRect(statsX, statsY, 45, 20), Qt::AlignRight, QString::number(m_naik));
     painter.setPen(QColor("#9ca3af"));
     painter.setFont(QFont("monospace", 9));
-    painter.drawText(QRect(statsX + 65, statsY, 50, 20), Qt::AlignLeft, "Naik");
-    painter.drawText(QRect(statsX + 65, statsY, 80, 20), Qt::AlignRight,
+    painter.drawText(QRect(statsX + 50, statsY, 40, 20), Qt::AlignLeft, "Naik");
+    painter.drawText(QRect(statsX + 50, statsY, 55, 20), Qt::AlignRight,
                      QString::number(m_naik * 100.0 / m_total, 'f', 1) + "%");
 
     // Turun
     statsY += 28;
     painter.setPen(QColor("#ef4444"));
     painter.setFont(QFont("monospace", 12, QFont::Bold));
-    painter.drawText(QRect(statsX, statsY, 60, 20), Qt::AlignRight, QString::number(m_turun));
+    painter.drawText(QRect(statsX, statsY, 45, 20), Qt::AlignRight, QString::number(m_turun));
     painter.setPen(QColor("#9ca3af"));
     painter.setFont(QFont("monospace", 9));
-    painter.drawText(QRect(statsX + 65, statsY, 50, 20), Qt::AlignLeft, "Turun");
-    painter.drawText(QRect(statsX + 65, statsY, 80, 20), Qt::AlignRight,
+    painter.drawText(QRect(statsX + 50, statsY, 40, 20), Qt::AlignLeft, "Turun");
+    painter.drawText(QRect(statsX + 50, statsY, 55, 20), Qt::AlignRight,
                      QString::number(m_turun * 100.0 / m_total, 'f', 1) + "%");
 
     // Stagnan
     statsY += 28;
     painter.setPen(QColor("#6b7280"));
     painter.setFont(QFont("monospace", 12, QFont::Bold));
-    painter.drawText(QRect(statsX, statsY, 60, 20), Qt::AlignRight, QString::number(m_stagnan));
+    painter.drawText(QRect(statsX, statsY, 45, 20), Qt::AlignRight, QString::number(m_stagnan));
     painter.setPen(QColor("#9ca3af"));
     painter.setFont(QFont("monospace", 9));
-    painter.drawText(QRect(statsX + 65, statsY, 50, 20), Qt::AlignLeft, "Stagnan");
-    painter.drawText(QRect(statsX + 65, statsY, 80, 20), Qt::AlignRight,
+    painter.drawText(QRect(statsX + 50, statsY, 40, 20), Qt::AlignLeft, "Stagnan");
+    painter.drawText(QRect(statsX + 50, statsY, 55, 20), Qt::AlignRight,
                      QString::number(m_stagnan * 100.0 / m_total, 'f', 1) + "%");
 
     // Total
