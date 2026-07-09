@@ -7,20 +7,7 @@ SectorPerformanceWidget::SectorPerformanceWidget(QWidget *parent)
     : QWidget(parent)
 {
     setMinimumHeight(250);
-
-    m_sectors = {
-        {"Teknologi", 2.45},
-        {"Energi", 1.87},
-        {"Keuangan", 1.56},
-        {"Industri", 1.21},
-        {"Bahan Baku", 0.98},
-        {"Infrastruktur", 0.72},
-        {"Konsumen Primer", 0.45},
-        {"Properti", -0.21},
-        {"Kesehatan", -0.33},
-        {"Konsumen Non-Primer", -0.65},
-        {"Transportasi", -0.91}
-    };
+    // No hardcoded data - widget starts empty and gets data from API
 }
 
 void SectorPerformanceWidget::updateData(const QJsonArray &sectors)
