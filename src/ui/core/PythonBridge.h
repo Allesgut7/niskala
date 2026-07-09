@@ -21,6 +21,7 @@ public:
     void fetchMarketBreadth();
     void fetchSectorPerformance();
     void fetchAIRegime();
+    void fetchNews();
     void startWebSocket(const QStringList &symbols);
     void stopWebSocket();
 
@@ -32,6 +33,7 @@ signals:
     void marketBreadthReceived(const QJsonObject &data);
     void sectorPerformanceReceived(const QJsonArray &data);
     void aiRegimeReceived(const QJsonObject &data);
+    void newsReceived(const QJsonArray &data);
     void realTimeUpdate(const QJsonObject &data);
     void commandOutput(const QString &output);
     void commandError(const QString &error);

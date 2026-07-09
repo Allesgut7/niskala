@@ -101,6 +101,13 @@ void PythonBridge::fetchAIRegime()
     executeCommand(m_pythonPath, args);
 }
 
+void PythonBridge::fetchNews()
+{
+    QStringList args;
+    args << m_scriptsDir + "/fetch_news.py";
+    executeCommand(m_pythonPath, args);
+}
+
 void PythonBridge::startWebSocket(const QStringList &symbols)
 {
     if (m_webSocketProcess->state() == QProcess::Running) {
@@ -212,8 +219,17 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
                                !firstItem.contains("symbol");
             }
             
+            // Check if this is news data (has "title" and "source" keys)
+            bool isNewsData = false;
+            if (!arr.isEmpty()) {
+                QJsonObject firstItem = arr[0].toObject();
+                isNewsData = firstItem.contains("title") && firstItem.contains("source");
+            }
+            
             if (isSectorData) {
                 emit sectorPerformanceReceived(arr);
+            } else if (isNewsData) {
+                emit newsReceived(arr);
             }
             
             for (const auto &item : arr) {

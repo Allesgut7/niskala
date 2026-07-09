@@ -26,6 +26,10 @@ DataManager::DataManager(QObject *parent)
             this, [this](const QJsonObject &data) {
         emit aiRegimeUpdated(data);
     });
+    connect(m_bridge, &PythonBridge::newsReceived,
+            this, [this](const QJsonArray &data) {
+        emit newsUpdated(data);
+    });
     connect(m_bridge, &PythonBridge::realTimeUpdate,
             this, &DataManager::onRealTimeUpdate);
     connect(m_bridge, &PythonBridge::commandError,
@@ -55,6 +59,7 @@ void DataManager::refreshAll()
     refreshMarketBreadth();
     refreshSectorPerformance();
     refreshAIRegime();
+    refreshNews();
 }
 
 void DataManager::refreshWatchlist()
@@ -85,6 +90,11 @@ void DataManager::refreshSectorPerformance()
 void DataManager::refreshAIRegime()
 {
     m_bridge->fetchAIRegime();
+}
+
+void DataManager::refreshNews()
+{
+    m_bridge->fetchNews();
 }
 
 void DataManager::startRealTimeStream(const QStringList &symbols)

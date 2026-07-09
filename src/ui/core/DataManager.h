@@ -23,6 +23,7 @@ public:
     void refreshMarketBreadth();
     void refreshSectorPerformance();
     void refreshAIRegime();
+    void refreshNews();
     void startRealTimeStream(const QStringList &symbols);
     void stopRealTimeStream();
 
@@ -36,6 +37,7 @@ signals:
     void marketBreadthUpdated(const QJsonObject &data);
     void sectorPerformanceUpdated(const QJsonObject &data);
     void aiRegimeUpdated(const QJsonObject &data);
+    void newsUpdated(const QJsonArray &data);
     void sentimentUpdated(const QString &symbol, const QJsonObject &data);
     void realTimeUpdate(const QString &symbol, const QJsonObject &data);
     void refreshStarted();

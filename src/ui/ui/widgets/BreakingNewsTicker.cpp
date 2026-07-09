@@ -8,19 +8,21 @@ BreakingNewsTicker::BreakingNewsTicker(QWidget *parent)
     setFixedHeight(36);
 
     m_headlines = {
-        "BBRI Buyback approved",
-        "BI Pertahankan Suku Bunga di 6.25%",
-        "Foreign Net Buy IDR 1.24T (All Market)",
-        "The Fed Minutes Tonight",
-        "Oil Menguat 1.8%",
-        "Nvidia +2.6% After Hours",
-        "IHSG Ditutup Menguat 1.23%",
-        "Rupiah Stabil di 16.140"
+        "Loading news..."
     };
 
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &BreakingNewsTicker::scroll);
     m_timer->start(60);
+}
+
+void BreakingNewsTicker::updateHeadlines(const QStringList &headlines)
+{
+    if (!headlines.isEmpty()) {
+        m_headlines = headlines;
+        m_scrollOffset = 0;
+        update();
+    }
 }
 
 void BreakingNewsTicker::scroll()

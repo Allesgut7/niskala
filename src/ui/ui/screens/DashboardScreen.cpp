@@ -205,6 +205,8 @@ void DashboardScreen::setupDataManager()
             this, &DashboardScreen::onSectorPerformanceUpdated);
     connect(m_dataManager, &DataManager::aiRegimeUpdated,
             this, &DashboardScreen::onAIRegimeUpdated);
+    connect(m_dataManager, &DataManager::newsUpdated,
+            this, &DashboardScreen::onNewsUpdated);
     connect(m_dataManager, &DataManager::realTimeUpdate,
             this, &DashboardScreen::onRealTimeUpdate);
 
@@ -328,6 +330,18 @@ void DashboardScreen::onAIRegimeUpdated(const QJsonObject &data)
         data["confidence"].toInt(),
         data["analysis"].toString()
     );
+}
+
+void DashboardScreen::onNewsUpdated(const QJsonArray &data)
+{
+    QStringList headlines;
+    for (const auto &item : data) {
+        QJsonObject obj = item.toObject();
+        headlines.append(obj["title"].toString());
+    }
+    if (!headlines.isEmpty()) {
+        m_ticker->updateHeadlines(headlines);
+    }
 }
 
 void DashboardScreen::onRealTimeUpdate(const QString &symbol, const QJsonObject &data)

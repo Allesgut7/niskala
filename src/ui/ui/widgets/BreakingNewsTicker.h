@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QWidget>
-#include <QLabel>
 #include <QTimer>
+#include <QStringList>
 
 class BreakingNewsTicker : public QWidget
 {
@@ -10,6 +10,8 @@ class BreakingNewsTicker : public QWidget
 
 public:
     explicit BreakingNewsTicker(QWidget *parent = nullptr);
+
+    void updateHeadlines(const QStringList &headlines);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
