@@ -315,7 +315,9 @@ void DashboardScreen::onMarketBreadthUpdated(const QJsonObject &data)
 
 void DashboardScreen::onSectorPerformanceUpdated(const QJsonObject &data)
 {
+    qDebug() << "DashboardScreen: onSectorPerformanceUpdated called, keys:" << data.keys();
     QJsonArray sectors = data["sectors"].toArray();
+    qDebug() << "DashboardScreen: Sectors count:" << sectors.size();
     m_sectorPerf->updateData(sectors);
 }
 

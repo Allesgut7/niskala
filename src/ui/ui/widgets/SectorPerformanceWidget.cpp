@@ -2,21 +2,27 @@
 #include <QPainter>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QDebug>
 
 SectorPerformanceWidget::SectorPerformanceWidget(QWidget *parent)
     : QWidget(parent)
 {
     setMinimumHeight(250);
-    // No hardcoded data - widget starts empty and gets data from API
+    qDebug() << "SectorPerformanceWidget: Created (empty)";
 }
 
 void SectorPerformanceWidget::updateData(const QJsonArray &sectors)
 {
+    qDebug() << "SectorPerformanceWidget: updateData called with" << sectors.size() << "sectors";
     m_sectors.clear();
     for (const auto &item : sectors) {
         QJsonObject obj = item.toObject();
-        m_sectors.append({obj["name"].toString(), obj["changePct"].toDouble()});
+        QString name = obj["name"].toString();
+        double pct = obj["changePct"].toDouble();
+        qDebug() << "  Sector:" << name << "changePct:" << pct;
+        m_sectors.append({name, pct});
     }
+    qDebug() << "SectorPerformanceWidget: Total sectors:" << m_sectors.size();
     update();
 }
 
