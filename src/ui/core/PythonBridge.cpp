@@ -16,6 +16,11 @@ PythonBridge::PythonBridge(QObject *parent)
     m_workDir = appDir.absoluteFilePath("../../../../..");
     m_process->setWorkingDirectory(m_workDir);
     
+    // Set Python executable path (use venv)
+    m_pythonPath = m_workDir + "/.venv/bin/python3";
+    qDebug() << "PythonBridge: Python path:" << m_pythonPath;
+    qDebug() << "PythonBridge: Working dir:" << m_workDir;
+    
     connect(m_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             this, &PythonBridge::onProcessFinished);
     connect(m_process, &QProcess::errorOccurred,
@@ -45,7 +50,7 @@ void PythonBridge::fetchMarketData(const QString &symbol)
                 "except Exception as e: "
                 "    print(json.dumps({'error': str(e)})) "
              ).arg(symbol);
-    executeCommand("python3", args);
+    executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchWatchlistBatch(const QStringList &symbols)
@@ -68,7 +73,7 @@ void PythonBridge::fetchWatchlistBatch(const QStringList &symbols)
                 "        pass "
                 "print(json.dumps(results)) "
              ).arg(symbolsStr);
-    executeCommand("python3", args);
+    executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchSentiment(const QString &symbol)
@@ -87,7 +92,7 @@ void PythonBridge::fetchSentiment(const QString &symbol)
                 "except Exception as e: "
                 "    print(json.dumps({'error': str(e)})) "
              ).arg(symbol);
-    executeCommand("python3", args);
+    executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchFearGreedIndex()
@@ -106,7 +111,7 @@ void PythonBridge::fetchFearGreedIndex()
                 "except Exception as e: "
                 "    print(json.dumps({'error': str(e)})) "
             );
-    executeCommand("python3", args);
+    executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchMarketBreadth()
@@ -125,7 +130,7 @@ void PythonBridge::fetchMarketBreadth()
                 "except Exception as e: "
                 "    print(json.dumps({'naik': 0, 'turun': 0, 'stagnan': 0, 'error': str(e)})) "
             );
-    executeCommand("python3", args);
+    executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchSectorPerformance()
@@ -150,7 +155,7 @@ void PythonBridge::fetchSectorPerformance()
                 "except Exception as e: "
                 "    print(json.dumps([])) "
             );
-    executeCommand("python3", args);
+    executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchAIRegime()
@@ -176,7 +181,7 @@ void PythonBridge::fetchAIRegime()
                 "except Exception as e: "
                 "    print(json.dumps({'regime': 'NEUTRAL', 'confidence': 50, 'analysis': 'Insufficient data'})) "
             );
-    executeCommand("python3", args);
+    executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::startWebSocket(const QStringList &symbols)
@@ -198,7 +203,7 @@ void PythonBridge::startWebSocket(const QStringList &symbols)
                 "ws.run() "
              ).arg(symbols.join("', '"));
 
-    m_webSocketProcess->start("python3", args);
+    m_webSocketProcess->start(m_pythonPath, args);
 }
 
 void PythonBridge::stopWebSocket()

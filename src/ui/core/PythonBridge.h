@@ -49,6 +49,7 @@ private:
     QProcess *m_process = nullptr;
     QProcess *m_webSocketProcess = nullptr;
     QString m_workDir;
+    QString m_pythonPath;
     QQueue<QPair<QString, QStringList>> m_commandQueue;
     bool m_processingCommand = false;
 };
