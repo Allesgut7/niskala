@@ -12,6 +12,9 @@ results = []
 for sym in symbols:
     try:
         data = client.get_stock(sym)
+        # Ensure changePct key exists (camelCase)
+        if 'change_pct' in data:
+            data['changePct'] = data.pop('change_pct')
         results.append(data)
     except:
         pass
