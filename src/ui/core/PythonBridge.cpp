@@ -18,6 +18,14 @@ PythonBridge::PythonBridge(QObject *parent)
     
     // Set Python executable path (use venv)
     m_pythonPath = m_workDir + "/.venv/bin/python3";
+    
+    // Check if Python exists, fallback to system python3
+    QFile pythonFile(m_pythonPath);
+    if (!pythonFile.exists()) {
+        qDebug() << "PythonBridge: Venv Python NOT FOUND, using system python3";
+        m_pythonPath = "python3";
+    }
+    
     qDebug() << "PythonBridge: Python path:" << m_pythonPath;
     qDebug() << "PythonBridge: Working dir:" << m_workDir;
     
@@ -242,10 +250,17 @@ void PythonBridge::processNextCommand()
     // Get next command
     auto cmd = m_commandQueue.dequeue();
     qDebug() << "PythonBridge: Processing command:" << cmd.first;
-    qDebug() << "PythonBridge: Working dir:" << m_workDir;
     
     // Start new process
     m_process->start(cmd.first, cmd.second);
+    
+    // Wait with timeout
+    if (!m_process->waitForFinished(30000)) {
+        qDebug() << "PythonBridge: TIMEOUT after 30s, killing process";
+        m_process->kill();
+        m_process->waitForFinished(1000);
+        processNextCommand();
+    }
 }
 
 void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
@@ -254,8 +269,14 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
     QByteArray error = m_process->readAllStandardError();
 
     QString outputStr = QString::fromUtf8(output).trimmed();
+    QString errorStr = QString::fromUtf8(error).trimmed();
+    
     qDebug() << "PythonBridge: Exit code:" << exitCode;
     qDebug() << "PythonBridge: Output length:" << outputStr.length();
+    qDebug() << "PythonBridge: Error length:" << errorStr.length();
+    if (!errorStr.isEmpty()) {
+        qDebug() << "PythonBridge: STDERR:" << errorStr.left(500);
+    }
     if (!outputStr.isEmpty()) {
         qDebug() << "PythonBridge: Output:" << outputStr.left(500);
     }
