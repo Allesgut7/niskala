@@ -16,7 +16,7 @@ PythonBridge::PythonBridge(QObject *parent)
     QString buildBinDir = appDir.absolutePath();
     // Go up 5 levels to reach niskala root
     m_workDir = buildBinDir;
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 4; ++i) {
         m_workDir = QFileInfo(m_workDir).absolutePath();
     }
     m_process->setWorkingDirectory(m_workDir);
