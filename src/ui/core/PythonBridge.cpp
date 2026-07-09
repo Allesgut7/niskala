@@ -161,16 +161,9 @@ void PythonBridge::processNextCommand()
     auto cmd = m_commandQueue.dequeue();
     qDebug() << "PythonBridge: Processing:" << cmd.first << cmd.second;
     
-    // Start new process
+    // Start new process (non-blocking)
     m_process->start(cmd.first, cmd.second);
-    
-    // Wait with timeout
-    if (!m_process->waitForFinished(30000)) {
-        qDebug() << "PythonBridge: TIMEOUT after 30s, killing process";
-        m_process->kill();
-        m_process->waitForFinished(1000);
-        processNextCommand();
-    }
+    // Don't wait - onProcessFinished signal will handle the result
 }
 
 void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
