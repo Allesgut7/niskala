@@ -11,9 +11,14 @@ PythonBridge::PythonBridge(QObject *parent)
 {
     m_process = new QProcess(this);
     
-    // Set working directory to niskala root
+    // Set working directory to niskala root (absolute path)
     QDir appDir(QCoreApplication::applicationDirPath());
-    m_workDir = appDir.absoluteFilePath("../../../../..");
+    QString buildBinDir = appDir.absolutePath();
+    // Go up 5 levels to reach niskala root
+    m_workDir = buildBinDir;
+    for (int i = 0; i < 5; ++i) {
+        m_workDir = QFileInfo(m_workDir).absolutePath();
+    }
     m_process->setWorkingDirectory(m_workDir);
     
     // Set Python executable path (use venv)
@@ -26,7 +31,7 @@ PythonBridge::PythonBridge(QObject *parent)
         m_pythonPath = "python3";
     }
     
-    // Set scripts directory
+    // Set scripts directory (absolute path)
     m_scriptsDir = m_workDir + "/python/scripts";
     
     qDebug() << "PythonBridge: Python path:" << m_pythonPath;
