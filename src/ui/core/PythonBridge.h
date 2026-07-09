@@ -50,6 +50,7 @@ private:
     QProcess *m_webSocketProcess = nullptr;
     QString m_workDir;
     QString m_pythonPath;
+    QString m_scriptsDir;
     QQueue<QPair<QString, QStringList>> m_commandQueue;
     bool m_processingCommand = false;
 };

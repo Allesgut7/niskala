@@ -26,7 +26,11 @@ PythonBridge::PythonBridge(QObject *parent)
         m_pythonPath = "python3";
     }
     
+    // Set scripts directory
+    m_scriptsDir = m_workDir + "/python/scripts";
+    
     qDebug() << "PythonBridge: Python path:" << m_pythonPath;
+    qDebug() << "PythonBridge: Scripts dir:" << m_scriptsDir;
     qDebug() << "PythonBridge: Working dir:" << m_workDir;
     
     connect(m_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
@@ -45,150 +49,50 @@ PythonBridge::PythonBridge(QObject *parent)
 void PythonBridge::fetchMarketData(const QString &symbol)
 {
     QStringList args;
-    args << "-c"
-         << QString(
-                "import json; "
-                "import sys; "
-                "sys.path.insert(0, '.'); "
-                "try: "
-                "    from python.data_sources.yfinance_client import YFinanceClient; "
-                "    client = YFinanceClient(); "
-                "    data = client.get_stock('%1'); "
-                "    print(json.dumps(data)) "
-                "except Exception as e: "
-                "    print(json.dumps({'error': str(e)})) "
-             ).arg(symbol);
+    args << m_scriptsDir + "/fetch_stock.py" << symbol;
     executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchWatchlistBatch(const QStringList &symbols)
 {
-    QString symbolsStr = symbols.join("','");
     QStringList args;
-    args << "-c"
-         << QString(
-                "import json; "
-                "import sys; "
-                "sys.path.insert(0, '.'); "
-                "from python.data_sources.yfinance_client import YFinanceClient; "
-                "client = YFinanceClient(); "
-                "results = [] "
-                "for sym in ['%1']: "
-                "    try: "
-                "        data = client.get_stock(sym) "
-                "        results.append(data) "
-                "    except: "
-                "        pass "
-                "print(json.dumps(results)) "
-             ).arg(symbolsStr);
+    args << m_scriptsDir + "/fetch_watchlist.py" << symbols.join(",");
     executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchSentiment(const QString &symbol)
 {
+    // Sentiment script not yet created, use placeholder
     QStringList args;
-    args << "-c"
-         << QString(
-                "import json; "
-                "import sys; "
-                "sys.path.insert(0, '.'); "
-                "try: "
-                "    from python.ai.sentiment_pipeline import SentimentPipeline; "
-                "    pipeline = SentimentPipeline(use_llm=False); "
-                "    result = pipeline.analyze('%1'); "
-                "    print(json.dumps(result)) "
-                "except Exception as e: "
-                "    print(json.dumps({'error': str(e)})) "
-             ).arg(symbol);
+    args << "-c" << QString("import json; print(json.dumps({'symbol': '%1', 'sentiment': 0}))").arg(symbol);
     executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchFearGreedIndex()
 {
     QStringList args;
-    args << "-c"
-         << (
-                "import json; "
-                "import sys; "
-                "sys.path.insert(0, '.'); "
-                "try: "
-                "    from python.fear_greed.calculator import FearGreedCalculator; "
-                "    calc = FearGreedCalculator(); "
-                "    data = calc.calculate(); "
-                "    print(json.dumps(data)) "
-                "except Exception as e: "
-                "    print(json.dumps({'error': str(e)})) "
-            );
+    args << m_scriptsDir + "/fetch_fear_greed.py";
     executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchMarketBreadth()
 {
     QStringList args;
-    args << "-c"
-         << (
-                "import json; "
-                "import sys; "
-                "sys.path.insert(0, '.'); "
-                "try: "
-                "    from python.data_sources.yfinance_client import YFinanceClient; "
-                "    client = YFinanceClient(); "
-                "    data = client.get_market_breadth(); "
-                "    print(json.dumps(data)) "
-                "except Exception as e: "
-                "    print(json.dumps({'naik': 0, 'turun': 0, 'stagnan': 0, 'error': str(e)})) "
-            );
+    args << m_scriptsDir + "/fetch_breadth.py";
     executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchSectorPerformance()
 {
     QStringList args;
-    args << "-c"
-         << (
-                "import json; "
-                "import sys; "
-                "sys.path.insert(0, '.'); "
-                "try: "
-                "    from python.data_sources.yfinance_client import YFinanceClient; "
-                "    client = YFinanceClient(); "
-                "    sectors = [ "
-                "      {'name': 'Teknologi', 'changePct': 0.0}, "
-                "      {'name': 'Keuangan', 'changePct': 0.0}, "
-                "      {'name': 'Energi', 'changePct': 0.0}, "
-                "      {'name': 'Industri', 'changePct': 0.0}, "
-                "      {'name': 'Consumer', 'changePct': 0.0}, "
-                "    ] "
-                "    print(json.dumps(sectors)) "
-                "except Exception as e: "
-                "    print(json.dumps([])) "
-            );
+    args << m_scriptsDir + "/fetch_sectors.py";
     executeCommand(m_pythonPath, args);
 }
 
 void PythonBridge::fetchAIRegime()
 {
     QStringList args;
-    args << "-c"
-         << (
-                "import json; "
-                "import sys; "
-                "sys.path.insert(0, '.'); "
-                "try: "
-                "    from python.data_sources.yfinance_client import YFinanceClient; "
-                "    client = YFinanceClient(); "
-                "    data = client.get_index('^JKSE') "
-                "    regime = 'BULL' if data.get('changePct', 0) > 0 else 'BEAR' "
-                "    confidence = min(90, max(50, 70 + abs(data.get('changePct', 0)) * 2)) "
-                "    result = { "
-                "      'regime': regime, "
-                "      'confidence': int(confidence), "
-                "      'analysis': f'IHSG change: {data.get(\"changePct\", 0):.2f}%. Market regime: {regime}.' "
-                "    } "
-                "    print(json.dumps(result)) "
-                "except Exception as e: "
-                "    print(json.dumps({'regime': 'NEUTRAL', 'confidence': 50, 'analysis': 'Insufficient data'})) "
-            );
+    args << m_scriptsDir + "/fetch_regime.py";
     executeCommand(m_pythonPath, args);
 }
 
@@ -199,6 +103,7 @@ void PythonBridge::startWebSocket(const QStringList &symbols)
         m_webSocketProcess->waitForFinished(2000);
     }
 
+    // Use Python script for websocket
     QStringList args;
     args << "-c"
          << QString(
@@ -249,7 +154,7 @@ void PythonBridge::processNextCommand()
     
     // Get next command
     auto cmd = m_commandQueue.dequeue();
-    qDebug() << "PythonBridge: Processing command:" << cmd.first;
+    qDebug() << "PythonBridge: Processing:" << cmd.first << cmd.second;
     
     // Start new process
     m_process->start(cmd.first, cmd.second);
@@ -271,25 +176,20 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
     QString outputStr = QString::fromUtf8(output).trimmed();
     QString errorStr = QString::fromUtf8(error).trimmed();
     
-    qDebug() << "PythonBridge: Exit code:" << exitCode;
-    qDebug() << "PythonBridge: Output length:" << outputStr.length();
-    qDebug() << "PythonBridge: Error length:" << errorStr.length();
+    qDebug() << "PythonBridge: Exit:" << exitCode << "Output:" << outputStr.length() << "Error:" << errorStr.length();
     if (!errorStr.isEmpty()) {
-        qDebug() << "PythonBridge: STDERR:" << errorStr.left(500);
+        qDebug() << "PythonBridge: STDERR:" << errorStr.left(300);
     }
     if (!outputStr.isEmpty()) {
-        qDebug() << "PythonBridge: Output:" << outputStr.left(500);
+        qDebug() << "PythonBridge: Output:" << outputStr.left(300);
     }
     
-    if (exitStatus == QProcess::NormalExit && exitCode == 0) {
+    if (exitStatus == QProcess::NormalExit && exitCode == 0 && !outputStr.isEmpty()) {
         QJsonDocument doc = QJsonDocument::fromJson(outputStr.toUtf8());
 
         if (doc.isObject()) {
             QJsonObject obj = doc.object();
-            if (obj.contains("error")) {
-                emit commandError(obj["error"].toString());
-            } else {
-                emit commandOutput(outputStr);
+            if (!obj.contains("error")) {
                 emit marketDataReceived(obj);
                 
                 if (obj.contains("score") || obj.contains("indo")) {
@@ -306,7 +206,6 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
             QJsonArray arr = doc.array();
             emit sectorPerformanceReceived(arr);
             
-            // Handle batch watchlist response
             for (const auto &item : arr) {
                 QJsonObject obj = item.toObject();
                 if (obj.contains("symbol")) {
@@ -314,11 +213,11 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
                 }
             }
         }
-    } else if (!error.isEmpty()) {
-        emit commandError(QString::fromUtf8(error));
+    } else if (!errorStr.isEmpty()) {
+        emit commandError(errorStr);
     }
     
-    // Process next command in queue
+    // Process next command
     processNextCommand();
 }
 
@@ -344,6 +243,7 @@ void PythonBridge::onProcessError(QProcess::ProcessError error)
         default:
             errorMsg = "Unknown Python process error";
     }
+    qDebug() << "PythonBridge ERROR:" << errorMsg;
     emit commandError(errorMsg);
     
     // Process next command even on error
