@@ -36,7 +36,7 @@ void PythonBridge::fetchMarketData(const QString &symbol)
          << QString(
                 "import json; "
                 "import sys; "
-                "sys.path.insert(0, '../../../../../'); "
+                "sys.path.insert(0, '.'); "
                 "try: "
                 "    from python.data_sources.yfinance_client import YFinanceClient; "
                 "    client = YFinanceClient(); "
@@ -56,7 +56,7 @@ void PythonBridge::fetchWatchlistBatch(const QStringList &symbols)
          << QString(
                 "import json; "
                 "import sys; "
-                "sys.path.insert(0, '../../../../../'); "
+                "sys.path.insert(0, '.'); "
                 "from python.data_sources.yfinance_client import YFinanceClient; "
                 "client = YFinanceClient(); "
                 "results = [] "
@@ -78,7 +78,7 @@ void PythonBridge::fetchSentiment(const QString &symbol)
          << QString(
                 "import json; "
                 "import sys; "
-                "sys.path.insert(0, '../../../../../'); "
+                "sys.path.insert(0, '.'); "
                 "try: "
                 "    from python.ai.sentiment_pipeline import SentimentPipeline; "
                 "    pipeline = SentimentPipeline(use_llm=False); "
@@ -97,7 +97,7 @@ void PythonBridge::fetchFearGreedIndex()
          << (
                 "import json; "
                 "import sys; "
-                "sys.path.insert(0, '../../../../../'); "
+                "sys.path.insert(0, '.'); "
                 "try: "
                 "    from python.fear_greed.calculator import FearGreedCalculator; "
                 "    calc = FearGreedCalculator(); "
@@ -116,7 +116,7 @@ void PythonBridge::fetchMarketBreadth()
          << (
                 "import json; "
                 "import sys; "
-                "sys.path.insert(0, '../../../../../'); "
+                "sys.path.insert(0, '.'); "
                 "try: "
                 "    from python.data_sources.yfinance_client import YFinanceClient; "
                 "    client = YFinanceClient(); "
@@ -135,7 +135,7 @@ void PythonBridge::fetchSectorPerformance()
          << (
                 "import json; "
                 "import sys; "
-                "sys.path.insert(0, '../../../../../'); "
+                "sys.path.insert(0, '.'); "
                 "try: "
                 "    from python.data_sources.yfinance_client import YFinanceClient; "
                 "    client = YFinanceClient(); "
@@ -160,7 +160,7 @@ void PythonBridge::fetchAIRegime()
          << (
                 "import json; "
                 "import sys; "
-                "sys.path.insert(0, '../../../../../'); "
+                "sys.path.insert(0, '.'); "
                 "try: "
                 "    from python.data_sources.yfinance_client import YFinanceClient; "
                 "    client = YFinanceClient(); "
@@ -191,7 +191,7 @@ void PythonBridge::startWebSocket(const QStringList &symbols)
          << QString(
                 "import json; "
                 "import sys; "
-                "sys.path.insert(0, '../../../../../'); "
+                "sys.path.insert(0, '.'); "
                 "from python.data_sources.yfinance_websocket import YFinanceWebSocket; "
                 "ws = YFinanceWebSocket(); "
                 "ws.connect(['%1']); "
