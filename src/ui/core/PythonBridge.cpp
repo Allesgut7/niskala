@@ -203,11 +203,13 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
         } else if (doc.isArray()) {
             QJsonArray arr = doc.array();
             
-            // Check if this is actually sector data (has "name" and "changePct" keys)
+            // Check if this is actually sector data (has "name" and "changePct" keys, but NO "symbol")
             bool isSectorData = false;
             if (!arr.isEmpty()) {
                 QJsonObject firstItem = arr[0].toObject();
-                isSectorData = firstItem.contains("name") && firstItem.contains("changePct");
+                isSectorData = firstItem.contains("name") && 
+                               firstItem.contains("changePct") && 
+                               !firstItem.contains("symbol");
             }
             
             if (isSectorData) {
