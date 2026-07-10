@@ -67,11 +67,4 @@ void BreakingNewsTicker::paintEvent(QPaintEvent *event)
 
     // Reset clip
     painter.setClipping(false);
-
-    // Time
-    QString time = QTime::currentTime().toString("HH:mm") + " WIB";
-    painter.setPen(QColor("#859585"));
-    painter.setFont(QFont("JetBrains Mono", 9));
-    QRect timeRect(width() - 120, 0, 110, height());
-    painter.drawText(timeRect, Qt::AlignRight | Qt::AlignVCenter, time);
 }
