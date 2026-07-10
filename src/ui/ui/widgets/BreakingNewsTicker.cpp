@@ -60,7 +60,7 @@ void BreakingNewsTicker::paintEvent(QPaintEvent *event)
     painter.setFont(QFont("Inter", 10));
 
     int originalWidth = painter.fontMetrics().horizontalAdvance(ticker);
-    int x = 110 - (m_scrollOffset % originalWidth);
+    int x = 110 + originalWidth - (m_scrollOffset % (originalWidth + width()));
     int y = (height() - painter.fontMetrics().height()) / 2;
 
     painter.drawText(x, y + painter.fontMetrics().ascent(), fullTicker);
