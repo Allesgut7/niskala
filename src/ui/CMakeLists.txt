@@ -9,6 +9,15 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network)
 
+# Optional: Qt6 WebEngine for Lightweight Charts
+find_package(Qt6 COMPONENTS WebEngineWidgets QUIET)
+if(Qt6WebEngineWidgets_FOUND)
+    add_definitions(-DHAS_QTWEBENGINE)
+    message(STATUS "Qt6 WebEngine found - Lightweight Charts enabled")
+else()
+    message(STATUS "Qt6 WebEngine not found - using QPainter chart fallback")
+endif()
+
 set(SOURCES
     main.cpp
     app/MainWindow.cpp
@@ -34,6 +43,7 @@ set(SOURCES
     ui/widgets/AIMarketRegimeWidget.cpp
     ui/widgets/ForeignFlowWidget.cpp
     ui/widgets/FooterWidget.cpp
+    ui/widgets/LightweightChartWidget.cpp
     ui/screens/DashboardScreen.cpp
     ui/screens/ChartScreen.cpp
     ui/screens/ScreenerScreen.cpp
@@ -69,6 +79,7 @@ set(HEADERS
     ui/widgets/AIMarketRegimeWidget.h
     ui/widgets/ForeignFlowWidget.h
     ui/widgets/FooterWidget.h
+    ui/widgets/LightweightChartWidget.h
     ui/screens/DashboardScreen.h
     ui/screens/ChartScreen.h
     ui/screens/ScreenerScreen.h
@@ -99,6 +110,10 @@ target_link_libraries(niskala-ui PRIVATE
     Qt6::Widgets
     Qt6::Network
 )
+
+if(Qt6WebEngineWidgets_FOUND)
+    target_link_libraries(niskala-ui PRIVATE Qt6::WebEngineWidgets)
+endif()
 
 set_target_properties(niskala-ui PROPERTIES
     OUTPUT_NAME "niskala"
