@@ -251,15 +251,24 @@ void DashboardScreen::onWatchlistUpdated(const QJsonObject &data)
 
 void DashboardScreen::onMarketOverviewUpdated(const QJsonObject &data)
 {
-    QJsonArray commodities = data["commodities"].toArray();
-    for (int i = 0; i < commodities.size() && i < 7; ++i) {
-        QJsonObject obj = commodities[i].toObject();
-        m_commodityTable->updateData(
-            i,
-            obj["price"].toDouble(),
-            obj["change"].toDouble(),
-            obj["changePct"].toDouble()
-        );
+    QString symbol = data["symbol"].toString();
+    
+    // Map Yahoo Finance symbols ke row index
+    QMap<QString, int> symbolToRow = {
+        {"GC=F", 0},    // Gold
+        {"CL=F", 1},    // Crude Oil
+        {"MTXF=F", 2},  // Coal
+        {"NI=F", 3},    // Nickel
+        {"HG=F", 4},    // Copper
+        {"NG=F", 6}     // Natural Gas
+    };
+    
+    if (symbolToRow.contains(symbol)) {
+        int row = symbolToRow[symbol];
+        m_commodityTable->updateData(row,
+            data["price"].toDouble(),
+            data["change"].toDouble(),
+            data["changePct"].toDouble());
     }
 }
 

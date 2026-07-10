@@ -69,7 +69,10 @@ void DataManager::refreshWatchlist()
 
 void DataManager::refreshMarketOverview()
 {
-    m_bridge->fetchWatchlistBatch({"^JKSE", "GC=F", "CL=F", "USDIDR=X"});
+    m_bridge->fetchWatchlistBatch({
+        "^JKSE", "GC=F", "CL=F", "USDIDR=X",
+        "MTXF=F", "NI=F", "HG=F", "NG=F"
+    });
 }
 
 void DataManager::refreshFearGreedIndex()
