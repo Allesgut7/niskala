@@ -1,4 +1,5 @@
 #include "LightweightChartWidget.h"
+#include "FinancialChart.h"
 #include <QVBoxLayout>
 #include <QJsonDocument>
 #include <QJsonArray>
