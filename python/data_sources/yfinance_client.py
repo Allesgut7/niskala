@@ -24,9 +24,9 @@ class YFinanceClient:
             Dict with price, change, volume, etc.
         """
         try:
-            # Add .JK suffix for IDX stocks (not for index/forex symbols)
-            if symbol.startswith('^') or symbol.endswith('=X'):
-                ticker_symbol = symbol  # Index or forex, don't add suffix
+            # Add .JK suffix for IDX stocks (not for index/forex/commodity symbols)
+            if symbol.startswith('^') or symbol.endswith('=X') or '=F' in symbol:
+                ticker_symbol = symbol  # Index, forex, or commodity - don't add suffix
             else:
                 ticker_symbol = f"{symbol}.JK" if not symbol.endswith('.JK') else symbol
             ticker = yf.Ticker(ticker_symbol)
