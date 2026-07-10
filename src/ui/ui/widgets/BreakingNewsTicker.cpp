@@ -59,8 +59,8 @@ void BreakingNewsTicker::paintEvent(QPaintEvent *event)
     painter.setPen(QColor("#E1E2E7"));
     painter.setFont(QFont("Inter", 10));
 
-    int textWidth = painter.fontMetrics().horizontalAdvance(fullTicker);
-    int x = 110 - (m_scrollOffset % textWidth);
+    int originalWidth = painter.fontMetrics().horizontalAdvance(ticker);
+    int x = 110 - (m_scrollOffset % originalWidth);
     int y = (height() - painter.fontMetrics().height()) / 2;
 
     painter.drawText(x, y + painter.fontMetrics().ascent(), fullTicker);
