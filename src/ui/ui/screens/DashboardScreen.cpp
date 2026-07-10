@@ -58,6 +58,14 @@ void DashboardScreen::setupUI()
     m_chart = new CandlestickChart();
     leftLayout->addWidget(m_chart, 1);
 
+    // Chart Toolbar connections
+    connect(chartToolbar, &ChartToolbarWidget::timeframeChanged,
+            this, [this](const QString &tf) {
+        m_chart->setTimeframe(tf);
+        // Request chart data from TradingView
+        m_dataManager->fetchChartData("IHSG INDEX", tf, 50);
+    });
+
     // News + Sector Performance (bottom row)
     auto *bottomRow = new QHBoxLayout();
     bottomRow->setSpacing(8);
@@ -207,6 +215,8 @@ void DashboardScreen::setupDataManager()
             this, &DashboardScreen::onAIRegimeUpdated);
     connect(m_dataManager, &DataManager::newsUpdated,
             this, &DashboardScreen::onNewsUpdated);
+    connect(m_dataManager, &DataManager::tradingViewUpdated,
+            this, &DashboardScreen::onTradingViewUpdated);
     connect(m_dataManager, &DataManager::realTimeUpdate,
             this, &DashboardScreen::onRealTimeUpdate);
 
@@ -351,6 +361,26 @@ void DashboardScreen::onNewsUpdated(const QJsonArray &data)
     if (!headlines.isEmpty()) {
         m_ticker->updateHeadlines(headlines);
     }
+}
+
+void DashboardScreen::onTradingViewUpdated(const QJsonArray &data)
+{
+    if (data.isEmpty() || !m_chart) return;
+    
+    QVector<OHLCData> ohlcData;
+    for (const auto &item : data) {
+        QJsonObject obj = item.toObject();
+        OHLCData candle;
+        candle.open = obj["open"].toDouble();
+        candle.high = obj["high"].toDouble();
+        candle.low = obj["low"].toDouble();
+        candle.close = obj["close"].toDouble();
+        candle.volume = obj["volume"].toInt();
+        candle.timestamp = obj["timestamp"].toInt();
+        ohlcData.append(candle);
+    }
+    
+    m_chart->loadOHLCVData(ohlcData);
 }
 
 void DashboardScreen::onRealTimeUpdate(const QString &symbol, const QJsonObject &data)

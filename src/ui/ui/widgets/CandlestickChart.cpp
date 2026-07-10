@@ -6,12 +6,6 @@ CandlestickChart::CandlestickChart(QWidget *parent)
     : QWidget(parent)
 {
     setupUI();
-    generateSampleData();
-
-    // Timer untuk refresh data real (bukan random)
-    m_refreshTimer = new QTimer(this);
-    connect(m_refreshTimer, &QTimer::timeout, this, &CandlestickChart::fetchRealData);
-    m_refreshTimer->start(30000); // 30 detik
 }
 
 void CandlestickChart::setupUI()
@@ -23,38 +17,15 @@ void CandlestickChart::setupUI()
     layout->addWidget(m_chart);
 }
 
-void CandlestickChart::generateSampleData()
-{
-    QVector<OHLCData> data;
-    double basePrice = 9000.0;
-
-    for (int i = 0; i < 50; ++i) {
-        OHLCData candle;
-        candle.open = basePrice + (rand() % 300 - 150);
-        candle.close = candle.open + (rand() % 200 - 100);
-        candle.high = qMax(candle.open, candle.close) + (rand() % 100);
-        candle.low = qMin(candle.open, candle.close) - (rand() % 100);
-        candle.volume = 1000000 + rand() % 5000000;
-        candle.timestamp = i;
-        data.append(candle);
-
-        basePrice = candle.close;
-    }
-
-    m_chart->loadData(data);
-}
-
 void CandlestickChart::loadSymbol(const QString &symbol)
 {
     m_currentSymbol = symbol;
-    generateSampleData();
 }
 
 void CandlestickChart::setTimeframe(const QString &tf)
 {
     m_timeframe = tf;
     m_chart->setTimeframe(tf);
-    generateSampleData();
 }
 
 void CandlestickChart::setMA5Visible(bool visible)
@@ -77,9 +48,7 @@ void CandlestickChart::addRealTimeCandle(const OHLCData &candle)
     m_chart->addCandle(candle);
 }
 
-void CandlestickChart::fetchRealData()
+void CandlestickChart::loadOHLCVData(const QVector<OHLCData> &data)
 {
-    // Request historical data from DataManager via signal
-    // This is a placeholder - actual data comes from DashboardScreen
-    // via addRealTimeCandle() when data is received
+    m_chart->loadData(data);
 }

@@ -30,6 +30,10 @@ DataManager::DataManager(QObject *parent)
             this, [this](const QJsonArray &data) {
         emit newsUpdated(data);
     });
+    connect(m_bridge, &PythonBridge::tradingViewDataReceived,
+            this, [this](const QJsonArray &data) {
+        emit tradingViewUpdated(data);
+    });
     connect(m_bridge, &PythonBridge::realTimeUpdate,
             this, &DataManager::onRealTimeUpdate);
     connect(m_bridge, &PythonBridge::commandError,
@@ -98,6 +102,11 @@ void DataManager::refreshAIRegime()
 void DataManager::refreshNews()
 {
     m_bridge->fetchNews();
+}
+
+void DataManager::fetchChartData(const QString &symbol, const QString &timeframe, int candles)
+{
+    m_bridge->fetchTradingViewData(symbol, timeframe, candles);
 }
 
 void DataManager::startRealTimeStream(const QStringList &symbols)

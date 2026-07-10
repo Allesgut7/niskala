@@ -17,17 +17,15 @@ public:
     void setMA20Visible(bool visible);
     void setVolumeVisible(bool visible);
     void addRealTimeCandle(const OHLCData &candle);
+    void loadOHLCVData(const QVector<OHLCData> &data);
 
 signals:
     void symbolClicked(const QString &symbol);
 
 private:
     void setupUI();
-    void generateSampleData();
-    void fetchRealData();
 
     FinancialChart *m_chart = nullptr;
     QString m_currentSymbol = "BBCA";
     QString m_timeframe = "1D";
-    QTimer *m_refreshTimer = nullptr;
 };

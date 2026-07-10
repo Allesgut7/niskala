@@ -22,6 +22,7 @@ public:
     void fetchSectorPerformance();
     void fetchAIRegime();
     void fetchNews();
+    void fetchTradingViewData(const QString &symbol, const QString &timeframe = "1D", int candles = 50);
     void startWebSocket(const QStringList &symbols);
     void stopWebSocket();
 
@@ -34,6 +35,7 @@ signals:
     void sectorPerformanceReceived(const QJsonArray &data);
     void aiRegimeReceived(const QJsonObject &data);
     void newsReceived(const QJsonArray &data);
+    void tradingViewDataReceived(const QJsonArray &data);
     void realTimeUpdate(const QJsonObject &data);
     void commandOutput(const QString &output);
     void commandError(const QString &error);

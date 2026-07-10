@@ -108,6 +108,13 @@ void PythonBridge::fetchNews()
     executeCommand(m_pythonPath, args);
 }
 
+void PythonBridge::fetchTradingViewData(const QString &symbol, const QString &timeframe, int candles)
+{
+    QStringList args;
+    args << m_scriptsDir + "/tradingview_data.py" << symbol << timeframe << QString::number(candles);
+    executeCommand(m_pythonPath, args);
+}
+
 void PythonBridge::startWebSocket(const QStringList &symbols)
 {
     if (m_webSocketProcess->state() == QProcess::Running) {
@@ -226,10 +233,21 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
                 isNewsData = firstItem.contains("title") && firstItem.contains("source");
             }
             
+            // Check if this is TradingView OHLCV data (has "timestamp", "open", "close")
+            bool isTradingViewData = false;
+            if (!arr.isEmpty()) {
+                QJsonObject firstItem = arr[0].toObject();
+                isTradingViewData = firstItem.contains("timestamp") && 
+                                    firstItem.contains("open") && 
+                                    firstItem.contains("close");
+            }
+            
             if (isSectorData) {
                 emit sectorPerformanceReceived(arr);
             } else if (isNewsData) {
                 emit newsReceived(arr);
+            } else if (isTradingViewData) {
+                emit tradingViewDataReceived(arr);
             }
             
             for (const auto &item : arr) {
