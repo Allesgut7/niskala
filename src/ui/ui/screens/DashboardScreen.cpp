@@ -314,8 +314,7 @@ void DashboardScreen::onFearGreedUpdated(const QJsonObject &data)
         QJsonObject regime = data["regime"].toObject();
         m_aiRegime->updateData(
             regime["regime"].toString(),
-            regime["confidence"].toInt(),
-            regime["analysis"].toString()
+            regime["confidence"].toInt()
         );
     }
 }
@@ -347,44 +346,10 @@ void DashboardScreen::onSectorPerformanceUpdated(const QJsonObject &data)
 
 void DashboardScreen::onAIRegimeUpdated(const QJsonObject &data)
 {
-    QString analysis = data["analysis"].toString();
-
-    if (data.contains("intraday") && data.contains("forecast")) {
-        QJsonObject intra = data["intraday"].toObject();
-        QJsonObject forecast = data["forecast"].toObject();
-        QJsonArray intraFc = data.value("intraday_forecast").toArray();
-
-        m_aiRegime->updateData(
-            intra["bias"].toString(),
-            intra["strength"].toInt(),
-            intra["rsi"].toDouble(),
-            intra["intra_return"].toDouble(),
-            intraFc,
-            data["regime"].toString(),
-            data["confidence"].toInt(),
-            forecast["next_regime"].toString(),
-            forecast["next_confidence"].toInt(),
-            forecast["steps"].toArray(),
-            data["divergence"].toBool(),
-            analysis
-        );
-    } else if (data.contains("forecast")) {
-        QJsonObject forecast = data["forecast"].toObject();
-        m_aiRegime->updateData(
-            data["regime"].toString(),
-            data["confidence"].toInt(),
-            analysis,
-            forecast["next_regime"].toString(),
-            forecast["next_confidence"].toInt(),
-            forecast["steps"].toArray()
-        );
-    } else {
-        m_aiRegime->updateData(
-            data["regime"].toString(),
-            data["confidence"].toInt(),
-            analysis
-        );
-    }
+    m_aiRegime->updateData(
+        data["regime"].toString(),
+        data["confidence"].toInt()
+    );
 }
 
 void DashboardScreen::onNewsUpdated(const QJsonArray &data)
