@@ -52,6 +52,7 @@ signals:
 
 private slots:
     void onAutoRefresh();
+    void onNewsRefresh();
     void onMarketDataReceived(const QJsonObject &data);
     void onFearGreedReceived(const QJsonObject &data);
     void onCommandError(const QString &error);
@@ -60,6 +61,7 @@ private slots:
 private:
     PythonBridge *m_bridge = nullptr;
     QTimer *m_refreshTimer = nullptr;
+    QTimer *m_newsTimer = nullptr;
     bool m_refreshing = false;
     QStringList m_watchlist;
 };

@@ -6,8 +6,10 @@ DataManager::DataManager(QObject *parent)
 {
     m_bridge = new PythonBridge(this);
     m_refreshTimer = new QTimer(this);
+    m_newsTimer = new QTimer(this);
 
     connect(m_refreshTimer, &QTimer::timeout, this, &DataManager::onAutoRefresh);
+    connect(m_newsTimer, &QTimer::timeout, this, &DataManager::onNewsRefresh);
     connect(m_bridge, &PythonBridge::marketDataReceived,
             this, &DataManager::onMarketDataReceived);
     connect(m_bridge, &PythonBridge::fearGreedReceived,
@@ -53,11 +55,13 @@ DataManager::DataManager(QObject *parent)
 void DataManager::startAutoRefresh(int intervalSec)
 {
     m_refreshTimer->start(intervalSec * 1000);
+    m_newsTimer->start(10000); // 10 seconds
 }
 
 void DataManager::stopAutoRefresh()
 {
     m_refreshTimer->stop();
+    m_newsTimer->stop();
 }
 
 void DataManager::refreshAll()
@@ -140,6 +144,11 @@ void DataManager::stopRealTimeStream()
 void DataManager::onAutoRefresh()
 {
     refreshAll();
+}
+
+void DataManager::onNewsRefresh()
+{
+    refreshNews();
 }
 
 void DataManager::onMarketDataReceived(const QJsonObject &data)

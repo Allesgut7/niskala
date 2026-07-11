@@ -12,7 +12,7 @@
 #endif
 
 LightweightChartWidget::LightweightChartWidget(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent), m_pageLoaded(false)
 {
     setupUI();
 }
@@ -26,17 +26,28 @@ void LightweightChartWidget::setupUI()
 
 #ifdef HAS_QTWEBENGINE
     m_webView = new QWebEngineView();
-    m_channel = new QWebChannel(this);
     
-    // Load chart HTML
+    // Load chart HTML from resources
     m_webView->setUrl(QUrl("qrc:/chart.html"));
     m_webView->setStyleSheet("background-color: transparent; border: none;");
     
-    m_webView->page()->setWebChannel(m_channel);
+    // Wait for page to load before sending data
+    connect(m_webView, &QWebEngineView::loadFinished, this, [this](bool ok) {
+        m_pageLoaded = ok;
+        if (ok) {
+            qDebug() << "LightweightChart: Page loaded successfully";
+            // Send queued data
+            if (!m_queuedData.isEmpty()) {
+                sendDataToJs(m_queuedData);
+                m_queuedData.clear();
+            }
+        } else {
+            qDebug() << "LightweightChart: Page load FAILED";
+        }
+    });
     
     layout->addWidget(m_webView);
 #else
-    // Fallback: show placeholder
     auto *placeholder = new QLabel("Lightweight Charts unavailable\nInstall Qt6 WebEngine");
     placeholder->setAlignment(Qt::AlignCenter);
     placeholder->setStyleSheet("color: #859585; font-size: 14px; background-color: #1D2023;");
@@ -46,9 +57,11 @@ void LightweightChartWidget::setupUI()
 
 void LightweightChartWidget::loadData(const QVector<OHLCData> &data)
 {
-#ifdef HAS_QTWEBENGINE
-    sendDataToJs(data);
-#endif
+    if (m_pageLoaded) {
+        sendDataToJs(data);
+    } else {
+        m_queuedData = data; // Queue until page loads
+    }
 }
 
 void LightweightChartWidget::loadSymbol(const QString &symbol)
@@ -79,6 +92,11 @@ void LightweightChartWidget::setVolumeVisible(bool visible)
 void LightweightChartWidget::sendDataToJs(const QVector<OHLCData> &data)
 {
 #ifdef HAS_QTWEBENGINE
+    if (!m_webView || !m_pageLoaded) {
+        m_queuedData = data;
+        return;
+    }
+    
     QJsonArray arr;
     for (const auto &candle : data) {
         QJsonObject obj;
@@ -94,8 +112,14 @@ void LightweightChartWidget::sendDataToJs(const QVector<OHLCData> &data)
     QJsonDocument doc(arr);
     QString jsonStr = QString::fromUtf8(doc.toJson(QJsonDocument::Compact));
     
-    // Call JavaScript function
+    // Escape single quotes for JavaScript
+    jsonStr.replace("'", "\\'");
+    
+    // Call JavaScript function after page is loaded
     m_webView->page()->runJavaScript(
-        QString("onQtDataReceived('%1');").arg(jsonStr));
+        QString("onQtDataReceived('%1');").arg(jsonStr),
+        [](const QVariant &result) {
+            qDebug() << "LightweightChart: JS result:" << result;
+        });
 #endif
 }

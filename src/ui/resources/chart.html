@@ -3,141 +3,158 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<script>
+// Load Lightweight Charts from CDN with fallback
+function loadScript(url, callback) {
+    var script = document.createElement('script');
+    script.src = url;
+    script.onload = callback;
+    script.onerror = function() {
+        console.log('Failed to load: ' + url);
+    };
+    document.head.appendChild(script);
+}
+
+loadScript('https://unpkg.com/lightweight-charts@5.0/dist/lightweight-charts.standalone.production.js', function() {
+    initChart();
+    console.log('Lightweight Charts loaded successfully');
+});
+</script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: #1D2023; }
 #chart { width: 100%; height: 100%; }
+#loading {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: #859585; font-family: 'JetBrains Mono', monospace; font-size: 14px;
+}
 </style>
 </head>
 <body>
-<div id="chart"></div>
+<div id="loading">Loading chart...</div>
+<div id="chart" style="display:none"></div>
 <script>
 let chart = null;
 let candleSeries = null;
 let volumeSeries = null;
 let ma5Series = null;
 let ma20Series = null;
+let chartReady = false;
 
 function initChart() {
-    chart = createChart(document.getElementById('chart'), {
-        layout: {
-            background: { type: 'solid', color: '#1D2023' },
-            textColor: '#E1E2E7',
-            fontSize: 11,
-            fontFamily: 'JetBrains Mono, monospace'
-        },
-        grid: {
-            vertLines: { color: '#3B4A3D', style: 2 },
-            horzLines: { color: '#3B4A3D', style: 2 }
-        },
-        crosshair: {
-            mode: 0,
-            vertLine: { color: '#859585', width: 1, style: 2, labelBackgroundColor: '#323538' },
-            horzLine: { color: '#859585', width: 1, style: 2, labelBackgroundColor: '#323538' }
-        },
-        rightPriceScale: {
-            borderColor: '#3B4A3D',
-            textColor: '#859585'
-        },
-        timeScale: {
-            borderColor: '#3B4A3D',
-            textColor: '#859585',
-            timeVisible: false
-        },
-        handleScroll: false,
-        handleScale: false,
-    });
+    var container = document.getElementById('chart');
+    if (!container) { console.error('Chart container not found'); return; }
+    
+    document.getElementById('loading').style.display = 'none';
+    container.style.display = 'block';
+    
+    try {
+        chart = createChart(container, {
+            layout: {
+                background: { type: 'solid', color: '#1D2023' },
+                textColor: '#E1E2E7',
+                fontSize: 11,
+                fontFamily: 'JetBrains Mono, monospace'
+            },
+            grid: {
+                vertLines: { color: '#3B4A3D', style: 2 },
+                horzLines: { color: '#3B4A3D', style: 2 }
+            },
+            crosshair: {
+                mode: 0,
+                vertLine: { color: '#859585', width: 1, style: 2, labelBackgroundColor: '#323538' },
+                horzLine: { color: '#859585', width: 1, style: 2, labelBackgroundColor: '#323538' }
+            },
+            rightPriceScale: { borderColor: '#3B4A3D', textColor: '#859585' },
+            timeScale: { borderColor: '#3B4A3D', textColor: '#859585', timeVisible: false },
+            handleScroll: false,
+            handleScale: false,
+        });
 
-    candleSeries = chart.addCandlestickSeries({
-        upColor: '#75FF9E',
-        downColor: '#FF5C72',
-        borderUpColor: '#75FF9E',
-        borderDownColor: '#FF5C72',
-        wickUpColor: '#75FF9E',
-        wickDownColor: '#FF5C72'
-    });
+        candleSeries = chart.addCandlestickSeries({
+            upColor: '#75FF9E',
+            downColor: '#FF5C72',
+            borderUpColor: '#75FF9E',
+            borderDownColor: '#FF5C72',
+            wickUpColor: '#75FF9E',
+            wickDownColor: '#FF5C72'
+        });
 
-    volumeSeries = chart.addHistogramSeries({
-        priceFormat: { type: 'volume' },
-        priceScaleId: 'volume',
-        color: '#3B4A3D'
-    });
+        volumeSeries = chart.addHistogramSeries({
+            priceFormat: { type: 'volume' },
+            priceScaleId: 'volume',
+            color: '#3B4A3D'
+        });
 
-    ma5Series = chart.addLineSeries({
-        color: '#CEE8FF',
-        lineWidth: 1,
-        priceLineVisible: false,
-        lastValueVisible: false,
-        visible: true
-    });
+        ma5Series = chart.addLineSeries({
+            color: '#CEE8FF', lineWidth: 1, priceLineVisible: false
+        });
 
-    ma20Series = chart.addLineSeries({
-        color: '#859585',
-        lineWidth: 1,
-        lineStyle: 2,
-        priceLineVisible: false,
-        lastValueVisible: false,
-        visible: true
-    });
+        ma20Series = chart.addLineSeries({
+            color: '#859585', lineWidth: 1, lineStyle: 2, priceLineVisible: false
+        });
 
-    chart.timeScale().fitContent();
+        chart.timeScale().fitContent();
+        chartReady = true;
+        console.log('Chart initialized successfully');
+    } catch(e) {
+        console.error('Chart init error:', e);
+    }
 }
 
 function updateData(data) {
-    if (!data || data.length === 0) return;
+    if (!data || data.length === 0 || !chartReady) return;
     
-    const candles = data.map(d => ({
-        time: d.timestamp,
-        open: d.open,
-        high: d.high,
-        low: d.low,
-        close: d.close
-    }));
-    candleSeries.setData(candles);
-
-    const volumes = data.map(d => ({
-        time: d.timestamp,
-        value: d.volume,
-        color: d.close >= d.open ? '#75FF9E' : '#FF5C72'
-    }));
-    volumeSeries.setData(volumes);
-
-    // MA5
-    if (data.length >= 5) {
-        const ma5 = data.slice(4).map((d, i) => {
-            let sum = 0;
-            for (let j = i; j < i + 5; j++) sum += data[j].close;
-            return { time: d.timestamp, value: sum / 5 };
-        });
-        ma5Series.setData(ma5);
-    }
-
-    // MA20
-    if (data.length >= 20) {
-        const ma20 = data.slice(19).map((d, i) => {
-            let sum = 0;
-            for (let j = i; j < i + 20; j++) sum += data[j].close;
-            return { time: d.timestamp, value: sum / 20 };
-        });
-        ma20Series.setData(ma20);
-    }
-
-    chart.timeScale().fitContent();
-}
-
-// Listen for Qt WebChannel messages
-function onQtDataReceived(jsonData) {
     try {
-        const data = JSON.parse(jsonData);
-        updateData(data);
+        var candles = data.map(function(d) {
+            return { time: d.timestamp, open: d.open, high: d.high, low: d.low, close: d.close };
+        });
+        candleSeries.setData(candles);
+
+        var volumes = data.map(function(d) {
+            return { time: d.timestamp, value: d.volume, 
+                     color: d.close >= d.open ? '#75FF9E' : '#FF5C72' };
+        });
+        volumeSeries.setData(volumes);
+
+        if (data.length >= 5) {
+            var ma5 = [];
+            for (var i = 4; i < data.length; i++) {
+                var sum = 0;
+                for (var j = i - 4; j <= i; j++) sum += data[j].close;
+                ma5.push({ time: data[i].timestamp, value: sum / 5 });
+            }
+            ma5Series.setData(ma5);
+        }
+
+        if (data.length >= 20) {
+            var ma20 = [];
+            for (var i = 19; i < data.length; i++) {
+                var sum = 0;
+                for (var j = i - 19; j <= i; j++) sum += data[j].close;
+                ma20.push({ time: data[i].timestamp, value: sum / 20 });
+            }
+            ma20Series.setData(ma20);
+        }
+
+        chart.timeScale().fitContent();
+        console.log('Chart data updated: ' + candles.length + ' candles');
     } catch(e) {
-        console.error('Invalid data:', e);
+        console.error('Chart update error:', e);
     }
 }
 
-// Initialize
-initChart();
+function onQtDataReceived(jsonStr) {
+    try {
+        var data = JSON.parse(jsonStr);
+        console.log('Qt data received: ' + data.length + ' items');
+        if (Array.isArray(data)) {
+            updateData(data);
+        }
+    } catch(e) {
+        console.error('Parse error:', e);
+    }
+}
 </script>
 </body>
 </html>
