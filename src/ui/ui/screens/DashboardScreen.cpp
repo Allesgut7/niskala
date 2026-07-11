@@ -129,7 +129,7 @@ void DashboardScreen::setupUI()
     m_commodityTable = new CommodityTable();
     commodityLayout->addWidget(m_commodityTable);
 
-    rightLayout->addWidget(commodityWidget, 1);
+    rightLayout->addWidget(commodityWidget);
 
     // Market Breadth
     auto *breadthWidget = new QWidget();
@@ -145,7 +145,7 @@ void DashboardScreen::setupUI()
 
     // AI Market Regime
     m_aiRegime = new AIMarketRegimeWidget();
-    rightLayout->addWidget(m_aiRegime);
+    rightLayout->addWidget(m_aiRegime, 1);
 
     rightLayout->addStretch();
 
@@ -230,7 +230,7 @@ void DashboardScreen::setupDataManager()
     m_dataManager->startRealTimeStream(symbols);
     
     // Fetch initial chart data
-    m_dataManager->fetchChartData("^JKSE", "D", 50);
+    m_dataManager->fetchChartData("JKSE", "D", 50);
 }
 
 void DashboardScreen::onWatchlistUpdated(const QJsonObject &data)
@@ -358,14 +358,26 @@ void DashboardScreen::onAIRegimeUpdated(const QJsonObject &data)
     QJsonArray forecastSteps;
     QString analysis = data["analysis"].toString();
 
+    // NEXT 1H: from intraday_forecast[0] if available, else from forecast.next_regime
+    if (data.contains("intraday_forecast")) {
+        QJsonArray intraFc = data["intraday_forecast"].toArray();
+        if (!intraFc.isEmpty()) {
+            QJsonObject ih = intraFc[0].toObject();
+            next1hRegime = ih["bias"].toString();
+            next1hConfidence = static_cast<int>(ih["confidence"].toDouble());
+        }
+    }
+
     if (data.contains("forecast")) {
         QJsonObject forecast = data["forecast"].toObject();
-        next1hRegime = forecast["next_regime"].toString();
-        next1hConfidence = forecast["next_confidence"].toInt();
+        if (next1hRegime.isEmpty()) {
+            next1hRegime = forecast["next_regime"].toString();
+            next1hConfidence = forecast["next_confidence"].toInt();
+        }
         forecastSteps = forecast["steps"].toArray();
     }
 
-    // Next day is Day 1 of forecast or current regime
+    // NEXT DAY: from forecast steps[0] or current regime
     if (!forecastSteps.isEmpty()) {
         QJsonObject step1 = forecastSteps[0].toObject();
         nextDayRegime = step1["regime"].toString();
@@ -375,12 +387,40 @@ void DashboardScreen::onAIRegimeUpdated(const QJsonObject &data)
         nextDayConfidence = data["confidence"].toInt();
     }
 
+    // Override + divergence + accuracy
+    bool overrideActive = false;
+    QString overrideRegime;
+    int overrideHours = 0;
+    bool divergence = false;
+    double acc7d = 0, acc30d = 0, accTotal = 0;
+
+    if (data.contains("override") && data["override"].isObject()) {
+        QJsonObject ov = data["override"].toObject();
+        overrideActive = ov["active"].toBool();
+        overrideRegime = ov["regime"].toString();
+        overrideHours = ov["consecutive_hours"].toInt();
+    }
+
+    if (data.contains("divergence")) {
+        divergence = data["divergence"].toBool();
+    }
+
+    if (data.contains("accuracy")) {
+        QJsonObject acc = data["accuracy"].toObject();
+        acc7d = acc["7d"].toDouble();
+        acc30d = acc["30d"].toDouble();
+        accTotal = acc["total"].toDouble();
+    }
+
     m_aiRegime->updateData(
         data["regime"].toString(),
         data["confidence"].toInt(),
         next1hRegime, next1hConfidence,
         nextDayRegime, nextDayConfidence,
-        analysis, forecastSteps
+        analysis, forecastSteps,
+        overrideActive, overrideRegime, overrideHours,
+        divergence,
+        acc7d, acc30d, accTotal
     );
 }
 
