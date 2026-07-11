@@ -22,6 +22,14 @@ DataManager::DataManager(QObject *parent)
         obj["sectors"] = data;
         emit sectorPerformanceUpdated(obj);
     });
+    connect(m_bridge, &PythonBridge::commoditiesReceived,
+            this, [this](const QJsonArray &data) {
+        emit commoditiesUpdated(data);
+    });
+    connect(m_bridge, &PythonBridge::indicesReceived,
+            this, [this](const QJsonArray &data) {
+        emit indicesUpdated(data);
+    });
     connect(m_bridge, &PythonBridge::aiRegimeReceived,
             this, [this](const QJsonObject &data) {
         emit aiRegimeUpdated(data);
@@ -92,6 +100,16 @@ void DataManager::refreshMarketBreadth()
 void DataManager::refreshSectorPerformance()
 {
     m_bridge->fetchSectorPerformance();
+}
+
+void DataManager::refreshCommodities()
+{
+    m_bridge->fetchCommodities();
+}
+
+void DataManager::refreshIndices()
+{
+    m_bridge->fetchIndices();
 }
 
 void DataManager::refreshAIRegime()

@@ -115,6 +115,20 @@ void PythonBridge::fetchTradingViewData(const QString &symbol, const QString &ti
     executeCommand(m_pythonPath, args);
 }
 
+void PythonBridge::fetchCommodities()
+{
+    QStringList args;
+    args << m_scriptsDir + "/fetch_commodities.py";
+    executeCommand(m_pythonPath, args);
+}
+
+void PythonBridge::fetchIndices()
+{
+    QStringList args;
+    args << m_scriptsDir + "/fetch_indices.py";
+    executeCommand(m_pythonPath, args);
+}
+
 void PythonBridge::startWebSocket(const QStringList &symbols)
 {
     if (m_webSocketProcess->state() == QProcess::Running) {
@@ -242,18 +256,40 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
                                     firstItem.contains("close");
             }
             
+            // Detect data type by symbol pattern
+            bool isCommodityData = false;
+            bool isIndexData = false;
+            bool isStockData = false;
+            
+            if (!arr.isEmpty() && !isSectorData && !isNewsData && !isTradingViewData) {
+                QJsonObject firstItem = arr[0].toObject();
+                if (firstItem.contains("symbol")) {
+                    QString sym = firstItem["symbol"].toString();
+                    isCommodityData = sym.contains("=");    // GC=F, CL=F
+                    isIndexData = sym.startsWith("^");      // ^JKSE, ^N225
+                    isStockData = !isCommodityData && !isIndexData;  // BBCA, BBRI
+                }
+            }
+            
             if (isSectorData) {
                 emit sectorPerformanceReceived(arr);
             } else if (isNewsData) {
                 emit newsReceived(arr);
             } else if (isTradingViewData) {
                 emit tradingViewDataReceived(arr);
+            } else if (isCommodityData) {
+                emit commoditiesReceived(arr);
+            } else if (isIndexData) {
+                emit indicesReceived(arr);
             }
             
-            for (const auto &item : arr) {
-                QJsonObject obj = item.toObject();
-                if (obj.contains("symbol")) {
-                    emit watchlistUpdated(obj);
+            // For stock data, emit individual watchlist updates
+            if (isStockData || isCommodityData || isIndexData) {
+                for (const auto &item : arr) {
+                    QJsonObject obj = item.toObject();
+                    if (obj.contains("symbol")) {
+                        emit watchlistUpdated(obj);
+                    }
                 }
             }
         }

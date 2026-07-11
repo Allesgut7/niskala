@@ -20,6 +20,8 @@ public:
     void fetchFearGreedIndex();
     void fetchMarketBreadth();
     void fetchSectorPerformance();
+    void fetchCommodities();
+    void fetchIndices();
     void fetchAIRegime();
     void fetchNews();
     void fetchTradingViewData(const QString &symbol, const QString &timeframe = "1D", int candles = 50);
@@ -33,6 +35,8 @@ signals:
     void fearGreedReceived(const QJsonObject &data);
     void marketBreadthReceived(const QJsonObject &data);
     void sectorPerformanceReceived(const QJsonArray &data);
+    void commoditiesReceived(const QJsonArray &data);
+    void indicesReceived(const QJsonArray &data);
     void aiRegimeReceived(const QJsonObject &data);
     void newsReceived(const QJsonArray &data);
     void tradingViewDataReceived(const QJsonArray &data);
