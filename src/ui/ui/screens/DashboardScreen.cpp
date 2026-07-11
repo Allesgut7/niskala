@@ -230,7 +230,7 @@ void DashboardScreen::setupDataManager()
     m_dataManager->startRealTimeStream(symbols);
     
     // Fetch initial chart data
-    m_dataManager->fetchChartData("IHSG INDEX", "D", 50);
+    m_dataManager->fetchChartData("^JKSE", "D", 50);
 }
 
 void DashboardScreen::onWatchlistUpdated(const QJsonObject &data)
