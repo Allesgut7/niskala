@@ -18,9 +18,8 @@ BreakingNewsTicker::BreakingNewsTicker(QWidget *parent)
 
 void BreakingNewsTicker::updateHeadlines(const QStringList &headlines)
 {
-    if (!headlines.isEmpty()) {
+    if (!headlines.isEmpty() && headlines != m_headlines) {
         m_headlines = headlines;
-        m_scrollOffset = 0;
         update();
     }
 }
