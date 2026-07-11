@@ -312,9 +312,16 @@ void DashboardScreen::onFearGreedUpdated(const QJsonObject &data)
     }
     if (data.contains("regime")) {
         QJsonObject regime = data["regime"].toObject();
+        QJsonArray emptySteps;
         m_aiRegime->updateData(
             regime["regime"].toString(),
-            regime["confidence"].toInt()
+            regime["confidence"].toInt(),
+            regime["next1h"].toString(),
+            regime["next1h_conf"].toInt(),
+            regime["next_day"].toString(),
+            regime["next_day_conf"].toInt(),
+            regime["analysis"].toString(),
+            emptySteps
         );
     }
 }
@@ -346,9 +353,34 @@ void DashboardScreen::onSectorPerformanceUpdated(const QJsonObject &data)
 
 void DashboardScreen::onAIRegimeUpdated(const QJsonObject &data)
 {
+    QString next1hRegime, nextDayRegime;
+    int next1hConfidence = 0, nextDayConfidence = 0;
+    QJsonArray forecastSteps;
+    QString analysis = data["analysis"].toString();
+
+    if (data.contains("forecast")) {
+        QJsonObject forecast = data["forecast"].toObject();
+        next1hRegime = forecast["next_regime"].toString();
+        next1hConfidence = forecast["next_confidence"].toInt();
+        forecastSteps = forecast["steps"].toArray();
+    }
+
+    // Next day is Day 1 of forecast or current regime
+    if (!forecastSteps.isEmpty()) {
+        QJsonObject step1 = forecastSteps[0].toObject();
+        nextDayRegime = step1["regime"].toString();
+        nextDayConfidence = static_cast<int>(step1["probability"].toDouble());
+    } else {
+        nextDayRegime = data["regime"].toString();
+        nextDayConfidence = data["confidence"].toInt();
+    }
+
     m_aiRegime->updateData(
         data["regime"].toString(),
-        data["confidence"].toInt()
+        data["confidence"].toInt(),
+        next1hRegime, next1hConfidence,
+        nextDayRegime, nextDayConfidence,
+        analysis, forecastSteps
     );
 }
 
