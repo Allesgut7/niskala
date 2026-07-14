@@ -47,6 +47,20 @@ class NewsCollector:
         },
     }
     
+    IPO_KEYWORDS = [
+        'ipo', 'initial public offering', 'go public',
+        'tercatat di bursa', 'peluncuran saham',
+        'saham baru', 'penawaran umum perdana', 'right issue',
+        'saham berhak', 'corporate action', 'efek baru',
+        'emas baru', 'pencatatan saham',
+    ]
+
+    DELISTING_KEYWORDS = [
+        'delisting', 'penghapusan saham', 'suspensi', 'suspended',
+        'ditangguhkan', 'dicabut', 'pencatatan ditutup',
+        'dihentikan perdagangannya',
+    ]
+
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({
@@ -108,9 +122,10 @@ class NewsCollector:
                     'timestamp': self._parse_date(entry),
                     'sectors': sectors,
                     'tickers': tickers,
+                    'corporate_actions': self._detect_corporate_actions(title + ' ' + summary),
                     'category': src_info.get('category', ''),
                     'language': src_info.get('language', 'en'),
-                    'sentiment_score': 0,  # Will be filled by FinBERT
+                    'sentiment_score': 0,
                     'sentiment_label': 'NEUTRAL'
                 }
                 
@@ -167,6 +182,19 @@ class NewsCollector:
         
         return [t for t in potential if t in known_tickers]
     
+    def _detect_corporate_actions(self, text: str) -> List[str]:
+        """Detect IPO or delisting mentions in text"""
+        text_lower = text.lower()
+        actions = []
+
+        if any(kw in text_lower for kw in self.IPO_KEYWORDS):
+            actions.append('IPO')
+
+        if any(kw in text_lower for kw in self.DELISTING_KEYWORDS):
+            actions.append('DELISTING')
+
+        return actions
+
     def _build_sector_keywords(self) -> Dict[str, List[str]]:
         """Build sector keyword mapping"""
         return {

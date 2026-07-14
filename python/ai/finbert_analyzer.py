@@ -1,5 +1,5 @@
 # Niskala - Sentiment Analyzer (Indonesian Model)
-# Version: 2.0.0
+# Version: 2.1.0
 # Using IndoBERT-based model for Indonesian financial sentiment
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -7,20 +7,36 @@ import torch
 from typing import Dict, Optional
 import logging
 
+from .models.market_impact_model import FinancialMarketImpactModel
+
 
 class FinBERTAnalyzer:
-    """Sentiment analyzer for Indonesian financial text"""
+    """Sentiment analyzer for Indonesian financial text
+    
+    Supports two model backends:
+    - "legacy" (default): taufiqdp/indonesian-sentiment (3-class)
+    - "market_impact": Multi-task FinancialMarketImpactModel (6 tasks)
+    """
     
     # Model: IndoBERT fine-tuned for Indonesian sentiment
     # Accuracy: 95.69% on Indonesian text
     # Classes: negatif, netral, positif
     MODEL_NAME = "taufiqdp/indonesian-sentiment"
     
-    def __init__(self):
+    def __init__(self, model_type: str = "legacy", model_dir: Optional[str] = None):
         self.tokenizer = None
         self.model = None
+        self.model_type = model_type
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self._load_model()
+        
+        if model_type == "market_impact":
+            if not model_dir:
+                model_dir = "indobert-financial/models/indobert-market-impact-v1/"
+            self.market_model = FinancialMarketImpactModel(model_dir)
+            logging.info(f"FinBERTAnalyzer using market_impact model from {model_dir}")
+        else:
+            self.market_model = None
+            self._load_model()
         
     def _load_model(self):
         """Load Indonesian sentiment model and tokenizer"""
@@ -39,24 +55,22 @@ class FinBERTAnalyzer:
     
     def analyze(self, text: str) -> Dict:
         """Analyze sentiment of Indonesian text
-        
+
         Args:
             text: Indonesian text to analyze (news headline, summary, etc.)
-            
+
         Returns:
-            Dict with:
-                - score: -100 to +100 (negative to positive)
-                - label: POSITIVE, NEGATIVE, NEUTRAL
-                - positive: 0-1 probability
-                - negative: 0-1 probability
-                - neutral: 0-1 probability
-                - confidence: 0-100
+            Dict with sentiment analysis results.
+            Legacy mode: score, label, positive, negative, neutral, confidence
+            Market impact mode: + sentiment, event, impact, time_horizon, entities, relations
         """
         if not text or not text.strip():
             return self._empty_result()
-        
+
+        if self.model_type == "market_impact":
+            return self.market_model.analyze(text)
+
         try:
-            # Tokenize
             inputs = self.tokenizer(
                 text,
                 return_tensors="pt",
@@ -65,22 +79,17 @@ class FinBERTAnalyzer:
                 padding=True
             )
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
-            
-            # Inference
+
             with torch.no_grad():
                 outputs = self.model(**inputs)
                 probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
-            
-            # Model outputs: [negatif, netral, positif]
-            # Index 0 = negatif, Index 1 = netral, Index 2 = positif
+
             negative = probs[0][0].item()
             neutral = probs[0][1].item()
             positive = probs[0][2].item()
-            
-            # Calculate score (-100 to +100)
+
             score = int((positive - negative) * 100)
-            
-            # Determine label
+
             max_prob = max(positive, negative, neutral)
             if max_prob == positive:
                 label = "POSITIVE"
@@ -88,10 +97,9 @@ class FinBERTAnalyzer:
                 label = "NEGATIVE"
             else:
                 label = "NEUTRAL"
-            
-            # Confidence
+
             confidence = int(max_prob * 100)
-            
+
             return {
                 'score': score,
                 'label': label,
@@ -100,7 +108,7 @@ class FinBERTAnalyzer:
                 'neutral': neutral,
                 'confidence': confidence
             }
-            
+
         except Exception as e:
             logging.error(f"Sentiment analysis error: {e}")
             return self._empty_result()
@@ -114,18 +122,30 @@ class FinBERTAnalyzer:
         Returns:
             List of sentiment dicts
         """
+        if self.model_type == "market_impact":
+            return self.market_model.analyze_batch(texts)
         return [self.analyze(text) for text in texts]
     
     def _empty_result(self) -> Dict:
         """Return empty sentiment result"""
-        return {
+        base = {
             'score': 0,
             'label': 'NEUTRAL',
             'positive': 0.0,
             'negative': 0.0,
             'neutral': 1.0,
-            'confidence': 0
+            'confidence': 0,
         }
+        if self.model_type == "market_impact":
+            base.update({
+                'sentiment': 'Neutral',
+                'event': [],
+                'impact': 'Neutral',
+                'time_horizon': 'Swing',
+                'entities': [],
+                'relations': [],
+            })
+        return base
 
 
 # Test function

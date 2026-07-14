@@ -4,6 +4,9 @@
 
 from typing import Dict, List, Optional
 import logging
+import os
+import subprocess
+import sys
 from datetime import datetime
 import time
 
@@ -84,6 +87,9 @@ class SentimentPipeline:
                     logging.error(f"LLM interpretation failed: {e}")
                     article['llm_interpretation'] = None
         
+        # Check for IPO/delisting news → auto-refresh ticker list
+        self._check_corporate_actions(articles)
+
         # Calculate impact scores
         logging.info("Calculating impact matrix...")
         for article in articles:
@@ -172,6 +178,32 @@ class SentimentPipeline:
             'label': label,
             'articles': relevant[:5]  # Top 5 articles
         }
+    
+    def _check_corporate_actions(self, articles: List[Dict]):
+        """Check articles for IPO/delisting news and trigger ticker refresh"""
+        has_ipo = any('IPO' in a.get('corporate_actions', []) for a in articles)
+        has_delisting = any('DELISTING' in a.get('corporate_actions', []) for a in articles)
+
+        if not has_ipo and not has_delisting:
+            return
+
+        trigger = 'IPO' if has_ipo else 'DELISTING'
+        logging.info(f"Detected {trigger} news — refreshing idx_tickers.json...")
+
+        script_path = os.path.join(
+            os.path.dirname(__file__), '..', 'scripts', 'generate_idx_tickers.py'
+        )
+        try:
+            result = subprocess.run(
+                [sys.executable, script_path],
+                capture_output=True, text=True, timeout=60
+            )
+            if result.returncode == 0:
+                logging.info(f"Ticker list refreshed: {result.stdout.strip()}")
+            else:
+                logging.warning(f"Ticker refresh failed: {result.stderr}")
+        except Exception as e:
+            logging.error(f"Ticker refresh error: {e}")
 
 
 class SectorMapper:
