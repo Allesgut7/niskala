@@ -1,12 +1,14 @@
 #pragma once
 
 #include <QWidget>
-#include <QComboBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QCheckBox>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QVector>
 
-class CandlestickChart;
+class LightweightChartWidget;
+class ChartToolbarWidget;
+class DataManager;
+struct OHLCData;
 
 class ChartScreen : public QWidget
 {
@@ -18,16 +20,21 @@ public:
     void loadSymbol(const QString &symbol);
 
 private slots:
-    void onTimeframeChanged(int index);
-    void onIndicatorToggled();
+    void onSymbolRequested(const QString &symbol);
+    void onTimeframeChanged(const QString &tf);
+    void onChartTypeChanged(const QString &type);
+    void onIndicatorToggled(const QString &name, bool visible);
+    void onTradingViewUpdated(const QJsonArray &data);
+    void onRealTimeUpdate(const QString &symbol, const QJsonObject &data);
+    void onTemplateApplied(const QJsonObject &config);
 
 private:
     void setupUI();
-
-    CandlestickChart *m_chart = nullptr;
-    QComboBox *m_symbolCombo = nullptr;
-    QComboBox *m_timeframeCombo = nullptr;
-    QCheckBox *m_ma5Check = nullptr;
-    QCheckBox *m_ma20Check = nullptr;
-    QCheckBox *m_volumeCheck = nullptr;
+    void setupDataManager();
+    void fetchChartData(const QString &symbol, const QString &tf, int candles);
+    LightweightChartWidget *m_chart = nullptr;
+    ChartToolbarWidget *m_toolbar = nullptr;
+    DataManager *m_dataManager = nullptr;
+    QString m_currentSymbol;
+    QString m_currentTf = "D";
 };

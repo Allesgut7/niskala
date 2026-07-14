@@ -1,10 +1,11 @@
 #pragma once
 
 #include <QWidget>
+#include <QLabel>
 
 class BreakingNewsTicker;
 class MarketIndicesStrip;
-class CandlestickChart;
+class LightweightChartWidget;
 class FearGreedGauge;
 class CommodityTable;
 class MarketBreadthWidget;
@@ -31,6 +32,7 @@ private slots:
     void onMarketBreadthUpdated(const QJsonObject &data);
     void onSectorPerformanceUpdated(const QJsonObject &data);
     void onAIRegimeUpdated(const QJsonObject &data);
+    void onTopMoversUpdated(const QJsonObject &data);
     void onNewsUpdated(const QJsonArray &data);
     void onTradingViewUpdated(const QJsonArray &data);
     void onRealTimeUpdate(const QString &symbol, const QJsonObject &data);
@@ -41,7 +43,7 @@ private:
 
     BreakingNewsTicker *m_ticker = nullptr;
     MarketIndicesStrip *m_indicesStrip = nullptr;
-    CandlestickChart *m_chart = nullptr;
+    LightweightChartWidget *m_chart = nullptr;
     FearGreedGauge *m_fgIndo = nullptr;
     FearGreedGauge *m_fgAsia = nullptr;
     FearGreedGauge *m_fgGlobal = nullptr;
@@ -50,5 +52,15 @@ private:
     AIMarketRegimeWidget *m_aiRegime = nullptr;
     NewsScreen *m_news = nullptr;
     SectorPerformanceWidget *m_sectorPerf = nullptr;
+    QLabel *m_gainersLabel = nullptr;
+    QLabel *m_losersLabel = nullptr;
     DataManager *m_dataManager = nullptr;
+
+    // Session OHLC state for real-time candle updates
+    QString m_rtSymbol;
+    double m_rtSessionOpen = 0;
+    double m_rtSessionHigh = 0;
+    double m_rtSessionLow = 0;
+    int m_rtLastSlot = 0;
+    QString m_rtTimeframe = "D";
 };

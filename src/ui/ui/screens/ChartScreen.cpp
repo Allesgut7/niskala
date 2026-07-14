@@ -1,87 +1,140 @@
 #include "ChartScreen.h"
-#include "../widgets/CandlestickChart.h"
+#include "../widgets/LightweightChartWidget.h"
+#include "../widgets/FinancialChart.h"
+#include "../widgets/ChartToolbarWidget.h"
+#include "../core/DataManager.h"
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QGroupBox>
 
 ChartScreen::ChartScreen(QWidget *parent)
     : QWidget(parent)
 {
+    setupDataManager();
     setupUI();
 }
 
 void ChartScreen::setupUI()
 {
-    auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(12, 12, 12, 12);
-    mainLayout->setSpacing(6);
+    auto *layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
 
-    // Top bar
-    auto *topBar = new QHBoxLayout();
+    // Toolbar at top with semi-transparent overlay look
+    m_toolbar = new ChartToolbarWidget();
+    layout->addWidget(m_toolbar);
 
-    auto *symbolLabel = new QLabel("Symbol:");
-    symbolLabel->setStyleSheet("color: #859585;");
-    topBar->addWidget(symbolLabel);
+    // Chart fills remaining space
+    m_chart = new LightweightChartWidget();
+    layout->addWidget(m_chart, 1);
 
-    m_symbolCombo = new QComboBox();
-    m_symbolCombo->addItems({"BBCA", "BBRI", "BMRI", "TLKM", "GOTO", "ADRO", "UNVR", "ICBP", "ASII"});
-    m_symbolCombo->setMinimumWidth(80);
-    connect(m_symbolCombo, &QComboBox::currentTextChanged, this, &ChartScreen::loadSymbol);
-    topBar->addWidget(m_symbolCombo);
-
-    auto *tfLabel = new QLabel("  Timeframe:");
-    tfLabel->setStyleSheet("color: #859585;");
-    topBar->addWidget(tfLabel);
-
-    m_timeframeCombo = new QComboBox();
-    m_timeframeCombo->addItems({"1D", "1W", "1M", "3M", "6M", "1Y"});
-    connect(m_timeframeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+    // Toolbar connections
+    connect(m_toolbar, &ChartToolbarWidget::symbolRequested,
+            this, &ChartScreen::onSymbolRequested);
+    connect(m_toolbar, &ChartToolbarWidget::timeframeChanged,
             this, &ChartScreen::onTimeframeChanged);
-    topBar->addWidget(m_timeframeCombo);
+    connect(m_toolbar, &ChartToolbarWidget::chartTypeChanged,
+            this, &ChartScreen::onChartTypeChanged);
+    connect(m_toolbar, &ChartToolbarWidget::indicatorToggled,
+            this, &ChartScreen::onIndicatorToggled);
+    connect(m_toolbar, &ChartToolbarWidget::templateApplied,
+            this, &ChartScreen::onTemplateApplied);
 
-    topBar->addStretch();
+    // Scroll-to-load
+    connect(m_chart, &LightweightChartWidget::loadMoreData,
+            this, [this](const QString &symbol, const QString &) {
+        if (!symbol.trimmed().isEmpty())
+            m_dataManager->fetchChartData(symbol, m_currentTf, 100);
+    });
 
-    // Indicators
-    m_ma5Check = new QCheckBox("MA5");
-    m_ma5Check->setChecked(true);
-    m_ma5Check->setStyleSheet("color: #CEE8FF;");
-    connect(m_ma5Check, &QCheckBox::toggled, this, &ChartScreen::onIndicatorToggled);
-    topBar->addWidget(m_ma5Check);
+    // Load default symbol
+    loadSymbol("JKSE");
+}
 
-    m_ma20Check = new QCheckBox("MA20");
-    m_ma20Check->setChecked(true);
-    m_ma20Check->setStyleSheet("color: #CEE8FF;");
-    connect(m_ma20Check, &QCheckBox::toggled, this, &ChartScreen::onIndicatorToggled);
-    topBar->addWidget(m_ma20Check);
+void ChartScreen::setupDataManager()
+{
+    m_dataManager = new DataManager(this);
 
-    m_volumeCheck = new QCheckBox("Volume");
-    m_volumeCheck->setChecked(true);
-    m_volumeCheck->setStyleSheet("color: #E1E2E7;");
-    topBar->addWidget(m_volumeCheck);
+    connect(m_dataManager, &DataManager::tradingViewUpdated,
+            this, &ChartScreen::onTradingViewUpdated);
+    connect(m_dataManager, &DataManager::realTimeUpdate,
+            this, &ChartScreen::onRealTimeUpdate);
+}
 
-    mainLayout->addLayout(topBar);
-
-    // Chart
-    m_chart = new CandlestickChart();
-    mainLayout->addWidget(m_chart);
+void ChartScreen::fetchChartData(const QString &symbol, const QString &tf, int candles)
+{
+    m_currentSymbol = symbol;
+    m_currentTf = tf;
+    m_dataManager->fetchChartData(symbol, tf, candles);
 }
 
 void ChartScreen::loadSymbol(const QString &symbol)
 {
+    if (symbol.trimmed().isEmpty()) return;
     m_chart->loadSymbol(symbol);
+    fetchChartData(symbol, "D", 252);
 }
 
-void ChartScreen::onTimeframeChanged(int index)
+void ChartScreen::onSymbolRequested(const QString &symbol)
 {
-    QStringList tfs = {"1D", "1W", "1M", "3M", "6M", "1Y"};
-    if (index >= 0 && index < tfs.size()) {
-        m_chart->setTimeframe(tfs[index]);
+    loadSymbol(symbol);
+}
+
+void ChartScreen::onTimeframeChanged(const QString &tf)
+{
+    m_chart->setTimeframe(tf);
+    int candles = 252;
+    if (tf == "1m" || tf == "5m" || tf == "15m") candles = 300;
+    else if (tf == "1h") candles = 200;
+    else if (tf == "D") candles = 252;
+    else if (tf == "W") candles = 104;
+    else if (tf == "M") candles = 60;
+    QString sym = m_currentSymbol.isEmpty() ? "JKSE" : m_currentSymbol;
+    fetchChartData(sym, tf, candles);
+}
+
+void ChartScreen::onChartTypeChanged(const QString &type)
+{
+    m_chart->setChartType(type);
+}
+
+void ChartScreen::onIndicatorToggled(const QString &name, bool visible)
+{
+    m_chart->setIndicatorVisible(name, visible);
+}
+
+void ChartScreen::onTradingViewUpdated(const QJsonArray &data)
+{
+    QVector<OHLCData> ohlcData;
+    for (const auto &item : data) {
+        QJsonObject obj = item.toObject();
+        OHLCData candle;
+        candle.timestamp = obj["timestamp"].toInt();
+        candle.open = obj["open"].toDouble();
+        candle.high = obj["high"].toDouble();
+        candle.low = obj["low"].toDouble();
+        candle.close = obj["close"].toDouble();
+        candle.volume = obj["volume"].toDouble();
+        ohlcData.append(candle);
+    }
+    m_chart->loadData(ohlcData);
+}
+
+void ChartScreen::onRealTimeUpdate(const QString &symbol, const QJsonObject &data)
+{
+    if (symbol != m_currentSymbol) return;
+    if (data.contains("open") && data.contains("close")) {
+        OHLCData candle;
+        candle.timestamp = data["timestamp"].toInt();
+        candle.open = data["open"].toDouble();
+        candle.high = data["high"].toDouble();
+        candle.low = data["low"].toDouble();
+        candle.close = data["close"].toDouble();
+        candle.volume = data["volume"].toDouble();
+        m_chart->addRealTimeCandle(candle);
     }
 }
 
-void ChartScreen::onIndicatorToggled()
+void ChartScreen::onTemplateApplied(const QJsonObject &config)
 {
-    m_chart->setMA5Visible(m_ma5Check->isChecked());
-    m_chart->setMA20Visible(m_ma20Check->isChecked());
+    Q_UNUSED(config);
 }

@@ -1,7 +1,8 @@
 #include "DashboardScreen.h"
 #include "../widgets/BreakingNewsTicker.h"
 #include "../widgets/MarketIndicesStrip.h"
-#include "../widgets/CandlestickChart.h"
+#include "../widgets/LightweightChartWidget.h"
+#include "../widgets/FinancialChart.h"
 #include "../widgets/ChartToolbarWidget.h"
 #include "../widgets/FearGreedGauge.h"
 #include "../widgets/CommodityTable.h"
@@ -40,7 +41,7 @@ void DashboardScreen::setupUI()
 
     // === Main Content (70% left + 30% right) ===
     auto *mainContent = new QHBoxLayout();
-    mainContent->setContentsMargins(12, 12, 12, 12);
+    mainContent->setContentsMargins(12, 4, 12, 12);
     mainContent->setSpacing(12);
 
     // --- Left Panel (70%) ---
@@ -55,16 +56,48 @@ void DashboardScreen::setupUI()
     leftLayout->addWidget(chartToolbar);
 
     // Candlestick Chart (flex)
-    m_chart = new CandlestickChart();
+    m_chart = new LightweightChartWidget();
     leftLayout->addWidget(m_chart, 1);
 
     // Chart Toolbar connections
     connect(chartToolbar, &ChartToolbarWidget::timeframeChanged,
             this, [this](const QString &tf) {
         m_chart->setTimeframe(tf);
-        // Request chart data from TradingView
-        m_dataManager->fetchChartData("IHSG INDEX", tf, 50);
+        m_rtTimeframe = tf;
+        int candles = 252;
+        if (tf == "1m" || tf == "5m" || tf == "15m") candles = 300;
+        else if (tf == "1h") candles = 200;
+        else if (tf == "D") candles = 252;
+        else if (tf == "W") candles = 104;
+        else if (tf == "M") candles = 60;
+        QString sym = m_chart->symbol().isEmpty() ? "JKSE" : m_chart->symbol();
+        m_dataManager->fetchChartData(sym, tf, candles);
     });
+
+    connect(chartToolbar, &ChartToolbarWidget::symbolRequested,
+            this, [this](const QString &symbol) {
+        if (symbol.trimmed().isEmpty()) return;
+        m_chart->loadSymbol(symbol);
+        m_dataManager->fetchChartData(symbol, "D", 250);
+    });
+
+    connect(m_chart, &LightweightChartWidget::loadMoreData,
+            this, [this](const QString &symbol, const QString &direction) {
+        qDebug() << "Dashboard: loadMoreData" << symbol << direction;
+        if (symbol.trimmed().isEmpty()) {
+            qDebug() << "Dashboard: loadMoreData skipped — empty symbol";
+            return;
+        }
+        m_dataManager->fetchChartData(symbol, "D", 100);
+    });
+
+    // Chart type switching
+    connect(chartToolbar, &ChartToolbarWidget::chartTypeChanged,
+            m_chart, &LightweightChartWidget::setChartType);
+
+    // Indicator toggles
+    connect(chartToolbar, &ChartToolbarWidget::indicatorToggled,
+            m_chart, &LightweightChartWidget::setIndicatorVisible);
 
     // News + Sector Performance (bottom row)
     auto *bottomRow = new QHBoxLayout();
@@ -98,7 +131,7 @@ void DashboardScreen::setupUI()
     auto *fgWidget = new QWidget();
     fgWidget->setStyleSheet("QWidget { background-color: #1D2023; border: 1px solid #3B4A3D; border-radius: 6px; }");
     auto *fgLayout = new QVBoxLayout(fgWidget);
-    fgLayout->setContentsMargins(12, 10, 12, 12);
+    fgLayout->setContentsMargins(12, 4, 12, 12);
     fgLayout->setSpacing(6);
 
     auto *fgGauges = new QHBoxLayout();
@@ -118,6 +151,7 @@ void DashboardScreen::setupUI()
     fgLayout->addLayout(fgGauges);
 
     rightLayout->addWidget(fgWidget);
+    fgWidget->setMinimumHeight(180);
 
     // Commodity Table
     auto *commodityWidget = new QWidget();
@@ -171,9 +205,9 @@ void DashboardScreen::setupUI()
     btLayout->addWidget(gainersBadge);
 
     // Gainers data (dynamic - will be updated by data)
-    auto *gainersData = new QLabel("Loading...");
-    gainersData->setStyleSheet("color: #E1E2E7; font-family: 'JetBrains Mono', monospace; font-size: 11px;");
-    btLayout->addWidget(gainersData);
+    m_gainersLabel = new QLabel("Loading...");
+    m_gainersLabel->setStyleSheet("color: #E1E2E7; font-family: 'JetBrains Mono', monospace; font-size: 11px;");
+    btLayout->addWidget(m_gainersLabel);
 
     btLayout->addStretch();
 
@@ -184,9 +218,9 @@ void DashboardScreen::setupUI()
     btLayout->addWidget(losersBadge);
 
     // Losers data (dynamic)
-    auto *losersData = new QLabel("Loading...");
-    losersData->setStyleSheet("color: #E1E2E7; font-family: 'JetBrains Mono', monospace; font-size: 11px;");
-    btLayout->addWidget(losersData);
+    m_losersLabel = new QLabel("Loading...");
+    m_losersLabel->setStyleSheet("color: #E1E2E7; font-family: 'JetBrains Mono', monospace; font-size: 11px;");
+    btLayout->addWidget(m_losersLabel);
 
     mainLayout->addWidget(bottomTicker);
 
@@ -213,6 +247,8 @@ void DashboardScreen::setupDataManager()
             this, &DashboardScreen::onSectorPerformanceUpdated);
     connect(m_dataManager, &DataManager::aiRegimeUpdated,
             this, &DashboardScreen::onAIRegimeUpdated);
+    connect(m_dataManager, &DataManager::topMoversUpdated,
+            this, &DashboardScreen::onTopMoversUpdated);
     connect(m_dataManager, &DataManager::newsUpdated,
             this, &DashboardScreen::onNewsUpdated);
     connect(m_dataManager, &DataManager::tradingViewUpdated,
@@ -221,16 +257,18 @@ void DashboardScreen::setupDataManager()
             this, &DashboardScreen::onRealTimeUpdate);
 
     // Start auto-refresh every 30 seconds
-    m_dataManager->startAutoRefresh(30);
+    m_dataManager->startAutoRefresh(120);
     
-    // Start real-time stream untuk watchlist + market indices
+    // Start real-time stream untuk watchlist + market indices + commodities
     QStringList symbols = m_dataManager->watchlist();
     symbols << "^JKSE" << "^N225" << "^HSI" << "^KS11" 
-            << "^GSPC" << "^IXIC" << "USDIDR=X";
+            << "^GSPC" << "^IXIC" << "USDIDR=X"
+            << "GC=F" << "CL=F" << "SI=F" << "NI=F" << "HG=F" << "PL=F" << "NG=F";
     m_dataManager->startRealTimeStream(symbols);
     
     // Fetch initial chart data
-    m_dataManager->fetchChartData("JKSE", "D", 50);
+    m_chart->loadSymbol("JKSE");
+    m_dataManager->fetchChartData("JKSE", "D", 250);
 }
 
 void DashboardScreen::onWatchlistUpdated(const QJsonObject &data)
@@ -270,10 +308,11 @@ void DashboardScreen::onMarketOverviewUpdated(const QJsonObject &data)
     QMap<QString, int> symbolToRow = {
         {"GC=F", 0},    // Gold
         {"CL=F", 1},    // Crude Oil
-        {"MTXF=F", 2},  // Coal
+        {"SI=F", 2},     // Silver
+        {"PL=F", 6},     // Platinum
         {"NI=F", 3},    // Nickel
         {"HG=F", 4},    // Copper
-        {"NG=F", 6}     // Natural Gas
+        {"NG=F", 5},    // Natural Gas
     };
     
     if (symbolToRow.contains(symbol)) {
@@ -387,12 +426,13 @@ void DashboardScreen::onAIRegimeUpdated(const QJsonObject &data)
         nextDayConfidence = data["confidence"].toInt();
     }
 
-    // Override + divergence + accuracy
+    // Override + divergence + accuracy + market status
     bool overrideActive = false;
     QString overrideRegime;
     int overrideHours = 0;
     bool divergence = false;
     double acc7d = 0, acc30d = 0, accTotal = 0;
+    QString marketStatus = data["market_status"].toString("UNKNOWN");
 
     if (data.contains("override") && data["override"].isObject()) {
         QJsonObject ov = data["override"].toObject();
@@ -420,8 +460,44 @@ void DashboardScreen::onAIRegimeUpdated(const QJsonObject &data)
         analysis, forecastSteps,
         overrideActive, overrideRegime, overrideHours,
         divergence,
-        acc7d, acc30d, accTotal
+        acc7d, acc30d, accTotal,
+        marketStatus
     );
+}
+
+void DashboardScreen::onTopMoversUpdated(const QJsonObject &data)
+{
+    QJsonArray gainers = data["gainers"].toArray();
+    QJsonArray losers = data["losers"].toArray();
+
+    QStringList gainersText;
+    for (const auto &item : gainers) {
+        QJsonObject g = item.toObject();
+        QString code = g["Code"].toString();
+        if (code.isEmpty()) code = g["code"].toString();
+        double pct = g["Percent"].toDouble();
+        if (pct == 0) pct = g["ChangePct"].toDouble();
+        if (pct == 0) pct = g["changePct"].toDouble();
+        gainersText.append(QString("%1 +%2%").arg(code).arg(pct, 0, 'f', 2));
+    }
+
+    QStringList losersText;
+    for (const auto &item : losers) {
+        QJsonObject l = item.toObject();
+        QString code = l["Code"].toString();
+        if (code.isEmpty()) code = l["code"].toString();
+        double pct = l["Percent"].toDouble();
+        if (pct == 0) pct = l["ChangePct"].toDouble();
+        if (pct == 0) pct = l["changePct"].toDouble();
+        losersText.append(QString("%1 %2%").arg(code).arg(pct, 0, 'f', 2));
+    }
+
+    if (!gainersText.isEmpty()) {
+        m_gainersLabel->setText(gainersText.join("  |  "));
+    }
+    if (!losersText.isEmpty()) {
+        m_losersLabel->setText(losersText.join("  |  "));
+    }
 }
 
 void DashboardScreen::onNewsUpdated(const QJsonArray &data)
@@ -440,6 +516,9 @@ void DashboardScreen::onTradingViewUpdated(const QJsonArray &data)
 {
     if (data.isEmpty() || !m_chart) return;
     
+    // Hide drawing toolbar on dashboard — only shown in ChartScreen
+    m_chart->setDrawingToolbarVisible(false);
+
     QVector<OHLCData> ohlcData;
     for (const auto &item : data) {
         QJsonObject obj = item.toObject();
@@ -453,11 +532,21 @@ void DashboardScreen::onTradingViewUpdated(const QJsonArray &data)
         ohlcData.append(candle);
     }
     
-    m_chart->loadOHLCVData(ohlcData);
+    m_chart->loadData(ohlcData);
 }
 
 void DashboardScreen::onRealTimeUpdate(const QString &symbol, const QJsonObject &data)
 {
+    // Route commodity symbols to CommodityTable
+    static const QStringList commodities = {"GC=F", "CL=F", "SI=F", "NI=F", "HG=F", "PL=F", "NG=F"};
+    if (commodities.contains(symbol) && data.contains("price")) {
+        m_commodityTable->updateBySymbol(symbol,
+            data["price"].toDouble(),
+            data["change"].toDouble(),
+            data["changePct"].toDouble());
+        return;
+    }
+    
     // Update market indices with real-time price
     if (data.contains("price")) {
         m_indicesStrip->updateData(symbol, 
@@ -466,15 +555,42 @@ void DashboardScreen::onRealTimeUpdate(const QString &symbol, const QJsonObject 
             data["changePct"].toDouble());
     }
     
-    // Update chart with new candle data (top-level keys)
-    if (m_chart && data.contains("open") && data.contains("close")) {
+    // Update chart with real-time candle (TradingView-style OHLC)
+    if (m_chart && data.contains("price")) {
+        double price = data["price"].toDouble();
+        int ts = data.contains("timestamp") ? data["timestamp"].toInt() : 0;
+        int vol = data.contains("volume") ? data["volume"].toInt() : 0;
+
+        if (ts <= 0 || price <= 0) return;
+
+        // Round timestamp ke timeframe interval
+        int ts_rounded = ts;
+        if (m_rtTimeframe == "1m")       ts_rounded = ts - (ts % 60);
+        else if (m_rtTimeframe == "5m")  ts_rounded = ts - (ts % 300);
+        else if (m_rtTimeframe == "15m") ts_rounded = ts - (ts % 900);
+        else if (m_rtTimeframe == "1h")  ts_rounded = ts - (ts % 3600);
+
+        // Reset session jika symbol BERUBAH atau time slot BERUBAH
+        if (symbol != m_rtSymbol || ts_rounded != m_rtLastSlot) {
+            m_rtSymbol = symbol;
+            m_rtLastSlot = ts_rounded;
+            m_rtSessionOpen = price;
+            m_rtSessionHigh = price;
+            m_rtSessionLow = price;
+        } else {
+            // Update high/low dalam candle yang sama
+            if (price > m_rtSessionHigh) m_rtSessionHigh = price;
+            if (price < m_rtSessionLow || m_rtSessionLow <= 0) m_rtSessionLow = price;
+        }
+
         OHLCData candle;
-        candle.open = data["open"].toDouble();
-        candle.high = data["high"].toDouble();
-        candle.low = data["low"].toDouble();
-        candle.close = data["close"].toDouble();
-        candle.volume = data["volume"].toInt();
-        candle.timestamp = data["timestamp"].toInt();
+        candle.open = m_rtSessionOpen;
+        candle.high = m_rtSessionHigh;
+        candle.low = m_rtSessionLow;
+        candle.close = price;
+        candle.volume = vol;
+        candle.timestamp = ts_rounded;
+
         m_chart->addRealTimeCandle(candle);
     }
 }
