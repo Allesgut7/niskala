@@ -7,7 +7,7 @@ sys.path.insert(0, '.')
 from python.data_sources.yfinance_client import YFinanceClient
 
 client = YFinanceClient()
-commodities = ['GC=F', 'CL=F', 'MTXF=F', 'NI=F', 'HG=F', 'NG=F']
+commodities = ['GC=F', 'CL=F', 'SI=F', 'NI=F', 'HG=F', 'PL=F', 'NG=F']
 results = []
 
 for sym in commodities:
