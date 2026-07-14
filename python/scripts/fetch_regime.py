@@ -61,33 +61,30 @@ def save_state(state):
         pass
 
 
-def daily_regime_from_momentum(momentum_3d, intraday_bias=None):
-    if momentum_3d is None:
+def daily_regime_from_momentum(momentum_5d_pct, intraday_bias=None):
+    if momentum_5d_pct is None:
         return None
-    strong_bear = momentum_3d < -3
-    strong_bull = momentum_3d > 3
-    bear = momentum_3d < -1
-    bull = momentum_3d > 1
-
-    if strong_bull:
+    if momentum_5d_pct > 3:
         return "STRONG BULL"
-    if strong_bear:
-        return "BEAR"
-    if bull:
+    if momentum_5d_pct > 0.5:
         return "BULL"
-    if bear:
+    if momentum_5d_pct < -3:
+        return "BEAR"
+    if momentum_5d_pct < -0.5:
         return "BEAR"
     if intraday_bias:
         return intraday_bias
     return "NEUTRAL"
 
 
-def compute_override(intraday_bias, intraday_strength, daily_regime, state, is_market_open, momentum_3d=None):
+def compute_override(intraday_bias, intraday_strength, daily_regime, state, is_market_open,
+                     momentum_3d=None, positive_5d_count=None, intra_consec_bull=None):
     today = str(date.today())
 
     if state.get("last_date") != today:
         state["consecutive_divergence"] = 0
         state["momentum_override"] = False
+        state["consecutive_bull"] = 0
         state["override_active"] = False
         state["last_date"] = today
 
@@ -99,9 +96,9 @@ def compute_override(intraday_bias, intraday_strength, daily_regime, state, is_m
         return None, state, "none"
 
     diverging = (
-        (intraday_bias == "BULL" and intraday_strength >= 60
+        (intraday_bias == "BULL" and intraday_strength >= 55
          and daily_regime in ("BEAR", "NEUTRAL"))
-        or (intraday_bias == "BEAR" and intraday_strength >= 60
+        or (intraday_bias == "BEAR" and intraday_strength >= 55
             and daily_regime in ("BULL", "STRONG BULL"))
     )
 
@@ -110,12 +107,40 @@ def compute_override(intraday_bias, intraday_strength, daily_regime, state, is_m
     else:
         state["consecutive_divergence"] = 0
 
+    if intraday_bias == "BULL" and intraday_strength > 50 and is_market_open:
+        state["consecutive_bull"] = state.get("consecutive_bull", 0) + 1
+    elif not is_market_open:
+        pass
+    else:
+        state["consecutive_bull"] = 0
+
     result = None
     reason = "none"
 
-    if momentum_3d is not None and is_market_open and state.get("consecutive_divergence", 0) >= 1:
+    # --- CHECK 1: Konfirmasi bullish — 3/5 days positive + intraday BULL ---
+    if (positive_5d_count is not None and positive_5d_count >= 3
+            and intraday_bias == "BULL" and intraday_strength >= 50
+            and daily_regime in ("BEAR", "NEUTRAL")
+            and is_market_open):
+        state["override_active"] = True
+        state["override_regime"] = "BULL"
+        state["consecutive_divergence"] = 0
+        result = {
+            "active": True,
+            "regime": "BULL",
+            "positive_5d": positive_5d_count,
+            "reason": "bull_confirmation",
+        }
+        reason = f"bull_confirmation({positive_5d_count}/5 positive)"
+        save_state(state)
+        return result, state, reason
+
+    # --- CHECK 2: Momentum reversal (threshold turun ke 0.5%) ---
+    if momentum_3d is not None and is_market_open:
         mom_regime = daily_regime_from_momentum(momentum_3d, intraday_bias)
-        if mom_regime and mom_regime != daily_regime and abs(momentum_3d) > 2:
+        if (mom_regime and mom_regime != daily_regime
+                and ((mom_regime == "BULL" and momentum_3d > 0.5)
+                     or (mom_regime == "BEAR" and momentum_3d < -0.5))):
             state["momentum_override"] = True
             state["override_active"] = True
             state["override_regime"] = mom_regime
@@ -130,6 +155,25 @@ def compute_override(intraday_bias, intraday_strength, daily_regime, state, is_m
             save_state(state)
             return result, state, reason
 
+    # --- CHECK 3: Intraday BULL 2 periode berturut ---
+    if (state.get("consecutive_bull", 0) >= 2
+            and intraday_bias == "BULL" and intraday_strength > 50
+            and daily_regime == "BEAR"
+            and is_market_open):
+        state["override_active"] = True
+        state["override_regime"] = "BULL"
+        state["consecutive_divergence"] = 0
+        result = {
+            "active": True,
+            "regime": "BULL",
+            "consecutive_bull_periods": state["consecutive_bull"],
+            "reason": "consecutive_bull",
+        }
+        reason = f"consecutive_bull({state['consecutive_bull']}x)"
+        save_state(state)
+        return result, state, reason
+
+    # --- CHECK 4: Intraday divergence (threshold 2h) ---
     if state["consecutive_divergence"] >= 2 and diverging and is_market_open:
         state["override_active"] = True
         state["override_regime"] = intraday_bias
@@ -380,15 +424,24 @@ def main():
 
                     close_to_close = features["ihsg_return"].iloc[-1] if "ihsg_return" in features.columns else None
                     momentum_3d = None
+                    positive_5d_count = None
                     if "ihsg_return" in features.columns:
                         last3 = features["ihsg_return"].iloc[-3:]
                         momentum_3d = float(last3.sum() * 100) if len(last3) == 3 else None
+                        last5 = features["ihsg_return"].iloc[-5:]
+                        positive_5d_count = int((last5 > 0).sum()) if len(last5) == 5 else None
+
+                    intra_consec_bull = None
+                    if intraday and intraday["bias"] == "BULL" and intraday["strength"] > 50:
+                        state_from_file = load_state()
+                        intra_consec_bull = state_from_file.get("consecutive_bull", 0) + 1
 
                     state = load_state()
                     override, state, override_reason = compute_override(
                         intraday["bias"] if intraday else None,
                         intraday["strength"] if intraday else 0,
-                        daily_regime, state, is_market_open, momentum_3d
+                        daily_regime, state, is_market_open,
+                        momentum_3d, positive_5d_count, intra_consec_bull
                     )
 
                     acc_stats = update_accuracy(daily_regime, close_to_close, state)
