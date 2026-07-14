@@ -6,10 +6,8 @@ DataManager::DataManager(QObject *parent)
 {
     m_bridge = new PythonBridge(this);
     m_refreshTimer = new QTimer(this);
-    m_newsTimer = new QTimer(this);
 
     connect(m_refreshTimer, &QTimer::timeout, this, &DataManager::onAutoRefresh);
-    connect(m_newsTimer, &QTimer::timeout, this, &DataManager::onNewsRefresh);
     connect(m_bridge, &PythonBridge::marketDataReceived,
             this, &DataManager::onMarketDataReceived);
     connect(m_bridge, &PythonBridge::fearGreedReceived,
@@ -36,6 +34,10 @@ DataManager::DataManager(QObject *parent)
             this, [this](const QJsonObject &data) {
         emit aiRegimeUpdated(data);
     });
+    connect(m_bridge, &PythonBridge::topMoversReceived,
+            this, [this](const QJsonObject &data) {
+        emit topMoversUpdated(data);
+    });
     connect(m_bridge, &PythonBridge::newsReceived,
             this, [this](const QJsonArray &data) {
         emit newsUpdated(data);
@@ -55,13 +57,11 @@ DataManager::DataManager(QObject *parent)
 void DataManager::startAutoRefresh(int intervalSec)
 {
     m_refreshTimer->start(intervalSec * 1000);
-    m_newsTimer->start(10000); // 10 seconds
 }
 
 void DataManager::stopAutoRefresh()
 {
     m_refreshTimer->stop();
-    m_newsTimer->stop();
 }
 
 void DataManager::refreshAll()
@@ -69,13 +69,16 @@ void DataManager::refreshAll()
     emit refreshStarted();
     m_refreshing = true;
 
+    // Primary data — immediate
     refreshWatchlist();
     refreshMarketOverview();
-    refreshFearGreedIndex();
-    refreshMarketBreadth();
-    refreshSectorPerformance();
-    refreshAIRegime();
-    refreshNews();
+
+    // Stagger secondary requests to reduce burst
+    QTimer::singleShot(2000, this, &DataManager::refreshFearGreedIndex);
+    QTimer::singleShot(4000, this, &DataManager::refreshMarketBreadth);
+    QTimer::singleShot(6000, this, &DataManager::refreshSectorPerformance);
+    QTimer::singleShot(8000, this, &DataManager::refreshAIRegime);
+    QTimer::singleShot(10000, this, &DataManager::refreshNews);
 }
 
 void DataManager::refreshWatchlist()
@@ -87,7 +90,7 @@ void DataManager::refreshMarketOverview()
 {
     m_bridge->fetchWatchlistBatch({
         "^JKSE", "GC=F", "CL=F", "USDIDR=X",
-        "MTXF=F", "NI=F", "HG=F", "NG=F"
+        "SI=F", "NI=F", "HG=F", "PL=F", "NG=F"
     });
 }
 
@@ -121,6 +124,11 @@ void DataManager::refreshAIRegime()
     m_bridge->fetchAIRegime();
 }
 
+void DataManager::refreshTopMovers()
+{
+    m_bridge->fetchTopMovers();
+}
+
 void DataManager::refreshNews()
 {
     m_bridge->fetchNews();
@@ -144,11 +152,6 @@ void DataManager::stopRealTimeStream()
 void DataManager::onAutoRefresh()
 {
     refreshAll();
-}
-
-void DataManager::onNewsRefresh()
-{
-    refreshNews();
 }
 
 void DataManager::onMarketDataReceived(const QJsonObject &data)

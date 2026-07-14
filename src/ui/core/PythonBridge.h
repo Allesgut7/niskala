@@ -25,6 +25,7 @@ public:
     void fetchAIRegime();
     void fetchNews();
     void fetchTradingViewData(const QString &symbol, const QString &timeframe = "1D", int candles = 50);
+    void fetchTopMovers();
     void startWebSocket(const QStringList &symbols);
     void stopWebSocket();
 
@@ -40,6 +41,7 @@ signals:
     void aiRegimeReceived(const QJsonObject &data);
     void newsReceived(const QJsonArray &data);
     void tradingViewDataReceived(const QJsonArray &data);
+    void topMoversReceived(const QJsonObject &data);
     void realTimeUpdate(const QJsonObject &data);
     void commandOutput(const QString &output);
     void commandError(const QString &error);
@@ -61,4 +63,14 @@ private:
     QString m_scriptsDir;
     QQueue<QPair<QString, QStringList>> m_commandQueue;
     bool m_processingCommand = false;
+
+    // Cache for rate-limit mitigation
+    QMap<QString, QPair<QDateTime, QString>> m_cache;
+    QMap<QString, int> m_retryCount;
+    int m_cacheTtlSec = 60;
+
+    QString m_lastCommand;
+    QStringList m_lastArgs;
+    QString m_currentCommand;
+    QStringList m_currentArgs;
 };

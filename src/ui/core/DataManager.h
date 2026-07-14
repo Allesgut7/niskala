@@ -25,6 +25,7 @@ public:
     void refreshCommodities();
     void refreshIndices();
     void refreshAIRegime();
+    void refreshTopMovers();
     void refreshNews();
     void fetchChartData(const QString &symbol, const QString &timeframe = "1D", int candles = 50);
     void startRealTimeStream(const QStringList &symbols);
@@ -42,6 +43,7 @@ signals:
     void commoditiesUpdated(const QJsonArray &data);
     void indicesUpdated(const QJsonArray &data);
     void aiRegimeUpdated(const QJsonObject &data);
+    void topMoversUpdated(const QJsonObject &data);
     void newsUpdated(const QJsonArray &data);
     void tradingViewUpdated(const QJsonArray &data);
     void sentimentUpdated(const QString &symbol, const QJsonObject &data);
@@ -52,7 +54,6 @@ signals:
 
 private slots:
     void onAutoRefresh();
-    void onNewsRefresh();
     void onMarketDataReceived(const QJsonObject &data);
     void onFearGreedReceived(const QJsonObject &data);
     void onCommandError(const QString &error);
@@ -61,7 +62,6 @@ private slots:
 private:
     PythonBridge *m_bridge = nullptr;
     QTimer *m_refreshTimer = nullptr;
-    QTimer *m_newsTimer = nullptr;
     bool m_refreshing = false;
     QStringList m_watchlist;
 };

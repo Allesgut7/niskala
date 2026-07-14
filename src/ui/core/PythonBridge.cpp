@@ -11,13 +11,18 @@ PythonBridge::PythonBridge(QObject *parent)
 {
     m_process = new QProcess(this);
     
-    // Set working directory to niskala root (absolute path)
+    // Set working directory to niskala root (dynamic detection)
     QDir appDir(QCoreApplication::applicationDirPath());
-    QString buildBinDir = appDir.absolutePath();
-    // Go up 5 levels to reach niskala root
-    m_workDir = buildBinDir;
-    for (int i = 0; i < 4; ++i) {
-        m_workDir = QFileInfo(m_workDir).absolutePath();
+    m_workDir = appDir.absolutePath();
+    while (!m_workDir.isEmpty() && !QDir(m_workDir + "/python/scripts").exists()) {
+        QString parent = QFileInfo(m_workDir).absolutePath();
+        if (parent == m_workDir) break;
+        m_workDir = parent;
+    }
+    if (!QDir(m_workDir + "/python/scripts").exists()) {
+        m_workDir = appDir.absolutePath();
+        for (int i = 0; i < 2; ++i)
+            m_workDir = QFileInfo(m_workDir).absolutePath();
     }
     m_process->setWorkingDirectory(m_workDir);
     
@@ -108,6 +113,13 @@ void PythonBridge::fetchNews()
     executeCommand(m_pythonPath, args);
 }
 
+void PythonBridge::fetchTopMovers()
+{
+    QStringList args;
+    args << m_scriptsDir + "/fetch_top_movers.py";
+    executeCommand(m_pythonPath, args);
+}
+
 void PythonBridge::fetchTradingViewData(const QString &symbol, const QString &timeframe, int candles)
 {
     QStringList args;
@@ -161,6 +173,68 @@ void PythonBridge::stopWebSocket()
 
 void PythonBridge::executeCommand(const QString &command, const QStringList &args)
 {
+    QString cacheKey = command + "|" + args.join("|");
+
+    // Check cache first
+    if (m_cache.contains(cacheKey)) {
+        QPair<QDateTime, QString> cached = m_cache.value(cacheKey);
+        if (cached.first.secsTo(QDateTime::currentDateTime()) < m_cacheTtlSec) {
+            qDebug() << "PythonBridge: Cache HIT for" << args.join(" ").right(50);
+            if (!cached.second.isEmpty()) {
+                QJsonDocument doc = QJsonDocument::fromJson(cached.second.toUtf8());
+                if (doc.isObject()) {
+                    QJsonObject obj = doc.object();
+                    emit marketDataReceived(obj);
+                    if (obj.contains("score") || obj.contains("indo"))
+                        emit fearGreedReceived(obj);
+                    if (obj.contains("naik") || obj.contains("turun"))
+                        emit marketBreadthReceived(obj);
+                    if (obj.contains("regime") || obj.contains("confidence"))
+                        emit aiRegimeReceived(obj);
+                    if (obj.contains("gainers") || obj.contains("losers"))
+                        emit topMoversReceived(obj);
+                } else if (doc.isArray()) {
+                    QJsonArray arr = doc.array();
+                    if (!arr.isEmpty()) {
+                        QJsonObject first = arr[0].toObject();
+                        if (first.contains("score") || first.contains("indo"))
+                            emit fearGreedReceived(first);
+                        if (first.contains("naik") || first.contains("turun"))
+                            emit marketBreadthReceived(first);
+                        if (first.contains("gainers") || first.contains("losers"))
+                            emit topMoversReceived(first);
+                        // TradingView OHLCV data
+                        if (first.contains("timestamp") && first.contains("open") && first.contains("close")) {
+                            // Don't emit stale cache if newer commands are queued
+                            if (!m_commandQueue.isEmpty()) {
+                                processNextCommand();
+                                return;
+                            }
+                            emit tradingViewDataReceived(arr);
+                            return;
+                        }
+                        bool isSector = first.contains("name") && first.contains("changePct") && !first.contains("symbol");
+                        bool isNews = first.contains("title") && first.contains("source");
+                        bool isStock = first.contains("symbol") && !isSector;
+                        if (isSector) {
+                            emit sectorPerformanceReceived(arr);
+                        } else if (isNews) {
+                            emit newsReceived(arr);
+                        } else if (isStock) {
+                            for (const auto &item : arr) emit watchlistUpdated(item.toObject());
+                        }
+                    }
+                }
+            }
+            return;
+        }
+        m_cache.remove(cacheKey);
+    }
+
+    // Store command for retry
+    m_lastCommand = command;
+    m_lastArgs = args;
+
     // Queue the command
     m_commandQueue.enqueue(qMakePair(command, args));
     
@@ -187,6 +261,8 @@ void PythonBridge::processNextCommand()
     
     // Get next command
     auto cmd = m_commandQueue.dequeue();
+    m_currentCommand = cmd.first;
+    m_currentArgs = cmd.second;
     qDebug() << "PythonBridge: Processing:" << cmd.first << cmd.second;
     
     // Start new process (non-blocking)
@@ -213,6 +289,17 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
     if (exitStatus == QProcess::NormalExit && exitCode == 0 && !outputStr.isEmpty()) {
         QJsonDocument doc = QJsonDocument::fromJson(outputStr.toUtf8());
 
+        // Cache successful result (use actual command processed, not last requested)
+        QString cacheKey = m_currentCommand + "|" + m_currentArgs.join("|");
+        m_cache[cacheKey] = {QDateTime::currentDateTime(), outputStr};
+        m_retryCount.remove(cacheKey);
+
+        // If there are newer commands queued, skip emitting this stale result
+        if (!m_commandQueue.isEmpty()) {
+            processNextCommand();
+            return;
+        }
+
         if (doc.isObject()) {
             QJsonObject obj = doc.object();
             if (!obj.contains("error")) {
@@ -226,6 +313,9 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
                 }
                 if (obj.contains("regime") || obj.contains("confidence")) {
                     emit aiRegimeReceived(obj);
+                }
+                if (obj.contains("gainers") || obj.contains("losers")) {
+                    emit topMoversReceived(obj);
                 }
             }
         } else if (doc.isArray()) {
@@ -294,6 +384,23 @@ void PythonBridge::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
             }
         }
     } else if (!errorStr.isEmpty()) {
+        // Detect rate limit and retry
+        if (errorStr.contains("Too Many Requests", Qt::CaseInsensitive) ||
+            errorStr.contains("rate limited", Qt::CaseInsensitive)) {
+            QString cacheKey = m_lastCommand + "|" + m_lastArgs.join("|");
+            int retries = m_retryCount.value(cacheKey, 0);
+            if (retries < 3) {
+                m_retryCount[cacheKey] = retries + 1;
+                int delay = 15000 * (retries + 1);
+                qDebug() << "PythonBridge: Rate limited, retry in" << delay << "ms (attempt" << retries + 1 << "/3)";
+                QTimer::singleShot(delay, this, [this]() {
+                    executeCommand(m_lastCommand, m_lastArgs);
+                });
+                processNextCommand();
+                return;
+            }
+            qDebug() << "PythonBridge: Rate limit retry exhausted, giving up";
+        }
         emit commandError(errorStr);
     }
     
