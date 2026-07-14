@@ -3,5 +3,7 @@
         <file alias="themes/dark_theme.qss">../ui/theme/dark_theme.qss</file>
         <file alias="images/logo.svg">logo.svg</file>
         <file alias="chart.html">chart.html</file>
+        <file alias="lightweight-charts.standalone.production.js">lightweight-charts.standalone.production.js</file>
+        <file alias="config/idx_tickers.json">../../../config/idx_tickers.json</file>
     </qresource>
 </RCC>

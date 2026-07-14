@@ -3,53 +3,576 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script>
-// Load Lightweight Charts from CDN with fallback
-function loadScript(url, callback) {
-    var script = document.createElement('script');
-    script.src = url;
-    script.onload = callback;
-    script.onerror = function() {
-        console.log('Failed to load: ' + url);
-    };
-    document.head.appendChild(script);
-}
-
-loadScript('https://unpkg.com/lightweight-charts@5.0/dist/lightweight-charts.standalone.production.js', function() {
-    initChart();
-    console.log('Lightweight Charts loaded successfully');
-});
-</script>
+<script src="qrc:/lightweight-charts.standalone.production.js"></script>
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: #1D2023; }
-#chart { width: 100%; height: 100%; }
+#chart-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; }
+#ohlc-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 4px 12px; height: 24px;
+    background: #272A2E; border-bottom: 1px solid #3B4A3D;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #E1E2E7;
+    white-space: nowrap; overflow-x: auto;
+}
+#ohlc-header .ohlc-label { color: #859585; }
+#ohlc-header .ohlc-up { color: #75FF9E; }
+#ohlc-header .ohlc-down { color: #FF5C72; }
+#chart-container { flex: 1; position: relative; min-height: 200px; }
+#chart { display: block; width: 100%; height: 100%; }
+.sub-pane {
+    width: 100%; height: 80px;
+    border-top: 1px solid #3B4A3D;
+    display: none;
+    flex-shrink: 0;
+}
+.sub-pane.visible { display: block; }
+#pane-atr { height: 60px; }
+#chart-loading {
+    display: none; position: absolute; bottom: 30px; left: 50%;
+    transform: translateX(-50%); color: #859585;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; z-index: 10;
+}
 #loading {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     color: #859585; font-family: 'JetBrains Mono', monospace; font-size: 14px;
 }
+#drawing-canvas { pointer-events: none; }
+#drawing-canvas.active { pointer-events: auto; cursor: crosshair; }
+#drawing-toolbar {
+    position: absolute; top: 4px; left: 4px; z-index: 6;
+    display: flex; flex-direction: column; gap: 1px;
+    background: rgba(39,42,46,0.85); border: 1px solid #3B4A3D;
+    border-radius: 4px; padding: 3px;
+}
+#drawing-toolbar.hidden { display: none; }
+#drawing-toolbar button {
+    width: 28px; height: 24px; background: transparent;
+    border: none; border-radius: 3px; color: #859585;
+    font-size: 12px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+}
+#drawing-toolbar button:hover { background: rgba(59,74,61,0.6); color: #E1E2E7; }
+#drawing-toolbar button.active { background: rgba(117,255,158,0.15); color: #75FF9E; }
+#drawing-toolbar .separator { height: 1px; background: #3B4A3D; margin: 2px 4px; }
 </style>
 </head>
 <body>
 <div id="loading">Loading chart...</div>
-<div id="chart" style="display:none"></div>
+<div id="chart-wrapper" style="display:none">
+    <div id="ohlc-header">
+        <span class="ohlc-label">O</span><span id="ohlc-open">-</span>
+        <span class="ohlc-label">H</span><span id="ohlc-high">-</span>
+        <span class="ohlc-label">L</span><span id="ohlc-low">-</span>
+        <span class="ohlc-label">C</span><span id="ohlc-close">-</span>
+        <span class="ohlc-label">V</span><span id="ohlc-vol">-</span>
+        <span class="ohlc-label" style="margin-left:8px">Chg</span><span id="ohlc-chg">-</span>
+    </div>
+    <div id="chart-container">
+        <div id="chart"></div>
+        <canvas id="drawing-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;"></canvas>
+        <div id="drawing-toolbar">
+            <button title="Cursor" data-tool="none">↹</button>
+            <button title="Horizontal Line" data-tool="hline">━</button>
+            <button title="Trendline" data-tool="trendline">╱</button>
+            <button title="Ray Line" data-tool="ray">➡</button>
+            <button title="Extended Line" data-tool="extended">↔</button>
+            <button title="Arrow" data-tool="arrow">↑</button>
+            <button title="Fibonacci Retracement" data-tool="fibonacci">⬡</button>
+            <button title="Fibonacci Extension" data-tool="fibext">⬟</button>
+            <button title="Rectangle" data-tool="rectangle">▭</button>
+            <button title="Circle" data-tool="circle">○</button>
+            <button title="Triangle" data-tool="triangle">△</button>
+            <button title="Text Label" data-tool="text">T</button>
+            <div class="separator"></div>
+            <button title="Measure" data-tool="measure">📏</button>
+            <div class="separator"></div>
+            <button title="Undo" data-tool="undo">↩</button>
+            <button title="Clear All" data-tool="clear">✕</button>
+        </div>
+        <div id="chart-loading">Loading data...</div>
+    </div>
+    <div id="pane-rsi" class="sub-pane"></div>
+    <div id="pane-macd" class="sub-pane"></div>
+    <div id="pane-stochastic" class="sub-pane"></div>
+    <div id="pane-atr" class="sub-pane"></div>
+</div>
 <script>
 let chart = null;
 let candleSeries = null;
 let volumeSeries = null;
-let ma5Series = null;
-let ma20Series = null;
 let chartReady = false;
+let isInitialLoad = true;
+let dataFirstTime = 0;
+let dataLastTime = 0;
+let bridge = null;
+let allCandles = [];
+let allVolumes = [];
+
+let indicators = {};
+let subCharts = {};
+let currentChartType = 'candlestick';
+var syncing = false;
+var newTickerLoaded = false;
+
+new QWebChannel(qt.webChannelTransport, function(channel) {
+    window.bridge = channel.objects.bridge;
+});
+
+// --- OHLC HEADER ---
+
+function updateOHLCHeader(t, open, high, low, close, volume) {
+    var up = close >= open;
+    var cls = up ? 'ohlc-up' : 'ohlc-down';
+    ['open','high','low','close','chg'].forEach(function(id) {
+        document.getElementById('ohlc-'+id).className = cls;
+    });
+    document.getElementById('ohlc-open').textContent = formatPrice(open);
+    document.getElementById('ohlc-high').textContent = formatPrice(high);
+    document.getElementById('ohlc-low').textContent = formatPrice(low);
+    document.getElementById('ohlc-close').textContent = formatPrice(close);
+    document.getElementById('ohlc-vol').textContent = formatVolume(volume);
+    var chg = (close - open) / open;
+    document.getElementById('ohlc-chg').textContent = (chg >= 0 ? '+' : '') + (chg * 100).toFixed(2) + '%';
+}
+
+function formatPrice(p) {
+    return p.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function formatVolume(v) {
+    if (v >= 1e9) return (v / 1e9).toFixed(2) + 'B';
+    if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+    if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+    return v.toString();
+}
+
+// --- INDICATOR CALCULATIONS ---
+
+function calcSMA(data, period) {
+    if (data.length < period) return [];
+    var result = [];
+    for (var i = period - 1; i < data.length; i++) {
+        var sum = 0;
+        for (var j = i - period + 1; j <= i; j++) sum += data[j].close;
+        result.push({ time: data[i].time, value: sum / period });
+    }
+    return result;
+}
+
+function calcEMA(data, period) {
+    if (data.length < period) return [];
+    var alpha = 2 / (period + 1);
+    var result = [];
+    var sum = 0;
+    for (var i = 0; i < period; i++) sum += data[i].close;
+    var ema = sum / period;
+    result.push({ time: data[period - 1].time, value: ema });
+    for (var i = period; i < data.length; i++) {
+        ema = (data[i].close - ema) * alpha + ema;
+        result.push({ time: data[i].time, value: ema });
+    }
+    return result;
+}
+
+function calcBollinger(data, period, stdDev) {
+    period = period || 20; stdDev = stdDev || 2;
+    if (data.length < period) return null;
+    var upper = [], middle = [], lower = [];
+    for (var i = period - 1; i < data.length; i++) {
+        var sum = 0;
+        for (var j = i - period + 1; j <= i; j++) sum += data[j].close;
+        var ma = sum / period;
+        var sqSum = 0;
+        for (var j = i - period + 1; j <= i; j++) sqSum += (data[j].close - ma) * (data[j].close - ma);
+        var std = Math.sqrt(sqSum / period);
+        var t = data[i].time;
+        middle.push({ time: t, value: ma });
+        upper.push({ time: t, value: ma + stdDev * std });
+        lower.push({ time: t, value: ma - stdDev * std });
+    }
+    return { upper: upper, middle: middle, lower: lower };
+}
+
+function calcRSI(data, period) {
+    period = period || 14;
+    if (data.length < period + 1) return [];
+    var changes = [];
+    for (var i = 1; i < data.length; i++) changes.push(data[i].close - data[i - 1].close);
+    var gains = changes.map(function(c) { return c > 0 ? c : 0; });
+    var losses = changes.map(function(c) { return c < 0 ? -c : 0; });
+    var avgGain = 0, avgLoss = 0;
+    for (var i = 0; i < period; i++) { avgGain += gains[i]; avgLoss += losses[i]; }
+    avgGain /= period; avgLoss /= period;
+    var result = [];
+    var rs = avgLoss > 0 ? avgGain / avgLoss : 100;
+    result.push({ time: data[period].time, value: 100 - 100 / (1 + rs) });
+    for (var i = period; i < gains.length; i++) {
+        avgGain = (avgGain * (period - 1) + gains[i]) / period;
+        avgLoss = (avgLoss * (period - 1) + losses[i]) / period;
+        rs = avgLoss > 0 ? avgGain / avgLoss : 100;
+        result.push({ time: data[i + 1].time, value: 100 - 100 / (1 + rs) });
+    }
+    return result;
+}
+
+function calcMACD(data, fast, slow, signal) {
+    fast = fast || 12; slow = slow || 26; signal = signal || 9;
+    var emaFast = calcEMA(data, fast);
+    var emaSlow = calcEMA(data, slow);
+    if (emaFast.length < signal || emaSlow.length < signal) return null;
+    var macdLine = [];
+    var offset = emaSlow.length - emaFast.length;
+    for (var i = 0; i < emaFast.length; i++) {
+        if (i >= offset) macdLine.push({ time: emaFast[i].time, value: emaFast[i].value - emaSlow[i - offset].value });
+    }
+    var macdVals = macdLine.map(function(m) { return m.value; });
+    var sigLine = [];
+    if (macdVals.length >= signal) {
+        var sigSum = 0;
+        for (var i = 0; i < signal; i++) sigSum += macdVals[i];
+        var sig = sigSum / signal;
+        sigLine.push({ time: macdLine[signal - 1].time, value: sig });
+        for (var i = signal; i < macdVals.length; i++) {
+            sig = (macdVals[i] - sig) * (2 / (signal + 1)) + sig;
+            sigLine.push({ time: macdLine[i].time, value: sig });
+        }
+    }
+    var hist = [];
+    for (var i = 0; i < sigLine.length; i++) {
+        var idx = i + (macdLine.length - sigLine.length);
+        hist.push({ time: macdLine[idx].time, value: macdLine[idx].value - sigLine[i].value });
+    }
+    return { macd: macdLine, signal: sigLine, histogram: hist };
+}
+
+function calcStochastic(data, kPeriod, dPeriod) {
+    kPeriod = kPeriod || 14; dPeriod = dPeriod || 3;
+    if (data.length < kPeriod + dPeriod) return null;
+    var kRaw = [];
+    for (var i = kPeriod - 1; i < data.length; i++) {
+        var high14 = -Infinity, low14 = Infinity;
+        for (var j = i - kPeriod + 1; j <= i; j++) {
+            if (data[j].high > high14) high14 = data[j].high;
+            if (data[j].low < low14) low14 = data[j].low;
+        }
+        var kVal = high14 !== low14 ? (data[i].close - low14) / (high14 - low14) * 100 : 50;
+        kRaw.push({ time: data[i].time, value: kVal });
+    }
+    var d = [];
+    if (kRaw.length >= dPeriod) {
+        for (var i = dPeriod - 1; i < kRaw.length; i++) {
+            var sum = 0;
+            for (var j = i - dPeriod + 1; j <= i; j++) sum += kRaw[j].value;
+            d.push({ time: kRaw[i].time, value: sum / dPeriod });
+        }
+    }
+    return { k: kRaw, d: d };
+}
+
+function calcATR(data, period) {
+    period = period || 14;
+    if (data.length < period + 1) return [];
+    var trs = [];
+    for (var i = 1; i < data.length; i++) {
+        var hl = data[i].high - data[i].low;
+        var hc = Math.abs(data[i].high - data[i - 1].close);
+        var lc = Math.abs(data[i].low - data[i - 1].close);
+        trs.push({ time: data[i].time, value: Math.max(hl, hc, lc) });
+    }
+    var sum = 0;
+    for (var i = 0; i < period; i++) sum += trs[i].value;
+    var atr = sum / period;
+    var result = [{ time: trs[period - 1].time, value: atr }];
+    for (var i = period; i < trs.length; i++) {
+        atr = (atr * (period - 1) + trs[i].value) / period;
+        result.push({ time: trs[i].time, value: atr });
+    }
+    return result;
+}
+
+function calcVWAP(data) {
+    if (data.length === 0) return [];
+    var cumPV = 0, cumVol = 0;
+    var result = [];
+    for (var i = 0; i < data.length; i++) {
+        var tp = (data[i].high + data[i].low + data[i].close) / 3;
+        cumPV += tp * data[i].volume;
+        cumVol += data[i].volume;
+        result.push({ time: data[i].time, value: cumPV / cumVol });
+    }
+    return result;
+}
+
+// --- CHART TYPE MANAGEMENT ---
+
+function setChartType(type) {
+    if (!chartReady || !candleSeries || type === currentChartType) return;
+    currentChartType = type;
+    var visibleRange = chart.timeScale().getVisibleRange();
+    chart.removeSeries(candleSeries);
+    candleSeries = null;
+    if (type === 'candlestick' || type === 'heikin_ashi') {
+        candleSeries = chart.addCandlestickSeries({
+            upColor: '#75FF9E', downColor: '#FF5C72',
+            borderUpColor: '#75FF9E', borderDownColor: '#FF5C72',
+            wickUpColor: '#75FF9E', wickDownColor: '#FF5C72'
+        });
+        candleSeries.setData(type === 'heikin_ashi' ? transformHeikinAshi(allCandles) : allCandles);
+    } else if (type === 'line') {
+        candleSeries = chart.addLineSeries({
+            color: '#75FF9E', lineWidth: 2, priceLineVisible: false
+        });
+        candleSeries.setData(allCandles.map(function(c) { return { time: c.time, value: c.close }; }));
+    } else if (type === 'area') {
+        candleSeries = chart.addAreaSeries({
+            lineColor: '#75FF9E', topColor: 'rgba(117,255,158,0.3)',
+            bottomColor: 'rgba(117,255,158,0.02)', lineWidth: 2, priceLineVisible: false
+        });
+        candleSeries.setData(allCandles.map(function(c) { return { time: c.time, value: c.close }; }));
+    }
+    if (visibleRange) chart.timeScale().setVisibleRange(visibleRange);
+    renderAllDrawings();
+}
+
+function transformHeikinAshi(candles) {
+    if (candles.length === 0) return [];
+    var result = [];
+    var haOpen = candles[0].open;
+    for (var i = 0; i < candles.length; i++) {
+        var c = candles[i];
+        var haClose = (c.open + c.high + c.low + c.close) / 4;
+        var haHigh = Math.max(c.high, haOpen, haClose);
+        var haLow = Math.min(c.low, haOpen, haClose);
+        result.push({ time: c.time, open: haOpen, high: haHigh, low: haLow, close: haClose });
+        haOpen = (haOpen + haClose) / 2;
+    }
+    return result;
+}
+
+// --- INDICATOR ADD / REMOVE / TOGGLE ---
+
+function createSubChart(containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return null;
+    // Explicit width/height ensures chart has non-zero size even if container is still settling
+    var w = container.clientWidth || 200;
+    var h = container.clientHeight || 80;
+    var sc = LightweightCharts.createChart(container, {
+        width: w, height: h,
+        layout: { background: { type: 'solid', color: '#1D2023' }, textColor: '#859585', fontSize: 10, fontFamily: 'JetBrains Mono, monospace' },
+        grid: { vertLines: { color: '#2A3D2A', style: 2 }, horzLines: { color: '#2A3D2A', style: 2 } },
+        rightPriceScale: { borderColor: '#3B4A3D', textColor: '#6B7280', scaleMargins: { top: 0.15, bottom: 0.15 } },
+        timeScale: { visible: false, borderColor: '#3B4A3D' },
+        crosshair: { mode: 0, vertLine: { color: '#859585', width: 1, style: 2, labelBackgroundColor: '#323538', labelVisible: false }, horzLine: { color: '#859585', width: 1, style: 2, labelBackgroundColor: '#323538', labelVisible: false } },
+        handleScroll: false, handleScale: false,
+    });
+    return sc;
+}
+
+var SUB_PANE_INDICATORS = ['rsi', 'macd', 'stochastic', 'atr'];
+var SUB_PANE_NAMES = { rsi: 'pane-rsi', macd: 'pane-macd', stochastic: 'pane-stochastic', atr: 'pane-atr' };
+
+function showSubPane(name) {
+    var id = SUB_PANE_NAMES[name];
+    if (!id) return null;
+    var el = document.getElementById(id);
+    if (!el) return null;
+    el.classList.add('visible');
+    if (!subCharts[name]) {
+        subCharts[name] = createSubChart(id);
+        if (subCharts[name]) {
+            syncSubChartTime(subCharts[name]);
+            subCharts[name].timeScale().fitContent();
+            // Re-size after container settles
+            setTimeout(function() {
+                if (subCharts[name] && el) {
+                    subCharts[name].resize(el.clientWidth, el.clientHeight);
+                    subCharts[name].timeScale().fitContent();
+                }
+            }, 50);
+        }
+    }
+    return subCharts[name];
+}
+
+function hideSubPane(name) {
+    var id = SUB_PANE_NAMES[name];
+    if (!id) return;
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('visible');
+    if (subCharts[name]) {
+        subCharts[name].remove();
+        delete subCharts[name];
+    }
+}
+
+function syncSubChartTime(subChart) {
+    if (!chart || !chartReady) return;
+    var range = chart.timeScale().getVisibleRange();
+    if (range) subChart.timeScale().setVisibleRange(range, false);
+}
+
+function syncAllSubChartTimes(sourceChart) {
+    if (syncing) return;
+    syncing = true;
+    var range = sourceChart.timeScale().getVisibleRange();
+    if (!range) { syncing = false; return; }
+    if (sourceChart !== chart && chartReady) chart.timeScale().setVisibleRange(range, false);
+    for (var n in subCharts) {
+        if (subCharts[n] !== sourceChart) subCharts[n].timeScale().setVisibleRange(range, false);
+    }
+    syncing = false;
+}
+
+function addIndicator(name) {
+    if (indicators[name]) return;
+
+    var isSubPane = SUB_PANE_INDICATORS.indexOf(name) >= 0;
+    var paneChart = isSubPane ? showSubPane(name) : chart;
+    if (!paneChart) return;
+
+    var indState = { name: name, visible: true, series: [], refSeries: [] };
+
+    if (name === 'bollinger') {
+        var bb = calcBollinger(allCandles);
+        if (!bb) { indicators[name] = indState; indState.visible = false; return; }
+        var upper = paneChart.addLineSeries({ color: '#818CF8', lineWidth: 1, priceLineVisible: false });
+        var middle = paneChart.addLineSeries({ color: '#818CF8', lineWidth: 1, lineStyle: 2, priceLineVisible: false });
+        var lower = paneChart.addLineSeries({ color: '#818CF8', lineWidth: 1, priceLineVisible: false });
+        upper.setData(bb.upper); middle.setData(bb.middle); lower.setData(bb.lower);
+        indState.series = [upper, middle, lower];
+    } else if (name === 'rsi') {
+        var rsi = calcRSI(allCandles);
+        var line = paneChart.addLineSeries({ color: '#8B5CF6', lineWidth: 1, priceLineVisible: false });
+        line.setData(rsi);
+        indState.series = [line];
+        var ref70 = paneChart.addLineSeries({ color: '#859585', lineWidth: 1, lineStyle: 2, priceLineVisible: false });
+        ref70.setData(rsi.length > 0 ? [{ time: rsi[0].time, value: 70 }, { time: rsi[rsi.length - 1].time, value: 70 }] : []);
+        var ref30 = paneChart.addLineSeries({ color: '#859585', lineWidth: 1, lineStyle: 2, priceLineVisible: false });
+        ref30.setData(rsi.length > 0 ? [{ time: rsi[0].time, value: 30 }, { time: rsi[rsi.length - 1].time, value: 30 }] : []);
+        indState.refSeries = [ref70, ref30];
+    } else if (name === 'macd') {
+        var macdData = calcMACD(allCandles);
+        if (!macdData) { hideSubPane(name); indicators[name] = indState; indState.visible = false; return; }
+        var macdLine = paneChart.addLineSeries({ color: '#3B82F6', lineWidth: 1, priceLineVisible: false });
+        macdLine.setData(macdData.macd);
+        var sigLine = paneChart.addLineSeries({ color: '#F97316', lineWidth: 1, priceLineVisible: false });
+        sigLine.setData(macdData.signal);
+        var hist = paneChart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceLineVisible: false });
+        var histData = [];
+        for (var i = 0; i < macdData.histogram.length; i++) {
+            histData.push({
+                time: macdData.histogram[i].time,
+                value: Math.abs(macdData.histogram[i].value),
+                color: macdData.histogram[i].value >= 0 ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'
+            });
+        }
+        hist.setData(histData);
+        indState.series = [macdLine, sigLine, hist];
+    } else if (name === 'stochastic') {
+        var stoch = calcStochastic(allCandles);
+        if (!stoch) { hideSubPane(name); indicators[name] = indState; indState.visible = false; return; }
+        var kLine = paneChart.addLineSeries({ color: '#EAB308', lineWidth: 1, priceLineVisible: false });
+        kLine.setData(stoch.k);
+        var dLine = paneChart.addLineSeries({ color: '#A855F7', lineWidth: 1, priceLineVisible: false });
+        dLine.setData(stoch.d);
+        indState.series = [kLine, dLine];
+        var ref80 = paneChart.addLineSeries({ color: '#859585', lineWidth: 1, lineStyle: 2, priceLineVisible: false });
+        ref80.setData(stoch.k.length > 0 ? [{ time: stoch.k[0].time, value: 80 }, { time: stoch.k[stoch.k.length - 1].time, value: 80 }] : []);
+        var ref20 = paneChart.addLineSeries({ color: '#859585', lineWidth: 1, lineStyle: 2, priceLineVisible: false });
+        ref20.setData(stoch.k.length > 0 ? [{ time: stoch.k[0].time, value: 20 }, { time: stoch.k[stoch.k.length - 1].time, value: 20 }] : []);
+        indState.refSeries = [ref80, ref20];
+    } else if (name === 'atr') {
+        var atr = calcATR(allCandles);
+        var line = paneChart.addLineSeries({ color: '#EC4899', lineWidth: 1, priceLineVisible: false });
+        line.setData(atr);
+        indState.series = [line];
+    } else if (name === 'vwap') {
+        var vwap = calcVWAP(allCandles);
+        var line = paneChart.addLineSeries({ color: '#FBBF24', lineWidth: 1, priceLineVisible: false });
+        line.setData(vwap);
+        indState.series = [line];
+    } else if (name.indexOf('sma_') === 0) {
+        var period = parseInt(name.split('_')[1], 10);
+        var sma = calcSMA(allCandles, period);
+        var line = paneChart.addLineSeries({ color: '#34D399', lineWidth: 1, priceLineVisible: false });
+        line.setData(sma);
+        indState.series = [line];
+    } else if (name.indexOf('ema_') === 0) {
+        var period = parseInt(name.split('_')[1], 10);
+        var ema = calcEMA(allCandles, period);
+        var line = paneChart.addLineSeries({ color: '#F59E0B', lineWidth: 1, priceLineVisible: false, lineStyle: 2 });
+        line.setData(ema);
+        indState.series = [line];
+    }
+
+    indicators[name] = indState;
+    if (isSubPane && paneChart) {
+        paneChart.timeScale().fitContent();
+        var subId = SUB_PANE_NAMES[name];
+        var subEl = document.getElementById(subId);
+        if (subEl) {
+            setTimeout(function() {
+                paneChart.resize(subEl.clientWidth, subEl.clientHeight);
+                paneChart.timeScale().fitContent();
+            }, 10);
+        }
+    }
+}
+
+function getChartFor(name) {
+    var isSub = SUB_PANE_INDICATORS.indexOf(name) >= 0;
+    return isSub ? (subCharts[name] || chart) : chart;
+}
+
+function removeIndicator(name) {
+    var ind = indicators[name];
+    if (!ind) return;
+    var c = getChartFor(name);
+    for (var i = 0; i < ind.series.length; i++) c.removeSeries(ind.series[i]);
+    for (var i = 0; i < ind.refSeries.length; i++) c.removeSeries(ind.refSeries[i]);
+    delete indicators[name];
+    hideSubPane(name);
+}
+
+function setIndicatorVisible(name, visible) {
+    if (visible && !indicators[name]) {
+        addIndicator(name);
+    } else if (!visible && indicators[name]) {
+        removeIndicator(name);
+    }
+}
+
+function recalcAllIndicators() {
+    for (var n in subCharts) { subCharts[n].remove(); delete subCharts[n]; }
+    for (var n in SUB_PANE_NAMES) {
+        var el = document.getElementById(SUB_PANE_NAMES[n]);
+        if (el) el.classList.remove('visible');
+    }
+    indicators = {};
+    var defaults = ['sma_5', 'sma_20', 'sma_50', 'macd'];
+    for (var i = 0; i < defaults.length; i++) addIndicator(defaults[i]);
+    for (var n in subCharts) { syncSubChartTime(subCharts[n]); subCharts[n].timeScale().fitContent(); }
+}
+
+function setMA5Visible(visible) { setIndicatorVisible('sma_5', visible); }
+function setMA20Visible(visible) { setIndicatorVisible('sma_20', visible); }
+function setVolumeVisible(visible) {
+    if (volumeSeries) volumeSeries.applyOptions({ visible: visible });
+}
+
+// --- INIT ---
 
 function initChart() {
     var container = document.getElementById('chart');
     if (!container) { console.error('Chart container not found'); return; }
-    
+
     document.getElementById('loading').style.display = 'none';
-    container.style.display = 'block';
-    
+    document.getElementById('chart-wrapper').style.display = 'flex';
+
     try {
-        chart = createChart(container, {
+        chart = LightweightCharts.createChart(container, {
             layout: {
                 background: { type: 'solid', color: '#1D2023' },
                 textColor: '#E1E2E7',
@@ -66,95 +589,562 @@ function initChart() {
                 horzLine: { color: '#859585', width: 1, style: 2, labelBackgroundColor: '#323538' }
             },
             rightPriceScale: { borderColor: '#3B4A3D', textColor: '#859585' },
-            timeScale: { borderColor: '#3B4A3D', textColor: '#859585', timeVisible: false },
-            handleScroll: false,
-            handleScale: false,
+            timeScale: { borderColor: '#3B4A3D', textColor: '#859585', timeVisible: true },
+            handleScroll: true,
+            handleScale: true,
         });
 
         candleSeries = chart.addCandlestickSeries({
-            upColor: '#75FF9E',
-            downColor: '#FF5C72',
-            borderUpColor: '#75FF9E',
-            borderDownColor: '#FF5C72',
-            wickUpColor: '#75FF9E',
-            wickDownColor: '#FF5C72'
+            upColor: '#75FF9E', downColor: '#FF5C72',
+            borderUpColor: '#75FF9E', borderDownColor: '#FF5C72',
+            wickUpColor: '#75FF9E', wickDownColor: '#FF5C72'
         });
 
         volumeSeries = chart.addHistogramSeries({
             priceFormat: { type: 'volume' },
-            priceScaleId: 'volume',
-            color: '#3B4A3D'
+            priceScaleId: 'volume-scale',
+            priceLineVisible: false,
+        });
+        chart.priceScale('volume-scale').applyOptions({
+            scaleMargins: { top: 0.8, bottom: 0 },
         });
 
-        ma5Series = chart.addLineSeries({
-            color: '#CEE8FF', lineWidth: 1, priceLineVisible: false
-        });
-
-        ma20Series = chart.addLineSeries({
-            color: '#859585', lineWidth: 1, lineStyle: 2, priceLineVisible: false
-        });
-
-        chart.timeScale().fitContent();
         chartReady = true;
-        console.log('Chart initialized successfully');
+
+        // Resize chart to fill container + auto-scale axes
+        requestAnimationFrame(function() {
+            if (chart && chartReady) {
+                var cc = document.getElementById('chart-container');
+                if (cc) {
+                    chart.resize(cc.clientWidth, cc.clientHeight);
+                }
+            }
+        });
+
+        // Re-scale chart when window resizes
+        window.addEventListener('resize', function() {
+            if (chart && chartReady) {
+                var cc = document.getElementById('chart-container');
+                if (cc) {
+                    chart.resize(cc.clientWidth, cc.clientHeight);
+                }
+            }
+        });
+
+        initDrawingCanvas();
+        // Wire canvas events
+        var canvas = document.getElementById('drawing-canvas');
+        if (canvas) {
+            canvas.addEventListener('mousedown', onDrawingMouseDown);
+            canvas.addEventListener('mousemove', onDrawingMouseMove);
+            canvas.addEventListener('mouseup', onDrawingMouseUp);
+            canvas.addEventListener('contextmenu', onDrawingContextMenu);
+        }
+        // Wire drawing toolbar buttons
+        var toolbar = document.getElementById('drawing-toolbar');
+        if (toolbar) {
+            toolbar.addEventListener('click', function(e) {
+                var btn = e.target.closest('button[data-tool]');
+                if (!btn) return;
+                var tool = btn.getAttribute('data-tool');
+                if (tool === 'undo') { undoLastDrawing(); return; }
+                if (tool === 'clear') { clearAllDrawings(); return; }
+                if (tool === activeDrawingTool) { setActiveDrawingTool('none'); return; }
+                setActiveDrawingTool(tool);
+            });
+        }
+        document.getElementById('chart-loading').style.display = 'block';
+
+        // Crosshair move -> update OHLC header
+        chart.subscribeCrosshairMove(function(param) {
+            if (!param.time || !param.seriesData || param.seriesData.size === 0) {
+                if (allCandles.length > 0) {
+                    var last = allCandles[allCandles.length - 1];
+                    updateOHLCHeader(last.time, last.open, last.high, last.low, last.close, last.volume || 0);
+                }
+                return;
+            }
+            var cd = param.seriesData.get(candleSeries);
+            if (cd) {
+                updateOHLCHeader(
+                    typeof param.time === 'object' ? param.time.timestamp || param.time._timestamp || 0 : param.time,
+                    cd.open !== undefined ? cd.open : (cd.value || 0),
+                    cd.high !== undefined ? cd.high : (cd.value || 0),
+                    cd.low !== undefined ? cd.low : (cd.value || 0),
+                    cd.close !== undefined ? cd.close : (cd.value || 0),
+                    cd.volume || 0
+                );
+            }
+        });
+
+        // Sync time scales on main chart scroll/zoom
+        chart.timeScale().subscribeVisibleTimeRangeChange(function() {
+            syncAllSubChartTimes(chart);
+        });
+
+        // Scroll-to-load with 5s cooldown
+        var lastRequestTime = 0;
+        var REQUEST_COOLDOWN = 5000;
+        chart.timeScale().subscribeVisibleTimeRangeChange(function(range) {
+            if (!range || !dataFirstTime || !dataLastTime || !window.bridge) return;
+            var ONE_DAY = 86400;
+            var now = Date.now();
+            if (now - lastRequestTime < REQUEST_COOLDOWN) return;
+            if (range.from <= dataFirstTime + ONE_DAY) {
+                lastRequestTime = now;
+                document.getElementById('chart-loading').style.display = 'block';
+                window.bridge.requestMoreData('left');
+            }
+            if (range.to >= dataLastTime - ONE_DAY) {
+                lastRequestTime = now;
+                document.getElementById('chart-loading').style.display = 'block';
+                window.bridge.requestMoreData('right');
+            }
+        });
     } catch(e) {
         console.error('Chart init error:', e);
     }
 }
 
+// --- DATA UPDATE ---
+
 function updateData(data) {
     if (!data || data.length === 0 || !chartReady) return;
-    
+
     try {
-        var candles = data.map(function(d) {
-            return { time: d.timestamp, open: d.open, high: d.high, low: d.low, close: d.close };
-        });
-        candleSeries.setData(candles);
-
-        var volumes = data.map(function(d) {
-            return { time: d.timestamp, value: d.volume, 
-                     color: d.close >= d.open ? '#75FF9E' : '#FF5C72' };
-        });
-        volumeSeries.setData(volumes);
-
-        if (data.length >= 5) {
-            var ma5 = [];
-            for (var i = 4; i < data.length; i++) {
-                var sum = 0;
-                for (var j = i - 4; j <= i; j++) sum += data[j].close;
-                ma5.push({ time: data[i].timestamp, value: sum / 5 });
+        // If ticker changed, replace all data (don't deduplicate against old)
+        if (newTickerLoaded) {
+            allCandles = [];
+            allVolumes = [];
+            newTickerLoaded = false;
+        }
+        for (var i = 0; i < data.length; i++) {
+            var candle = data[i];
+            var exists = false;
+            for (var j = allCandles.length - 1; j >= Math.max(0, allCandles.length - 50); j--) {
+                if (allCandles[j].time === candle.timestamp) { exists = true; break; }
             }
-            ma5Series.setData(ma5);
+            if (!exists && candle.timestamp != null && candle.open != null && candle.high != null && candle.low != null && candle.close != null) {
+                allCandles.push({
+                    time: candle.timestamp,
+                    open: candle.open, high: candle.high,
+                    low: candle.low, close: candle.close,
+                    volume: candle.volume != null ? candle.volume : 1
+                });
+                allVolumes.push({
+                    time: candle.timestamp,
+                    value: candle.volume != null && candle.volume > 0 ? candle.volume : 1,
+                    color: candle.close >= candle.open ? 'rgba(117,255,158,0.25)' : 'rgba(255,92,114,0.25)'
+                });
+            }
         }
 
-        if (data.length >= 20) {
-            var ma20 = [];
-            for (var i = 19; i < data.length; i++) {
-                var sum = 0;
-                for (var j = i - 19; j <= i; j++) sum += data[j].close;
-                ma20.push({ time: data[i].timestamp, value: sum / 20 });
-            }
-            ma20Series.setData(ma20);
+        allCandles.sort(function(a, b) { return a.time - b.time; });
+        allVolumes.sort(function(a, b) { return a.time - b.time; });
+
+        candleSeries.setData(currentChartType === 'heikin_ashi' ? transformHeikinAshi(allCandles) : allCandles);
+        volumeSeries.setData(allVolumes);
+
+        recalcAllIndicators();
+
+        if (allCandles.length > 0) {
+            dataFirstTime = allCandles[0].time;
+            dataLastTime = allCandles[allCandles.length - 1].time;
+            var last = allCandles[allCandles.length - 1];
+            updateOHLCHeader(last.time, last.open, last.high, last.low, last.close, last.volume || 0);
         }
 
-        chart.timeScale().fitContent();
-        console.log('Chart data updated: ' + candles.length + ' candles');
+        if (isInitialLoad && allCandles.length > 0) {
+            var numCandles = Math.min(250, allCandles.length);
+            var startTime = allCandles[allCandles.length - numCandles].time;
+            var latestTime = allCandles[allCandles.length - 1].time;
+            chart.timeScale().setVisibleRange({ from: startTime, to: latestTime });
+            isInitialLoad = false;
+        }
+        for (var n in subCharts) syncSubChartTime(subCharts[n]);
+        // Resize chart to fill container + auto-scale axes
+        var cc = document.getElementById('chart-container');
+        if (chart && cc) {
+            chart.resize(cc.offsetWidth, cc.offsetHeight);
+        }
+        document.getElementById('chart-loading').style.display = 'none';
     } catch(e) {
-        console.error('Chart update error:', e);
+        console.error('Chart update error:', e.message);
     }
 }
 
 function onQtDataReceived(jsonStr) {
     try {
         var data = JSON.parse(jsonStr);
-        console.log('Qt data received: ' + data.length + ' items');
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
             updateData(data);
         }
     } catch(e) {
-        console.error('Parse error:', e);
+        console.error('Parse error:', e.message);
+    }
+    return "ok";
+}
+
+function onAddCandle(jsonStr) {
+    if (typeof jsonStr === 'undefined') return;
+    try {
+        var candle = JSON.parse(jsonStr);
+        if (!chartReady || !candleSeries) return;
+        if (!candle || candle.timestamp === null || candle.close === null) return;
+        candleSeries.update({ time: candle.timestamp, open: candle.open,
+                              high: candle.high, low: candle.low, close: candle.close });
+        volumeSeries.update({ time: candle.timestamp, value: candle.volume,
+                              color: candle.close >= candle.open ? 'rgba(117,255,158,0.25)' : 'rgba(255,92,114,0.25)' });
+
+        // Auto-scroll to latest candle
+        if (chart && chart.timeScale) {
+            chart.timeScale().scrollToRealTime();
+        }
+
+        if (allCandles.length > 0) {
+            var last = allCandles[allCandles.length - 1];
+            if (!last || last.time !== candle.timestamp) {
+                allCandles.push({
+                    time: candle.timestamp, open: candle.open, high: candle.high,
+                    low: candle.low, close: candle.close
+                });
+            }
+            dataLastTime = allCandles[allCandles.length - 1].time;
+        }
+    } catch(e) { /* silent */ }
+}
+
+// Signal ready to C++ after chart initialized
+function isChartReady() {
+    return chartReady ? 'ready' : 'not_ready';
+}
+
+function clearChart() {
+    allCandles = [];
+    allVolumes = [];
+    dataFirstTime = 0;
+    dataLastTime = 0;
+    isInitialLoad = true;
+    for (var n in subCharts) { subCharts[n].remove(); delete subCharts[n]; }
+    for (var n in SUB_PANE_NAMES) {
+        var el = document.getElementById(SUB_PANE_NAMES[n]);
+        if (el) el.classList.remove('visible');
+    }
+    indicators = {};
+    if (candleSeries) candleSeries.setData([]);
+    if (volumeSeries) volumeSeries.setData([]);
+    if (chart) chart.timeScale().fitContent();
+    document.getElementById('chart-loading').style.display = 'none';
+    document.getElementById('ohlc-open').textContent = '-';
+    document.getElementById('ohlc-high').textContent = '-';
+    document.getElementById('ohlc-low').textContent = '-';
+    document.getElementById('ohlc-close').textContent = '-';
+    document.getElementById('ohlc-vol').textContent = '-';
+    document.getElementById('ohlc-chg').textContent = '-';
+    drawings = [];
+    currentDrawing = null;
+    if (drawingCtx) drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+}
+
+// ===== DRAWING TOOLS =====
+
+let drawings = [];
+let activeDrawingTool = null;
+let currentDrawing = null;
+let nextDrawId = 1;
+let drawingCanvas = null;
+let drawingCtx = null;
+
+function initDrawingCanvas() {
+    drawingCanvas = document.getElementById('drawing-canvas');
+    if (!drawingCanvas) return;
+    drawingCtx = drawingCanvas.getContext('2d');
+    resizeDrawingCanvas();
+    window.addEventListener('resize', resizeDrawingCanvas);
+}
+
+function resizeDrawingCanvas() {
+    if (!drawingCanvas) return;
+    var container = drawingCanvas.parentElement;
+    drawingCanvas.width = container.offsetWidth;
+    drawingCanvas.height = container.offsetHeight;
+    renderAllDrawings();
+}
+
+function getCanvasCoords(e) {
+    if (!drawingCanvas) return { x: 0, y: 0 };
+    var rect = drawingCanvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+function pxToTime(x) {
+    if (!chart) return 0;
+    var t = chart.timeScale().coordinateToTime(x);
+    return t !== null ? t : 0;
+}
+
+function pxToPrice(y) {
+    if (!candleSeries) return 0;
+    var p = candleSeries.coordinateToPrice(y);
+    return p !== null ? p : 0;
+}
+
+function timeToPx(time) {
+    if (!chart) return -1;
+    var x = chart.timeScale().timeToCoordinate(time);
+    return x !== null ? x : -1;
+}
+
+function priceToPx(price) {
+    if (!candleSeries) return -1;
+    var y = candleSeries.priceToCoordinate(price);
+    return y !== null ? y : -1;
+}
+
+function setActiveDrawingTool(tool) {
+    activeDrawingTool = tool;
+    currentDrawing = null;
+    if (drawingCanvas) {
+        drawingCanvas.classList.toggle('active', tool !== null && tool !== 'none');
+    }
+    var toolbar = document.getElementById('drawing-toolbar');
+    if (toolbar) {
+        var btns = toolbar.querySelectorAll('button[data-tool]');
+        for (var i = 0; i < btns.length; i++) {
+            var t = btns[i].getAttribute('data-tool');
+            btns[i].classList.toggle('active', t === tool);
+        }
     }
 }
+
+function renderAllDrawings() {
+    if (!drawingCtx || !drawingCanvas) return;
+    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+
+    for (var i = 0; i < drawings.length; i++) {
+        renderDrawing(drawings[i]);
+    }
+
+    // Render preview (in-progress drawing)
+    if (currentDrawing) renderDrawing(currentDrawing, true);
+}
+
+function renderDrawing(d, preview) {
+    if (!drawingCtx) return;
+    var ctx = drawingCtx;
+    var alpha = preview ? 0.5 : 1;
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = d.color || '#FFD700';
+    ctx.lineWidth = d.lineWidth || 2;
+    ctx.fillStyle = d.color || '#FFD700';
+    ctx.font = '11px JetBrains Mono, monospace';
+
+    if (d.type === 'hline' && d.points.length >= 1) {
+        var y = priceToPx(d.points[0].price);
+        if (y < 0) { ctx.globalAlpha = 1; return; }
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(drawingCanvas.width, y); ctx.stroke();
+        ctx.fillText(d.id + ': ' + d.points[0].price.toFixed(0), 4, y - 4);
+    } else if (d.type === 'trendline' && d.points.length >= 2) {
+        var x1 = timeToPx(d.points[0].time), y1 = priceToPx(d.points[0].price);
+        var x2 = timeToPx(d.points[1].time), y2 = priceToPx(d.points[1].price);
+        if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0) { ctx.globalAlpha = 1; return; }
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    } else if (d.type === 'fibonacci' && d.points.length >= 2) {
+        var y1 = priceToPx(d.points[0].price), y2 = priceToPx(d.points[1].price);
+        if (y1 < 0 || y2 < 0) { ctx.globalAlpha = 1; return; }
+        var levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+        var labels = ['0%', '23.6%', '38.2%', '50%', '61.8%', '78.6%', '100%'];
+        var x1 = timeToPx(d.points[0].time), x2 = timeToPx(d.points[1].time);
+
+        for (var i = 0; i < levels.length; i++) {
+            var y = y1 + (y2 - y1) * (1 - levels[i]);
+            if (x1 >= 0) {
+                ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2 >= 0 ? x2 : drawingCanvas.width, y); ctx.stroke();
+            }
+            ctx.fillText(labels[i] + ' ' + (d.points[0].price + (d.points[1].price - d.points[0].price) * (1 - levels[i])).toFixed(0), 4, y - 4);
+        }
+    } else if (d.type === 'rectangle' && d.points.length >= 2) {
+        var x1 = timeToPx(d.points[0].time), y1 = priceToPx(d.points[0].price);
+        var x2 = timeToPx(d.points[1].time), y2 = priceToPx(d.points[1].price);
+        if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0) { ctx.globalAlpha = 1; return; }
+        ctx.strokeRect(Math.min(x1,x2), Math.min(y1,y2), Math.abs(x2-x1), Math.abs(y2-y1));
+    } else if (d.type === 'text' && d.points.length >= 1 && d.text) {
+        var x = timeToPx(d.points[0].time), y = priceToPx(d.points[0].price);
+        if (x < 0 || y < 0) { ctx.globalAlpha = 1; return; }
+        ctx.fillText(d.text, x + 8, y - 8);
+    } else if ((d.type === 'ray' || d.type === 'extended' || d.type === 'arrow') && d.points.length >= 2) {
+        var x1 = timeToPx(d.points[0].time), y1 = priceToPx(d.points[0].price);
+        var x2 = timeToPx(d.points[1].time), y2 = priceToPx(d.points[1].price);
+        if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0) { ctx.globalAlpha = 1; return; }
+        var dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx*dx+dy*dy);
+        if (d.type === 'ray') {
+            var ex = x1 + dx * (drawingCanvas.width / Math.max(Math.abs(dx), 1));
+            var ey = y1 + dy * (drawingCanvas.width / Math.max(Math.abs(dx), 1));
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(ex, ey); ctx.stroke();
+        } else {
+            var bx = x1 - dx * (drawingCanvas.width / Math.max(Math.abs(dx), 1));
+            var by = y1 - dy * (drawingCanvas.width / Math.max(Math.abs(dx), 1));
+            var ex = x1 + dx * (drawingCanvas.width / Math.max(Math.abs(dx), 1));
+            var ey = y1 + dy * (drawingCanvas.width / Math.max(Math.abs(dx), 1));
+            ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(ex, ey); ctx.stroke();
+            if (d.type === 'arrow') {
+                var angle = Math.atan2(dy, dx);
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x2 - 10 * Math.cos(angle - 0.4), y2 - 10 * Math.sin(angle - 0.4));
+                ctx.lineTo(x2 - 10 * Math.cos(angle + 0.4), y2 - 10 * Math.sin(angle + 0.4));
+                ctx.closePath(); ctx.fill();
+            }
+        }
+    } else if (d.type === 'circle' && d.points.length >= 2) {
+        var x1 = timeToPx(d.points[0].time), y1 = priceToPx(d.points[0].price);
+        var x2 = timeToPx(d.points[1].time), y2 = priceToPx(d.points[1].price);
+        if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0) { ctx.globalAlpha = 1; return; }
+        var r = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+        ctx.beginPath(); ctx.arc(x1, y1, r, 0, 2*Math.PI); ctx.stroke();
+    } else if (d.type === 'triangle' && d.points.length >= 3) {
+        var pts = [];
+        var valid = true;
+        for (var t = 0; t < 3; t++) {
+            var px = timeToPx(d.points[t].time), py = priceToPx(d.points[t].price);
+            if (px < 0 || py < 0) { valid = false; break; }
+            pts.push({x:px, y:py});
+        }
+        if (!valid) { ctx.globalAlpha = 1; return; }
+        ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+        ctx.lineTo(pts[1].x, pts[1].y); ctx.lineTo(pts[2].x, pts[2].y);
+        ctx.closePath(); ctx.stroke();
+    } else if (d.type === 'fibext' && d.points.length >= 2) {
+        var y1 = priceToPx(d.points[0].price), y2 = priceToPx(d.points[1].price);
+        if (y1 < 0 || y2 < 0) { ctx.globalAlpha = 1; return; }
+        var levels = [0, 0.382, 0.618, 1, 1.272, 1.414, 1.618, 2.0, 2.618];
+        var labels = ['0%', '38.2%','61.8%','100%','127.2%','141.4%','161.8%','200%','261.8%'];
+        var x1 = timeToPx(d.points[0].time), x2 = timeToPx(d.points[1].time);
+        for (var i = 0; i < levels.length; i++) {
+            var y = y1 + (y2 - y1) * (1 - levels[i]);
+            if (x1 >= 0) {
+                ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2 >= 0 ? x2 : drawingCanvas.width, y); ctx.stroke();
+            }
+            ctx.fillText(labels[i] + ' ' + (d.points[0].price + (d.points[1].price - d.points[0].price) * (1 - levels[i])).toFixed(0), 4, y - 4);
+        }
+    } else if (d.type === 'measure' && d.points.length >= 2) {
+        var x1 = timeToPx(d.points[0].time), y1 = priceToPx(d.points[0].price);
+        var x2 = timeToPx(d.points[1].time), y2 = priceToPx(d.points[1].price);
+        if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0) { ctx.globalAlpha = 1; return; }
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        var pct = ((d.points[1].price - d.points[0].price) / d.points[0].price * 100).toFixed(2);
+        ctx.fillText(pct + '%', (x1+x2)/2, (y1+y2)/2 - 8);
+    }
+    ctx.globalAlpha = 1;
+}
+
+// Drawing mouse handlers
+function onDrawingMouseDown(e) {
+    if (!activeDrawingTool || activeDrawingTool === 'none') return;
+    var coords = getCanvasCoords(e);
+    var time = pxToTime(coords.x);
+    var price = pxToPrice(coords.y);
+    if (!time || !price) return;
+
+    if (activeDrawingTool === 'hline') {
+        drawings.push({
+            id: 'D' + (nextDrawId++),
+            type: 'hline',
+            points: [{ time: time, price: price }],
+            color: '#FFD700', lineWidth: 2
+        });
+        renderAllDrawings();
+        return;
+    }
+
+    if (!currentDrawing) {
+        currentDrawing = {
+            id: 'D' + (nextDrawId++),
+            type: activeDrawingTool,
+            points: [{ time: time, price: price }],
+            color: '#FFD700', lineWidth: 2, text: ''
+        };
+    }
+}
+
+function onDrawingMouseMove(e) {
+    if (!activeDrawingTool || activeDrawingTool === 'none' || !currentDrawing) return;
+    var coords = getCanvasCoords(e);
+    var time = pxToTime(coords.x);
+    var price = pxToPrice(coords.y);
+    if (!time || !price) return;
+
+    var tempPoints = [currentDrawing.points[0]];
+    tempPoints.push({ time: time, price: price });
+    currentDrawing.points = tempPoints;
+    renderAllDrawings();
+}
+
+function onDrawingMouseUp(e) {
+    if (!activeDrawingTool || activeDrawingTool === 'none' || !currentDrawing) return;
+    var TWO_POINT_TOOLS = ['trendline','fibonacci','fibext','rectangle','ray','extended','arrow','circle','measure'];
+    if (TWO_POINT_TOOLS.indexOf(activeDrawingTool) >= 0) {
+        var coords2 = getCanvasCoords(e);
+        var time2 = pxToTime(coords2.x);
+        var price2 = pxToPrice(coords2.y);
+        if (time2 && price2) {
+            currentDrawing.points.push({ time: time2, price: price2 });
+        }
+        drawings.push(currentDrawing);
+        currentDrawing = null;
+        renderAllDrawings();
+    } else if (activeDrawingTool === 'text') {
+        currentDrawing.text = 'Text';
+        drawings.push(currentDrawing);
+        currentDrawing = null;
+        renderAllDrawings();
+    } else if (activeDrawingTool === 'triangle') {
+        currentDrawing.points.push({ time: currentDrawing.points[0].time, price: currentDrawing.points[0].price });
+        drawings.push(currentDrawing);
+        currentDrawing = null;
+        renderAllDrawings();
+    }
+}
+
+// Bridge functions for C++ communication
+function markNewTicker() { newTickerLoaded = true; }
+function setActiveDrawingToolFromCpp(tool) { setActiveDrawingTool(tool); }
+function setDrawingToolbarVisible(visible) {
+    var tb = document.getElementById('drawing-toolbar');
+    if (tb) tb.classList.toggle('hidden', !visible);
+}
+
+function clearAllDrawings() {
+    drawings = [];
+    currentDrawing = null;
+    renderAllDrawings();
+}
+
+function undoLastDrawing() {
+    drawings.pop();
+    renderAllDrawings();
+}
+
+function getDrawingsJson() { return JSON.stringify(drawings); }
+
+function loadDrawingsJson(jsonStr) {
+    try { drawings = JSON.parse(jsonStr) || []; renderAllDrawings(); }
+    catch(e) { console.error('loadDrawings error:', e); }
+}
+
+// Remove last point on right-click
+function onDrawingContextMenu(e) {
+    if (currentDrawing) { currentDrawing = null; renderAllDrawings(); return; }
+    e.preventDefault();
+}
+
+initChart();
+window.addEventListener('load', function() {
+    if (chart && chartReady) {
+        var cc = document.getElementById('chart-container');
+        if (cc) chart.resize(cc.clientWidth, cc.clientHeight);
+    }
+});
 </script>
 </body>
 </html>
