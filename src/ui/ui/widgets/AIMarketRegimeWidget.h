@@ -15,7 +15,13 @@ public:
     void updateData(const QString &regime, int confidence,
                     const QString &next1hRegime, int next1hConfidence,
                     const QString &nextDayRegime, int nextDayConfidence,
-                    const QString &analysis, const QJsonArray &forecastSteps);
+                    const QString &analysis, const QJsonArray &forecastSteps,
+                    bool overrideActive = false,
+                    const QString &overrideRegime = QString(),
+                    int overrideHours = 0,
+                    bool divergence = false,
+                    double acc7d = 0, double acc30d = 0, double accTotal = 0,
+                    const QString &marketStatus = "UNKNOWN");
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -29,4 +35,13 @@ private:
     int m_nextDayConfidence = 0;
     QString m_analysis;
     QJsonArray m_forecastSteps;
+
+    bool m_overrideActive = false;
+    QString m_overrideRegime;
+    int m_overrideHours = 0;
+    bool m_divergence = false;
+    double m_acc7d = 0;
+    double m_acc30d = 0;
+    double m_accTotal = 0;
+    QString m_marketStatus = "UNKNOWN";
 };

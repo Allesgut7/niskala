@@ -18,9 +18,20 @@ BreakingNewsTicker::BreakingNewsTicker(QWidget *parent)
 
 void BreakingNewsTicker::updateHeadlines(const QStringList &headlines)
 {
-    if (!headlines.isEmpty() && headlines != m_headlines) {
-        m_headlines = headlines;
-        update();
+    if (headlines.isEmpty()) return;
+
+    for (const auto &h : headlines) {
+        if (!m_headlines.contains(h)) {
+            m_headlines.append(h);
+        }
+    }
+
+    while (m_headlines.size() > 30) {
+        m_headlines.removeFirst();
+    }
+
+    if (m_headlines.size() > 1 && m_headlines.first() == "Loading news...") {
+        m_headlines.removeFirst();
     }
 }
 

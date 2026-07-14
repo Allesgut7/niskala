@@ -5,7 +5,7 @@
 MarketBreadthWidget::MarketBreadthWidget(QWidget *parent)
     : QWidget(parent)
 {
-    setMinimumSize(200, 180);
+    setMinimumSize(200, 150);
     setupData();
 }
 
@@ -36,7 +36,7 @@ void MarketBreadthWidget::paintEvent(QPaintEvent *event)
 
     // Semi-circle gauge (shifted left for more room on right)
     int centerX = static_cast<int>(width() * 0.35);
-    int centerY = 130;
+    int centerY = 103;
     int radius = 55;
 
     // Background arc
@@ -64,7 +64,7 @@ void MarketBreadthWidget::paintEvent(QPaintEvent *event)
 
     // Stats on right - 3 separate columns
     int statsX = static_cast<int>(width() * 0.6);
-    int statsY = 35;
+    int statsY = 48;
 
     // Naik
     painter.setPen(QColor("#75FF9E"));

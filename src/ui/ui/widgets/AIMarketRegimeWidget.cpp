@@ -3,13 +3,20 @@
 AIMarketRegimeWidget::AIMarketRegimeWidget(QWidget *parent)
     : QWidget(parent)
 {
-    setMinimumHeight(120);
+    setMinimumHeight(140);
+    setMaximumHeight(180);
 }
 
 void AIMarketRegimeWidget::updateData(const QString &regime, int confidence,
                                        const QString &next1hRegime, int next1hConfidence,
                                        const QString &nextDayRegime, int nextDayConfidence,
-                                       const QString &analysis, const QJsonArray &forecastSteps)
+                                       const QString &analysis, const QJsonArray &forecastSteps,
+                                       bool overrideActive,
+                                       const QString &overrideRegime,
+                                       int overrideHours,
+                                       bool divergence,
+                                       double acc7d, double acc30d, double accTotal,
+                                       const QString &marketStatus)
 {
     m_regime = regime;
     m_confidence = confidence;
@@ -19,6 +26,14 @@ void AIMarketRegimeWidget::updateData(const QString &regime, int confidence,
     m_nextDayConfidence = nextDayConfidence;
     m_analysis = analysis;
     m_forecastSteps = forecastSteps;
+    m_overrideActive = overrideActive;
+    m_overrideRegime = overrideRegime;
+    m_overrideHours = overrideHours;
+    m_divergence = divergence;
+    m_acc7d = acc7d;
+    m_acc30d = acc30d;
+    m_accTotal = accTotal;
+    m_marketStatus = marketStatus;
     update();
 }
 
@@ -56,14 +71,49 @@ void AIMarketRegimeWidget::paintEvent(QPaintEvent *event)
     // --- COL 1: Current Regime ---
     int cx = 8;
 
-    // LIVE badge
-    QRect liveRect(cx + 4, y, 50, 18);
-    painter.setBrush(QColor("#75FF9E"));
+    // Market status badge
+    QColor statusBg;
+    QString statusText;
+    if (m_marketStatus == "OPEN") {
+        statusBg = QColor("#75FF9E");
+        statusText = "LIVE";
+    } else if (m_marketStatus == "CLOSED_HOURS") {
+        statusBg = QColor("#FFD700");
+        statusText = "CLOSED";
+    } else if (m_marketStatus == "CLOSED_WEEKEND") {
+        statusBg = QColor("#859585");
+        statusText = "WEEKEND";
+    } else {
+        statusBg = QColor("#859585");
+        statusText = "UNKNOWN";
+    }
+
+    QRect statusRect(cx + 4, y, 54, 18);
     painter.setPen(Qt::NoPen);
-    painter.drawRoundedRect(liveRect, 3, 3);
+    painter.setBrush(statusBg);
+    painter.drawRoundedRect(statusRect, 3, 3);
     painter.setPen(QColor("#060B16"));
     painter.setFont(QFont("Inter", 8, QFont::Bold));
-    painter.drawText(liveRect, Qt::AlignCenter, "LIVE");
+    painter.drawText(statusRect, Qt::AlignCenter, statusText);
+
+    // Override badge (only during OPEN market)
+    if (m_overrideActive && m_marketStatus == "OPEN") {
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QColor("#FFD700"));
+        QRect ovRect(cx + 62, y, 60, 18);
+        painter.drawRoundedRect(ovRect, 3, 3);
+        painter.setPen(QColor("#1A1A1A"));
+        painter.setFont(QFont("JetBrains Mono", 7, QFont::Bold));
+        painter.drawText(ovRect, Qt::AlignCenter, "\u26A0 OVERRIDE");
+    } else if (m_divergence && m_marketStatus == "OPEN") {
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QColor("#FFB3AE"));
+        QRect dvRect(cx + 62, y, 40, 18);
+        painter.drawRoundedRect(dvRect, 3, 3);
+        painter.setPen(QColor("#1A1A1A"));
+        painter.setFont(QFont("Inter", 7, QFont::Bold));
+        painter.drawText(dvRect, Qt::AlignCenter, "DIVERGE");
+    }
 
     // "REGIME" label
     painter.setPen(QColor("#859585"));
@@ -165,16 +215,22 @@ void AIMarketRegimeWidget::paintEvent(QPaintEvent *event)
             painter.drawText(QRect(barX, y, 16, 16), Qt::AlignCenter, arrowForRegime(regime));
 
             painter.setFont(QFont("Inter", 8));
-            painter.drawText(QRect(barX + 16, y, 40, 16), Qt::AlignLeft,
+            painter.drawText(QRect(barX + 16, y, 60, 16), Qt::AlignLeft,
                              regime + " " + QString::number(prob, 'f', 0) + "%");
 
-            int barW = qMin(static_cast<int>(prob), 50);
-            painter.setPen(Qt::NoPen);
-            painter.setBrush(fc);
-            painter.drawRoundedRect(barX + 60, y + 4, barW, 8, 2, 2);
-
-            barX += barW + 70;
+            barX += 120;
         }
         y += 18;
+    }
+
+    // Accuracy stats
+    if (m_accTotal > 0) {
+        painter.setPen(QColor("#859585"));
+        painter.setFont(QFont("Inter", 8));
+        QString accText = QString("Accuracy: 7d %1% | 30d %2% | All %3%")
+            .arg(m_acc7d, 0, 'f', 0)
+            .arg(m_acc30d, 0, 'f', 0)
+            .arg(m_accTotal, 0, 'f', 0);
+        painter.drawText(QRect(8, y, width() - 16, 14), Qt::AlignLeft, accText);
     }
 }
