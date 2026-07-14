@@ -15,14 +15,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 INTRADAY_SYMBOLS = ["^JKSE", "^GSPC"]
 
-STATE_PATH = os.path.join(
+MODEL_DIR = os.path.join(
     os.path.dirname(__file__), "..", "..", "..",
-    "regime_trainer", "models", "intraday_state.json"
+    "regime_trainer", "models"
 )
-ACC_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..",
-    "regime_trainer", "models", "regime_accuracy.json"
-)
+STATE_PATH = os.path.join(MODEL_DIR, "intraday_state.json")
+ACC_PATH = os.path.join(MODEL_DIR, "regime_accuracy.json")
 
 
 def get_market_status():
@@ -63,19 +61,42 @@ def save_state(state):
         pass
 
 
-def compute_override(intraday_bias, intraday_strength, daily_regime, state, is_market_open):
+def daily_regime_from_momentum(momentum_3d, intraday_bias=None):
+    if momentum_3d is None:
+        return None
+    strong_bear = momentum_3d < -3
+    strong_bull = momentum_3d > 3
+    bear = momentum_3d < -1
+    bull = momentum_3d > 1
+
+    if strong_bull:
+        return "STRONG BULL"
+    if strong_bear:
+        return "BEAR"
+    if bull:
+        return "BULL"
+    if bear:
+        return "BEAR"
+    if intraday_bias:
+        return intraday_bias
+    return "NEUTRAL"
+
+
+def compute_override(intraday_bias, intraday_strength, daily_regime, state, is_market_open, momentum_3d=None):
     today = str(date.today())
 
     if state.get("last_date") != today:
         state["consecutive_divergence"] = 0
+        state["momentum_override"] = False
         state["override_active"] = False
         state["last_date"] = today
 
     if intraday_bias is None or daily_regime is None:
         state["consecutive_divergence"] = 0
+        state["momentum_override"] = False
         state["override_active"] = False
         save_state(state)
-        return None, state
+        return None, state, "none"
 
     diverging = (
         (intraday_bias == "BULL" and intraday_strength >= 60
@@ -90,20 +111,41 @@ def compute_override(intraday_bias, intraday_strength, daily_regime, state, is_m
         state["consecutive_divergence"] = 0
 
     result = None
-    if state["consecutive_divergence"] >= 3 and diverging and is_market_open:
+    reason = "none"
+
+    if momentum_3d is not None and is_market_open and state.get("consecutive_divergence", 0) >= 1:
+        mom_regime = daily_regime_from_momentum(momentum_3d, intraday_bias)
+        if mom_regime and mom_regime != daily_regime and abs(momentum_3d) > 2:
+            state["momentum_override"] = True
+            state["override_active"] = True
+            state["override_regime"] = mom_regime
+            state["consecutive_divergence"] = 0
+            result = {
+                "active": True,
+                "regime": mom_regime,
+                "momentum_3d": round(momentum_3d, 2),
+                "reason": "momentum_reversal",
+            }
+            reason = f"momentum({mom_regime},3d={momentum_3d:.1f}%)"
+            save_state(state)
+            return result, state, reason
+
+    if state["consecutive_divergence"] >= 2 and diverging and is_market_open:
         state["override_active"] = True
         state["override_regime"] = intraday_bias
         result = {
             "active": True,
             "regime": intraday_bias,
             "consecutive_hours": state["consecutive_divergence"],
+            "reason": "intraday_divergence",
         }
+        reason = f"divergence({intraday_bias},{state['consecutive_divergence']}h)"
     else:
         state["override_active"] = False
         state["override_regime"] = ""
 
     save_state(state)
-    return result, state
+    return result, state, reason
 
 
 def load_accuracy():
@@ -209,47 +251,13 @@ def compute_intraday(df, is_market_open=True):
                 rsi_3h_ago = 100.0 - (100.0 / (1.0 + ag2 / al2))
         rsi_trend = intra_rsi - rsi_3h_ago
 
-        score = 50
-        if intra_rsi > 65:
-            score += 20
-        elif intra_rsi > 55:
-            score += 12
-        elif intra_rsi > 50:
-            score += 5
-        elif intra_rsi < 35:
-            score -= 20
-        elif intra_rsi < 45:
-            score -= 12
-        elif intra_rsi < 48:
-            score -= 5
-        if vwap_dist > 0.002:
-            score += 15
-        elif vwap_dist > 0.001:
-            score += 8
-        elif vwap_dist < -0.002:
-            score -= 15
-        elif vwap_dist < -0.001:
-            score -= 8
-        if intra_return > 0.005:
-            score += 15
-        elif intra_return > 0.002:
-            score += 8
-        elif intra_return < -0.005:
-            score -= 15
-        elif intra_return < -0.002:
-            score -= 8
-        if mom_3h > 0.003:
-            score += 10
-        elif mom_3h > 0.001:
-            score += 5
-        elif mom_3h < -0.003:
-            score -= 10
-        elif mom_3h < -0.001:
-            score -= 5
-        if intra_rsi > 60 and intra_return > 0 and mom_3h > 0:
-            score += 5
-        elif intra_rsi < 40 and intra_return < 0 and mom_3h < 0:
-            score -= 5
+        rsi_score = np.clip((intra_rsi - 50) * 1.2, -20, 20)
+        vwap_score = np.clip(vwap_dist * 6000, -15, 15)
+        return_score = np.clip(intra_return * 2000, -15, 15)
+        mom_score = np.clip(mom_3h * 2000, -10, 10)
+
+        score = 50 + rsi_score + vwap_score + return_score + mom_score
+        score = np.clip(score, 5, 95)
 
         bias = "BULL" if score > 60 else "BEAR" if score < 40 else "NEUTRAL"
 
@@ -264,6 +272,7 @@ def compute_intraday(df, is_market_open=True):
             "intra_return": round(intra_return * 100, 2),
             "momentum_3h": round(mom_3h * 100, 2),
             "rsi_trend": round(rsi_trend, 1),
+            "score": int(score),
         }
     except Exception:
         return None
@@ -319,18 +328,9 @@ def main():
         import numpy as np
         import pandas as pd
 
-        MODEL_PATH = os.path.join(
-            os.path.dirname(__file__), "..", "..", "..",
-            "regime_trainer", "models", "regime_hmm.pkl"
-        )
-        SCALER_PATH = os.path.join(
-            os.path.dirname(__file__), "..", "..", "..",
-            "regime_trainer", "models", "regime_scaler.pkl"
-        )
-        FEATURES_PATH = os.path.join(
-            os.path.dirname(__file__), "..", "..", "..",
-            "regime_trainer", "models", "regime_features.json"
-        )
+        MODEL_PATH = os.path.join(MODEL_DIR, "regime_hmm_best.pkl")
+        SCALER_PATH = os.path.join(MODEL_DIR, "regime_scaler_best.pkl")
+        FEATURES_PATH = os.path.join(MODEL_DIR, "regime_features_best.json")
 
         market_status, is_market_open = get_market_status()
 
@@ -347,15 +347,17 @@ def main():
         intraday = compute_intraday(intraday_df, is_market_open) if intraday_df is not None and len(intraday_df) >= 14 else None
         intra_forecast = compute_intraday_forecast(intraday_df, is_market_open) if intraday_df is not None and len(intraday_df) >= 14 else None
 
+        hmm_ok = False
+        fallback_reason = ""
+
         if os.path.exists(MODEL_PATH) and os.path.exists(SCALER_PATH):
             detector.load(MODEL_PATH, SCALER_PATH, FEATURES_PATH)
 
             df_dict = {}
             for name, symbol in SYMBOLS.items():
                 df = client.get_history(symbol, period="1y")
-                if not df.empty:
+                if df is not None and not df.empty:
                     df_dict[name] = df[["Open", "High", "Low", "Close", "Volume"]].copy()
-                    df_dict[name].columns = pd.MultiIndex.from_product([[name], df_dict[name].columns])
 
             features = detector.extract_features(df_dict)
 
@@ -364,6 +366,10 @@ def main():
                 if result:
                     daily_regime = result["regime"]
                     daily_conf = result["confidence"]
+                    hmm_ok = daily_conf >= 50
+
+                    if not hmm_ok:
+                        fallback_reason = f"low_confidence({daily_conf})"
 
                     divergence = False
                     if intraday:
@@ -372,17 +378,60 @@ def main():
                             or (intraday["bias"] == "BEAR" and daily_regime in ("BULL", "STRONG BULL"))
                         )
 
+                    close_to_close = features["ihsg_return"].iloc[-1] if "ihsg_return" in features.columns else None
+                    momentum_3d = None
+                    if "ihsg_return" in features.columns:
+                        last3 = features["ihsg_return"].iloc[-3:]
+                        momentum_3d = float(last3.sum() * 100) if len(last3) == 3 else None
+
                     state = load_state()
-                    override, state = compute_override(
+                    override, state, override_reason = compute_override(
                         intraday["bias"] if intraday else None,
                         intraday["strength"] if intraday else 0,
-                        daily_regime, state, is_market_open
+                        daily_regime, state, is_market_open, momentum_3d
                     )
 
-                    close_to_close = features["ihsg_return"].iloc[-1] if "ihsg_return" in features.columns else None
                     acc_stats = update_accuracy(daily_regime, close_to_close, state)
 
                     analysis_parts = []
+
+                    # === FALLBACK MODE: use intraday bias + MA trend when HMM confidence is low ===
+                    if not hmm_ok or (intraday and override):
+                        if intraday:
+                            fb_bias = intraday["bias"]
+                            daily_change = intraday["intra_return"]
+                            if not is_market_open:
+                                close = intraday_df["Close"].values if intraday_df is not None else []
+                                daily_change = ((close[-1] / close[0]) - 1) * 100 if len(close) > 1 else 0
+
+                            sma20 = None
+                            if intraday_df is not None and len(intraday_df) >= 20:
+                                close = intraday_df["Close"].values
+                                sma20 = (close[-1] / np.mean(close[-20:]) - 1) * 100
+
+                            trend_bull = sma20 is not None and sma20 > 0 and daily_change > 0
+                            trend_bear = sma20 is not None and sma20 < 0 and daily_change < 0
+
+                            if trend_bull and fb_bias != "BEAR":
+                                display_regime = "BULL"
+                                display_conf = min(70, 50 + abs(daily_change) * 3 + abs(sma20))
+                            elif trend_bear and fb_bias != "BULL":
+                                display_regime = "BEAR"
+                                display_conf = min(70, 50 + abs(daily_change) * 3 + abs(sma20))
+                            else:
+                                display_regime = daily_regime if hmm_ok else fb_bias
+                                display_conf = min(60, daily_conf) if hmm_ok else 55
+
+                            hmm_ok = True
+                            daily_regime = display_regime
+                            daily_conf = display_conf
+                            result["regime"] = display_regime
+                            result["confidence"] = display_conf
+                            analysis_parts.append(
+                                f"Regime harian: {display_regime} (fallback: {fallback_reason})."
+                            )
+                    # === END FALLBACK ===
+
                     if market_status == "OPEN" and intraday:
                         ib = intraday["bias"]
                         st = intraday["strength"]
@@ -461,7 +510,7 @@ def main():
                                 f"Pasar sudah berbalik arah menjadi {override['regime'].lower()}. Tren baru mulai terbentuk.",
                                 f"Terjadi pembalikan tren — dari bearish kini bergerak {override['regime'].lower()}.",
                             ]))
-                        elif divergence:
+                        elif divergence and hmm_ok:
                             opposite = "bearish" if ib == "BULL" else "bullish"
                             analysis_parts.append(random.choice([
                                 f"Menarik: intraday {ib.lower()} tapi HMM masih {opposite}. Bisa jadi early signal reversal.",

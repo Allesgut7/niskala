@@ -20,6 +20,14 @@ SYMBOLS = {
     "usdidr": "USDIDR=X",
 }
 
+REGIME_LABELS = {
+    0: "STRONG BULL",
+    1: "BULL",
+    2: "NEUTRAL",
+    3: "BEAR",
+    4: "CRASH",
+}
+
 
 class RegimeDetector:
     def __init__(self, model_path=None, scaler_path=None, features_path=None):
@@ -41,44 +49,45 @@ class RegimeDetector:
             with open(features_path) as f:
                 meta = json.load(f)
             self.state_labels = {int(k): v for k, v in meta.get("state_labels", {}).items()}
-            self.feature_names = meta.get("feature_names", [])
+            self.feature_names = meta.get("feature_names", meta.get("train_columns", []))
 
         if not self.state_labels:
-            means = self.model.means_
-            return_col = None
+            self._label_states()
+
+    def _label_states(self):
+        means = self.model.means_
+        return_col = None
+        for i, name in enumerate(self.feature_names):
+            if name == "ihsg_return":
+                return_col = i
+                break
+        if return_col is None:
             for i, name in enumerate(self.feature_names):
                 if "return" in name:
                     return_col = i
                     break
-            if return_col is None:
-                return_col = 0
-            state_returns = means[:, return_col]
-            sorted_idx = np.argsort(state_returns)[::-1]
-            for new_order, orig_state in enumerate(sorted_idx):
-                self.state_labels[orig_state] = REGIME_LABELS.get(new_order, f"STATE_{new_order}")
+        if return_col is None:
+            return_col = 0
+        state_returns = means[:, return_col]
+        sorted_idx = np.argsort(state_returns)[::-1]
+        for new_order, orig_state in enumerate(sorted_idx):
+            label = REGIME_LABELS.get(new_order, f"STATE_{new_order}")
+            self.state_labels[orig_state] = label
 
     def extract_features(self, df_dict):
-        dfs = []
         name_order = list(SYMBOLS.keys())
-        for name in name_order:
-            if name in df_dict:
-                df = df_dict[name].copy()
-                df.index = df.index.tz_localize(None) if df.index.tz else df.index
-                dfs.append(df)
-
-        combined = pd.concat(dfs, axis=1).dropna()
-
         features_list = []
         for name in name_order:
             if name not in df_dict:
                 continue
-            df = combined.xs(name, axis=1, level=0)
-            feats = pd.DataFrame(index=combined.index)
+            df = df_dict[name].copy()
+            if df.index.tz is not None:
+                df.index = df.index.tz_localize(None)
+            feats = pd.DataFrame(index=df.index)
 
             ret = df["Close"].pct_change()
             feats["return"] = ret
             feats["vol_5d"] = ret.rolling(5).std()
-            feats["vol_21d"] = ret.rolling(21).std()
 
             high_low = df["High"] - df["Low"]
             feats["hl_range"] = high_low / df["Close"].replace(0, np.nan)
@@ -92,39 +101,26 @@ class RegimeDetector:
 
                 ema12 = df["Close"].ewm(span=12).mean()
                 ema26 = df["Close"].ewm(span=26).mean()
-                macd = ema12 - ema26
-                signal = macd.ewm(span=9).mean()
-                feats["macd"] = macd
-                feats["macd_signal"] = signal
-                feats["macd_hist"] = macd - signal
-
-                vol_avg = df["Volume"].rolling(21).mean()
-                feats["vol_ratio"] = df["Volume"] / vol_avg.replace(0, np.nan)
+                feats["macd_hist"] = (ema12 - ema26) - (ema12 - ema26).ewm(span=9).mean()
 
                 sma20 = df["Close"].rolling(20).mean()
-                sma50 = df["Close"].rolling(50).mean()
                 feats["sma20_dist"] = (df["Close"] - sma20) / sma20.replace(0, np.nan)
-                feats["sma50_dist"] = (df["Close"] - sma50) / sma50.replace(0, np.nan)
-
-                atr = high_low.rolling(14).mean()
-                feats["atr_ratio"] = atr / df["Close"].replace(0, np.nan)
-                feats["skew_5d"] = ret.rolling(5).skew()
 
             feats.columns = [f"{name}_{c}" for c in feats.columns]
             features_list.append(feats)
 
-        all_feats = pd.concat(features_list, axis=1).dropna()
-        return all_feats
+        if not features_list:
+            return pd.DataFrame()
+        combined = pd.concat(features_list, axis=1).dropna()
+        return combined
 
     def _align_features(self, features_df):
         if not self.feature_names:
             return features_df.values
-
+        out = pd.DataFrame(index=features_df.index)
         for col in self.feature_names:
-            if col not in features_df.columns:
-                features_df[col] = 0.0
-
-        return features_df[self.feature_names].values
+            out[col] = features_df[col] if col in features_df.columns else 0.0
+        return out.values
 
     def predict_current(self, features_df):
         if not self._fitted:
